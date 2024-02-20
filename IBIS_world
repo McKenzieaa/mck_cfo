@@ -1,0 +1,29 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+
+# Specify the URL and credentials
+url = "https://services.ibisworld.com/identity/login?signin=c2e9bcfb881bb8535e4e96c030c59709"
+username = "njain@mckenzieaa.com"
+password = "August@123"
+
+# Start a new instance of Firefox WebDriver
+driver = webdriver.Firefox()
+
+# Navigate to the URL
+driver.get(url)
+
+# Find the username and password fields by their ID
+username_field = driver.find_element(By.ID, "Username")
+password_field = driver.find_element(By.ID, "Password")
+
+# Clear any pre-existing text in the fields
+username_field.clear()
+password_field.clear()
+
+# Input the username and password
+username_field.send_keys(username)
+password_field.send_keys(password)
+
+# Submit the form
+password_field.send_keys(Keys.RETURN)
