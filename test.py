@@ -3,9 +3,9 @@ import pandas as pd
 import streamlit as st
 import os
 
-# Ensure the 'assets' folder exists
-if not os.path.exists("assets"):
-    os.makedirs("assets")
+# # Ensure the 'assets' folder exists
+# if not os.path.exists("assets"):
+#     os.makedirs("assets")
 
 def fig_to_image(fig, filename):
     """Save the Plotly figure as an image in the assets folder."""
@@ -69,6 +69,6 @@ external_driver_fig = plot_external_driver(selected_indicators)
 if st.button("Save Image"):
     image_path = fig_to_image(external_driver_fig, "external_driver")
 
-    # Optionally display the saved image if successful
-    if image_path:
-        st.image(image_path, caption="External Driver Indicators", use_column_width=True)
+    # # Optionally display the saved image if successful
+    # if image_path:
+    #     st.image(image_path, caption="External Driver Indicators", use_column_width=True)
