@@ -3,4 +3,4 @@ streamlit==1.25.0
 pandas==2.1.1
 plotly==5.15.0
 kaleido==0.2.1
-Pillow>=7.1.0,<10  # Allow pip to pick the compatible version
+Pillow>=2.0.0,<10  # Allow pip to pick the compatible version
