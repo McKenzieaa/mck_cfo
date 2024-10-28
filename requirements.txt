@@ -3,7 +3,4 @@ pandas==2.1.1  # For data manipulation
 plotly==5.15.0  # For interactive plots
 kaleido==0.2.1  # Required for exporting Plotly figures as images
 psutil==5.9.5  # Optional: For monitoring system resources
-pandas
-matplotlib
-requests
-seaborn
+
