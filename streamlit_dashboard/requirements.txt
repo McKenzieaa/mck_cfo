@@ -1,6 +1,6 @@
 pandas
 plotly
-kaledio
+kaleido
 numpy
 matplotlib
 seaborn
