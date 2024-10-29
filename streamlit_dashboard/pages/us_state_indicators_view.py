@@ -75,7 +75,7 @@ def load_state_gdp_data():
                 st.error("No CSV file found with the specified prefix.")
     else:
         st.error("Failed to download GDP data.")
-# Load GDP data on startup
+
 load_state_gdp_data()
 
 def plot_unemployment_labour_chart(state_name):
