@@ -8,9 +8,6 @@ from pptx.util import Inches
 from io import BytesIO
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-st.set_page_config(layout="wide")
-# script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the script
-
 path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx'
 
 def get_transaction_layout():
