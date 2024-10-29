@@ -2,7 +2,7 @@ import streamlit as st
 from pages.home import get_home_layout
 from pages.public_comps_view import display_public_comps
 from pages.transactions_view import display_transactions
-# from pages.us_indicators_view import get_us_indicators_layout
+from pages.us_indicators_view import get_us_indicators_layout
 from pages.us_state_indicators_view import get_state_indicators_layout
 from pages.benchmarking_view import get_benchmarking_layout
 from pages.presentation_view import presentation_view
@@ -20,7 +20,7 @@ PAGES = {
     "Home": (get_home_layout, None),
     "Public Comps": (display_public_comps, None),
     "Precedent Transactions": (display_transactions, None),
-    # "US Indicators": (get_us_indicators_layout, None),
+    "US Indicators": (get_us_indicators_layout, None),
     "State Indicators": (get_state_indicators_layout, None),
     "Benchmarking": (get_benchmarking_layout, None),
     "Presentation": (presentation_view, None),
@@ -28,14 +28,14 @@ PAGES = {
 
 def render_page(page_name):
     """Render the selected page layout."""
-    page_function = PAGES.get(page_name)
+    page_function, _ = PAGES.get(page_name, (None, None))  # Get the function and ignore the second item
     if page_function:
-        page_function()
+        page_function()  # Call the page function
     else:
         st.error("404: Page not found")
 
 def sidebar_navigation():
-    """Generate sidebar navigation with a selectbox."""
+    """Generate sidebar navigation with a selectbox.""" 
     st.sidebar.title("Navigation")
     selected_page = st.sidebar.selectbox("Select a Page", options=PAGES.keys())
     # Store the selected page in the query parameters
@@ -49,7 +49,7 @@ def get_current_page():
     return query_params.get("page", ["Home"])[0]
 
 def main():
-    """Main entry point for the app."""
+    """Main entry point for the app.""" 
     current_page = sidebar_navigation()  # Create sidebar links and get the selected page
     render_page(current_page)  # Render the appropriate page layout
 
