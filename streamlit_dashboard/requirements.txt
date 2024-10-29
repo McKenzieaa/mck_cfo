@@ -1,0 +1,9 @@
+pandas
+plotly
+kaledio
+numpy
+matplotlib
+seaborn
+python-pptx
+openpyxl
+st-aggrid
