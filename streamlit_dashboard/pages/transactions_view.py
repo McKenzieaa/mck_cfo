@@ -13,7 +13,9 @@ st.set_page_config(layout="wide")
 # Load Precedent Transactions Data
 # user_profile = os.path.expanduser("~")
 # folder_path = os.path.join(user_profile, 'source', 'mck_setup', 'asset')
-path = r"streamlit_dashboard/data/Updated - Precedent Transaction.xlsx"
+path = os.path.join(
+    os.getcwd(), "streamlit_dashboard", "data", "Updated - Precedent Transaction.xlsx"
+)
 
 def get_transaction_layout():
     """Render the Precedent Transactions page layout."""

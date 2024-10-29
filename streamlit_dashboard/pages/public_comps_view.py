@@ -12,7 +12,9 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 # Path to the data
 # user_profile = os.path.expanduser("~")
 # source_path = os.path.join(user_profile, 'source', 'mck_setup', 'streamlit_dashboard', 'data')
-path_public_comps = r"streamlit_dashboard/data/Public Listed Companies US.xlsx"
+path_public_comps= os.path.join(
+    os.getcwd(), "streamlit_dashboard", "data", "Updated - Public Listed Companies US.xlsx"
+)
 
 def get_public_comps_layout():
     """Render the Public Companies page layout."""
