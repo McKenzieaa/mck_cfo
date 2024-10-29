@@ -3,12 +3,11 @@ import pandas as pd
 import streamlit as st
 
 # File paths for data sources
-user_profile = os.path.expanduser("~")
-folder_path = os.path.join(user_profile, 'source', 'mck_setup', 'streamlit_dashboard', 'data')
+# user_profile = os.path.expanduser("~")
+# folder_path = os.path.join(user_profile, 'source', 'mck_setup', 'streamlit_dashboard', 'data')
 
-rma_file_path = os.path.join(folder_path, "RMA.xlsx")
-public_comps_file_path = os.path.join(folder_path, "Public Listed Companies US.xlsx")
-
+rma_file_path = r"streamlit_dashboard/data/RMA.xlsx"
+public_comps_file_path = r"streamlit_dashboard/data/Public Listed Companies US.xlsx"
 # Helper functions to load and process data
 def get_industries(file_path, sheet_name):
     try:

@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="McK Analysis",
     page_icon="",  # Add path to an icon if available
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # Dictionary mapping page names to layout functions
