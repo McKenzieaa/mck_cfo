@@ -6,4 +6,4 @@ matplotlib
 seaborn
 python-pptx
 openpyxl
-streamlit-aggrid --upgrade
+streamlit-aggrid
