@@ -13,14 +13,14 @@ st.set_page_config(layout="wide")
 # Load Precedent Transactions Data
 # user_profile = os.path.expanduser("~")
 # folder_path = os.path.join(user_profile, 'source', 'mck_setup', 'asset')
-path = os.path.join(
+path_transaction = os.path.join(
     os.getcwd(), "streamlit_dashboard", "data", "Updated - Precedent Transaction.xlsx"
 )
 
 def get_transaction_layout():
     """Render the Precedent Transactions page layout."""
     st.header("Precedent Transactions")
-    transactions_df = pd.read_excel(path, sheet_name="Final - Precedent Transactions")
+    transactions_df = pd.read_excel(path_transaction, sheet_name="Final - Precedent Transactions")
     transactions_df['Announced Date'] = pd.to_datetime(transactions_df['Announced Date'], errors='coerce')
     transactions_df.dropna(subset=['Announced Date'], inplace=True)
     transactions_df['Year'] = transactions_df['Announced Date'].dt.year.astype(int)
