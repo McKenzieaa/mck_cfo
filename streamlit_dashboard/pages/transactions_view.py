@@ -17,8 +17,8 @@ def load_transaction_data():
     transactions_df['Year'] = transactions_df['Announced Date'].dt.year.astype(int)
     transactions_df['EV/Revenue'] = pd.to_numeric(transactions_df['EV/Revenue'], errors='coerce').fillna(0).round(1)
     transactions_df['EV/EBITDA'] = pd.to_numeric(transactions_df['EV/EBITDA'], errors='coerce').fillna(0).round(1)
-    return transactions_df
 
+    pass
 # Usage in the layout
 transactions_df = load_transaction_data()
 

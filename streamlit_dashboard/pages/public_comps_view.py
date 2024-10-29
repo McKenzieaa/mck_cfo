@@ -19,8 +19,8 @@ def load_public_comps_data():
     public_comps_df['EBITDA (in $)'] = pd.to_numeric(public_comps_df['EBITDA (in $)'], errors='coerce').round(1)
     public_comps_df['EV/Revenue'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['Revenue (in $)']
     public_comps_df['EV/EBITDA'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['EBITDA (in $)']
-    return public_comps_df
 
+    pass
 public_comps_df = load_public_comps_data()
 
 def get_public_comps_layout():
