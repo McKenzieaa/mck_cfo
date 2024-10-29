@@ -2,7 +2,7 @@ import streamlit as st
 from pages.home import get_home_layout
 from pages.public_comps_view import get_public_comps_layout
 from pages.transactions_view import get_transaction_layout
-from pages.us_indicators_view import (get_us_indicators_layout,load_data)
+from pages.us_indicators_view import get_us_indicators_layout, load_data
 from pages.us_state_indicators_view import get_state_indicators_layout
 from pages.benchmarking_view import get_benchmarking_layout
 from pages.presentation_view import presentation_view
