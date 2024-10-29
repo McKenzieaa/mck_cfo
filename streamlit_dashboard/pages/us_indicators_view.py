@@ -20,7 +20,7 @@ xls = pd.ExcelFile(url_gdp_us)
 
 # folder_path = os.path.join(os.path.expanduser("~"), 'source', 'mck_setup', 'asset')
 # external_driver_path = r"data\business_enviornmental_profiles_final.xlsx"
-external_driver_path = os.path.abspath(r'data\business_enviornmental_profiles_final.xlsx')
+external_driver_path = os.path.abspath('data/business_enviornmental_profiles_final.xlsx')
 
 @st.cache_data
 def load_data():
