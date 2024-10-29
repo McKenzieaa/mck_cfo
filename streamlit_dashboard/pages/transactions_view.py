@@ -10,10 +10,8 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 st.set_page_config(layout="wide")
 
-# Load Precedent Transactions Data
-# user_profile = os.path.expanduser("~")
-# folder_path = os.path.join(user_profile, 'source', 'mck_setup', 'asset')
-path_transaction = path_transaction = os.path.join('data', 'Updated - Precedent Transaction.xlsx')
+script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the script
+path_transaction = os.path.join(script_dir, 'data', 'Updated - Precedent Transaction.xlsx')
 
 def get_transaction_layout():
     """Render the Precedent Transactions page layout."""
