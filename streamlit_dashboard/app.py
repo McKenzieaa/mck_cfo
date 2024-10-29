@@ -1,7 +1,7 @@
 import streamlit as st
 from pages.home import get_home_layout
-from pages.public_comps_view import get_public_comps_layout
-from pages.transactions_view import get_transaction_layout
+from pages.public_comps_view import get_public_comps_layout,load_public_comps_data
+from pages.transactions_view import get_transaction_layout,load_transaction_data
 # from pages.us_indicators_view import get_us_indicators_layout, load_data
 from pages.us_state_indicators_view import get_state_indicators_layout
 from pages.benchmarking_view import get_benchmarking_layout
@@ -18,9 +18,9 @@ st.set_page_config(
 # Dictionary mapping page names to layout functions
 PAGES = {
     "Home": get_home_layout,
-    "Public Comps": get_public_comps_layout,
-    "Precedent Transactions": get_transaction_layout,
-    # "US Indicators": lambda: (get_us_indicators_layout, load_data),
+    "Public Comps": (get_public_comps_layout,load_public_comps_data),
+    "Precedent Transactions": (get_transaction_layout,load_transaction_data),
+    # "US Indicators": (get_us_indicators_layout, load_data),
     "State Indicators": get_state_indicators_layout,
     "Benchmarking": get_benchmarking_layout,
     "Presentation": presentation_view,
