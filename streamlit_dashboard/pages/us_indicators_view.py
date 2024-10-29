@@ -18,9 +18,9 @@ url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&cha
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
 xls = pd.ExcelFile(url_gdp_us)
 
-folder_path = os.path.join(os.path.expanduser("~"), 'source', 'mck_setup', 'asset')
-external_driver_path = os.path.join(folder_path, "business_enviornmental_profiles_final.xlsx")
-external_driver_df = pd.read_excel(external_driver_path)
+# folder_path = os.path.join(os.path.expanduser("~"), 'source', 'mck_setup', 'asset')
+# external_driver_path = os.path.join(folder_path, "business_enviornmental_profiles_final.xlsx")
+# external_driver_df = pd.read_excel(external_driver_path)
 
 @st.cache_data
 def load_data():
@@ -49,7 +49,7 @@ def load_data():
     df_pop['month'] = df_pop['date'].dt.month
 
     # External Driver Data
-    external_driver_path = os.path.join(folder_path, "business_enviornmental_profiles_final.xlsx")
+    external_driver_path = r"data\business_enviornmental_profiles_final.xlsx"
     external_driver_df = pd.read_excel(external_driver_path)
     external_driver_df['Year'] = pd.to_numeric(external_driver_df['Year'], errors='coerce')
     external_indicator_options = [{'label': indicator, 'value': indicator} for indicator in external_driver_df['Indicator'].unique()]
@@ -64,8 +64,8 @@ def load_data():
         'Food': 'CUSR0000SAF1'
     }
 
-    file_path = os.path.join(os.path.expanduser("~"), 'source', 'mck_setup', 'asset', "CPI_industry.txt")
-    ppi_file_path = os.path.join(os.path.expanduser("~"), 'source', 'mck_setup', 'asset', "PPI.txt")
+    file_path = r"data\CPI_industry.txt"
+    ppi_file_path = r"data\PPI.txt"
 
     # Load CPI data
     df = pd.read_csv(file_path, delimiter=',').dropna().reset_index(drop=True)
