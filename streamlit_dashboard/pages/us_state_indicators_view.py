@@ -10,12 +10,6 @@ from io import BytesIO
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Streamlit page configuration
-st.set_page_config(
-    page_title="State Indicators Dashboard",
-    layout="wide"
-)
-
 # Initialize data
 today_date = date.today().strftime("%Y-%m-%d")
 state_gdp_data = None  # Initialize state GDP data
