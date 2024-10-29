@@ -6,5 +6,4 @@ matplotlib
 seaborn
 python-pptx
 openpyxl
-st-aggrid
 zipfile
