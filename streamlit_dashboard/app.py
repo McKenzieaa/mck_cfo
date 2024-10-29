@@ -2,7 +2,7 @@ import streamlit as st
 from pages.home import get_home_layout
 from pages.public_comps_view import display_public_comps
 from pages.transactions_view import display_transactions
-from pages.us_indicators_view import get_us_indicators_layout
+# from pages.us_indicators_view import get_us_indicators_layout
 from pages.us_state_indicators_view import get_state_indicators_layout
 from pages.benchmarking_view import get_benchmarking_layout
 from pages.presentation_view import presentation_view
@@ -20,7 +20,7 @@ PAGES = {
     "Home": (get_home_layout, None),
     "Public Comps": (display_public_comps, None),
     "Precedent Transactions": (display_transactions, None),
-    "US Indicators": (get_us_indicators_layout, None),
+    # "US Indicators": (get_us_indicators_layout, None),
     "State Indicators": (get_state_indicators_layout, None),
     "Benchmarking": (get_benchmarking_layout, None),
     "Presentation": (presentation_view, None),
