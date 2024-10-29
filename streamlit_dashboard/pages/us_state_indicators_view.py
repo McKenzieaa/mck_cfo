@@ -79,49 +79,6 @@ def load_state_gdp_data():
 load_state_gdp_data()
 
 def plot_unemployment_labour_chart(state_name):
-    """Plot unemployment and labour force trends."""
-    unemployment_data = download_csv(state_name, "unemployment")
-    labour_data = download_csv(state_name, "labour")
-
-    if unemployment_data is not None and labour_data is not None:
-        # Filter data to start from the year 2000
-        unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
-        labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
-
-        merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
-
-        # Set figure size inside the function
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.lineplot(data=merged_data, x='DATE', y='Unemployment', 
-                     color='#032649', label='Unemployment', ax=ax)
-        sns.lineplot(data=merged_data, x='DATE', y='Labour Force', 
-                     color='#EB8928', label='Labour Force', ax=ax)
-
-        # Customize axes
-        ax.tick_params(axis='both', colors='gray')  # Set tick color to gray
-        ax.set_xlabel('')  # Clear x-axis label
-        ax.set_ylabel("Value", color='gray')  # Set y-axis label with gray color
-
-        # Add labels for 50% of the data points
-        # for i, row in merged_data.iloc[::30].iterrows():  # Label every other data point
-        #     ax.text(row['DATE'], row['Unemployment'], 
-        #             f"{row['Unemployment']:.1f}", color='black', ha='right', fontsize=8)
-        #     ax.text(row['DATE'], row['Labour Force'], 
-        #             f"{row['Labour Force']:.1f}", color='black', ha='right', fontsize=8)
-        last_row = merged_data.iloc[-1]
-        ax.text(last_row['DATE'], last_row['Unemployment'], 
-                f"{last_row['Unemployment']:.1f}", color='#032649', ha='right')
-        ax.text(last_row['DATE'], last_row['Labour Force'], 
-                f"{last_row['Labour Force']:.1f}", color='#EB8928', ha='right')
-
-        ax.legend(loc='center right',fontsize=8, frameon=False)
-        st.pyplot(fig)
-        return fig
-    else:
-        st.warning(f"No data available for {state_name}.")
-        return None
-
-def plot_unemployment_labour_chart(state_name):
     unemployment_data = download_csv(state_name, "unemployment")
     labour_data = download_csv(state_name, "labour")
 
