@@ -8,7 +8,7 @@ from pptx.util import Inches
 from io import BytesIO
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx'
+path_transaction = os.path.abspath(r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx')
 
 def get_transaction_layout():
     """Render the Precedent Transactions page layout."""

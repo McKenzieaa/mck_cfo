@@ -10,7 +10,7 @@ from io import BytesIO
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 
-path_public_comps= r'streamlit_dashboard/data/Public Listed Companies US.xlsx'
+path_public_comps= os.path.abspath(r'streamlit_dashboard/data/Public Listed Companies US.xlsx')
 
 def get_public_comps_layout():
     """Render the Public Companies page layout."""
