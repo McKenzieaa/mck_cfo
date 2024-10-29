@@ -172,4 +172,4 @@ def export_to_pptx(ev_revenue_fig, ev_ebitda_fig):
     prs.save(pptx_io)
     pptx_io.seek(0)
     return pptx_io
-get_transaction_layout()
+# get_transaction_layout()
