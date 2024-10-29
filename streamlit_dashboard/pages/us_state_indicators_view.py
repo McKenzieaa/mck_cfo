@@ -121,60 +121,62 @@ def plot_unemployment_labour_chart(state_name):
         st.warning(f"No data available for {state_name}.")
         return None
 
+def plot_unemployment_labour_chart(state_name):
+    unemployment_data = download_csv(state_name, "unemployment")
+    labour_data = download_csv(state_name, "labour")
+
+    if unemployment_data is not None and labour_data is not None:
+        unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
+        labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
+
+        merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
+
+        # Use Streamlit's native line chart
+        st.line_chart(merged_data.set_index('DATE'), use_container_width=True)
+        return merged_data
+    else:
+        st.warning(f"No data available for {state_name}.")
+        return None
+
+# Function to plot GDP trends using Streamlit native charts
 def plot_gdp_chart(state_name):
-    """Plot GDP trends over time."""
-    global state_gdp_data
+    global state_gdp_data  # Assume `state_gdp_data` is loaded elsewhere
 
     if state_gdp_data is not None:
-        # Filter data to start from the year 2000
         gdp_data = state_gdp_data[state_gdp_data["State"].str.lower() == state_name.lower()]
         gdp_data = gdp_data[gdp_data["Year"] >= 2000]
 
         if not gdp_data.empty:
-            # Set figure size inside the function
-            fig, ax = plt.subplots(figsize=(6, 4))
-            sns.lineplot(data=gdp_data, x='Year', y='Value', color='black', label='GDP', ax=ax)
-
-            # Customize axes
-            ax.tick_params(axis='both', colors='gray')  # Set tick color to gray
-            ax.set_xlabel('')  # Clear x-axis label
-            ax.set_ylabel("GDP (Millions)", color='gray')  # Set y-axis label
-
-            # # Add labels for 50% of the data points
-            # for i, row in gdp_data.iloc[::25].iterrows():  # Label every other data point
-            #     ax.text(row['Year'], row['Value'], 
-            #             f"{row['Value']:.1f}", color='#032649', ha='right', fontsize=10)
-            last_row = gdp_data.iloc[-1]
-            ax.text(last_row['Year'], last_row['Value'], 
-                    f"{last_row['Value']:.1f}", color='#032649', ha='right')
-            ax.legend(loc='upper left',fontsize=8, frameon=False)
-            st.pyplot(fig)
-            return fig
+            gdp_chart_data = gdp_data.set_index('Year')['Value']
+            st.line_chart(gdp_chart_data, use_container_width=True)
+            return gdp_chart_data
         else:
             st.warning(f"No GDP data available for {state_name}.")
-            st.write("Available State Names in GDP Data:", state_gdp_data["State"].unique())
             return None
     else:
         st.warning("State GDP data not loaded.")
         return None
-    
-def export_to_pptx(labour_fig, gdp_fig):
+
+# Function to export charts to PowerPoint
+def export_to_pptx(labour_data, gdp_data):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
+    # Slide 1: Unemployment & Labour Force
     slide1 = prs.slides.add_slide(slide_layout)
     title1 = slide1.shapes.title
     title1.text = "Unemployment & Labour Force"
     img1 = BytesIO()
-    labour_fig.savefig(img1, format="png")
+    labour_data.plot().get_figure().savefig(img1, format="png")
     img1.seek(0)
     slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
 
+    # Slide 2: GDP
     slide2 = prs.slides.add_slide(slide_layout)
     title2 = slide2.shapes.title
     title2.text = "GDP"
     img2 = BytesIO()
-    gdp_fig.savefig(img2, format="png")
+    gdp_data.plot().get_figure().savefig(img2, format="png")
     img2.seek(0)
     slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
 
@@ -183,31 +185,23 @@ def export_to_pptx(labour_fig, gdp_fig):
     pptx_io.seek(0)
     return pptx_io
 
+# Layout for the state indicators page
 def get_state_indicators_layout():
-    """Render the State Indicators page layout with side-by-side charts."""
     state_name = st.selectbox("Select State", list(states_data_id.keys()), index=0)
 
-    # Create two columns for side-by-side charts
-    col1, col2 = st.columns(2)
+    st.write(f"### {state_name} - Unemployment & Labour Force")
+    labour_data = plot_unemployment_labour_chart(state_name)
 
-    # Plot unemployment and labour chart in the first column
-    with col1:
-        st.write(f"### {state_name} - Unemployment & Labour Force")
-        labour_fig = plot_unemployment_labour_chart(state_name)  # Plot with default figure size inside the function
 
-    # Plot GDP chart in the second column
-    with col2:
-        st.write(f"### {state_name} - GDP Over Time")
-        gdp_fig = plot_gdp_chart(state_name)  # Plot with default figure size inside the function
+    st.write(f"### {state_name} - GDP Over Time")
+    gdp_data = plot_gdp_chart(state_name)
 
     # Export to PowerPoint button
-    if st.button("Export Charts to PowerPoint") and labour_fig and gdp_fig:
-        pptx_file = export_to_pptx(labour_fig, gdp_fig)
+    if st.button("Export Charts to PowerPoint") and labour_data is not None and gdp_data is not None:
+        pptx_file = export_to_pptx(labour_data, gdp_data)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
             file_name="state_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
-# Render the layout
-get_state_indicators_layout()
