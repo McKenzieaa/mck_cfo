@@ -19,7 +19,7 @@ PAGES = {
     "Home": get_home_layout,
     "Public Comps": get_public_comps_layout,
     "Precedent Transactions": get_transaction_layout,
-    "US Indicators": lambda: (get_us_indicators_layout(),load_data()),
+    "US Indicators": lambda: (get_us_indicators_layout,load_data),
     "State Indicators": get_state_indicators_layout,
     "Benchmarking": get_benchmarking_layout,
     "Presentation": presentation_view,
