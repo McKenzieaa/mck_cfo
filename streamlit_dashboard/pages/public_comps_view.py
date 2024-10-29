@@ -38,7 +38,7 @@ def get_public_comps_layout():
         filtered_df,
         gridOptions=grid_options,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
-        theme='streamlit',
+        theme='light',
         fit_columns_on_grid_load=True,
         height=500,
         width='100%'
