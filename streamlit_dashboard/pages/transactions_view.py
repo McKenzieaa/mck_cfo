@@ -9,20 +9,21 @@ from io import BytesIO
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 path_transaction = os.path.abspath(r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx')
-
-def get_transaction_layout():
-    """Render the Precedent Transactions page layout."""
-    st.header("Precedent Transactions")
+@st.cache_data
+def load_transaction_data():
     transactions_df = pd.read_excel(path_transaction, sheet_name="Final - Precedent Transactions")
     transactions_df['Announced Date'] = pd.to_datetime(transactions_df['Announced Date'], errors='coerce')
     transactions_df.dropna(subset=['Announced Date'], inplace=True)
     transactions_df['Year'] = transactions_df['Announced Date'].dt.year.astype(int)
-
-    # Replace NaN values in EV/Revenue and EV/EBITDA columns with 0
     transactions_df['EV/Revenue'] = pd.to_numeric(transactions_df['EV/Revenue'], errors='coerce').fillna(0).round(1)
     transactions_df['EV/EBITDA'] = pd.to_numeric(transactions_df['EV/EBITDA'], errors='coerce').fillna(0).round(1)
+    return transactions_df
 
-    # Select and rename relevant columns
+# Usage in the layout
+transactions_df = load_transaction_data()
+
+def get_transaction_layout():
+    
     columns_to_display = {
         'Target': 'Company',
         'Geographic Locations': 'Location',
@@ -34,13 +35,10 @@ def get_transaction_layout():
     }
     filtered_df = transactions_df[list(columns_to_display.keys())].rename(columns=columns_to_display)
 
-    # Configure AgGrid
     gb = GridOptionsBuilder.from_dataframe(filtered_df)
     gb.configure_selection('multiple', use_checkbox=True)
     gb.configure_default_column(editable=True, filter=True, sortable=True, resizable=True)
     grid_options = gb.build()
-
-    # st.subheader("Precedent Transactions")
     grid_response = AgGrid(
         filtered_df,
         gridOptions=grid_options,
@@ -51,10 +49,8 @@ def get_transaction_layout():
         width='100%'
     )
 
-    # Retrieve selected rows safely
     selected_rows = pd.DataFrame(grid_response['selected_rows'])
 
-    # Sidebar: Chart Settings
     bar_width = st.sidebar.slider("Select Bar Width", min_value=0.1, max_value=0.9, value=0.5, step=0.1)
 
     if not selected_rows.empty:
@@ -89,6 +85,7 @@ def plot_transactions_charts(data, bar_width):
     ax1.set_xlabel("")  # Remove x-axis label
     ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45, ha='right')
     st.pyplot(fig1)
+    plt.close(fig1)
 
     # EV/EBITDA Chart
     st.subheader("EV/EBITDA")
@@ -104,6 +101,7 @@ def plot_transactions_charts(data, bar_width):
     ax2.set_xlabel("")  # Remove x-axis label
     ax2.set_xticklabels(ax2.get_xticklabels(), rotation=45, ha='right')
     st.pyplot(fig2)
+    plt.close(fig2)
 
     return fig1, fig2
 
@@ -169,4 +167,3 @@ def export_to_pptx(ev_revenue_fig, ev_ebitda_fig):
     prs.save(pptx_io)
     pptx_io.seek(0)
     return pptx_io
-# get_transaction_layout()

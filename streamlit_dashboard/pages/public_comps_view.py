@@ -9,31 +9,31 @@ from pptx.util import Inches
 from io import BytesIO
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-
 path_public_comps= os.path.abspath(r'streamlit_dashboard/data/Public Listed Companies US.xlsx')
 
-def get_public_comps_layout():
-    """Render the Public Companies page layout."""
-    st.header("Public Companies")
-
-    # Load and process data
+@st.cache_data
+def load_public_comps_data():
     public_comps_df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
     public_comps_df['Enterprise Value (in $)'] = pd.to_numeric(public_comps_df['Enterprise Value (in $)'], errors='coerce')
     public_comps_df['Revenue (in $)'] = pd.to_numeric(public_comps_df['Revenue (in $)'], errors='coerce').round(1)
     public_comps_df['EBITDA (in $)'] = pd.to_numeric(public_comps_df['EBITDA (in $)'], errors='coerce').round(1)
     public_comps_df['EV/Revenue'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['Revenue (in $)']
     public_comps_df['EV/EBITDA'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['EBITDA (in $)']
+    return public_comps_df
+
+public_comps_df = load_public_comps_data()
+
+def get_public_comps_layout():
+    """Render the Public Companies page layout."""
+    st.subheader("Public Companies")
 
     columns_to_display = ['Name', 'Country', 'Industry', 'EV/Revenue', 'EV/EBITDA', 'Business Description']
     filtered_df = public_comps_df[columns_to_display]
 
-    # Configure AgGrid
     gb = GridOptionsBuilder.from_dataframe(filtered_df)
     gb.configure_selection('multiple', use_checkbox=True)
     gb.configure_default_column(editable=True, filter=True, sortable=True, resizable=True)
     grid_options = gb.build()
-
-    # st.subheader("Company Data")
     grid_response = AgGrid(
         filtered_df,
         gridOptions=grid_options,
@@ -50,15 +50,14 @@ def get_public_comps_layout():
         ev_revenue_fig, ev_ebitda_fig = plot_public_comps_charts(selected_rows)
         export_chart_options(ev_revenue_fig, ev_ebitda_fig)
     else:
-        st.info("Select companies to visualize their data.")
-        
-
+        st.info("Select companies to visualize their data.")   
 
 def plot_public_comps_charts(data):
     sns.set_style("whitegrid")
     plt.rc('axes', edgecolor='gray')
     plt.rc('xtick', color='gray')
     plt.rc('ytick', color='gray')
+
     """Plot EV/Revenue and EV/EBITDA charts."""
     # EV/Revenue Chart
     fig1, ax1 = plt.subplots(figsize=(12, 4))
@@ -126,15 +125,14 @@ def export_to_pptx(ev_revenue_fig, ev_ebitda_fig):
     img1 = BytesIO()
     ev_revenue_fig.savefig(img1, format="png", bbox_inches='tight')
     img1.seek(0)
-    slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10), height=Inches(4.5))
-
-    slide2 = prs.slides.add_slide(slide_layout)
-    title2 = slide2.shapes.title
-    title2.text = "EV/EBITDA Chart"
+    slide1.shapes.add_picture(img1, Inches(0.5), Inches(1.15), width=Inches(9), height=Inches(2.8))
+    # slide2 = prs.slides.add_slide(slide_layout)
+    # title2 = slide2.shapes.title
+    # title2.text = "EV/EBITDA Chart"
     img2 = BytesIO()
     ev_ebitda_fig.savefig(img2, format="png", bbox_inches='tight')
     img2.seek(0)
-    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10), height=Inches(4.5))
+    slide1.shapes.add_picture(img2, Inches(0.5), Inches(4.35), width=Inches(9), height=Inches(2.8))
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
