@@ -52,12 +52,13 @@ def get_public_comps_layout():
     else:
         st.info("Select companies to visualize their data.")
         
-sns.set_style("whitegrid")
-plt.rc('axes', edgecolor='gray')
-plt.rc('xtick', color='gray')
-plt.rc('ytick', color='gray')
+
 
 def plot_public_comps_charts(data):
+    sns.set_style("whitegrid")
+    plt.rc('axes', edgecolor='gray')
+    plt.rc('xtick', color='gray')
+    plt.rc('ytick', color='gray')
     """Plot EV/Revenue and EV/EBITDA charts."""
     # EV/Revenue Chart
     fig1, ax1 = plt.subplots(figsize=(12, 4))
