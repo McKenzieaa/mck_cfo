@@ -19,14 +19,12 @@ def load_public_comps_data():
     public_comps_df['EBITDA (in $)'] = pd.to_numeric(public_comps_df['EBITDA (in $)'], errors='coerce').round(1)
     public_comps_df['EV/Revenue'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['Revenue (in $)']
     public_comps_df['EV/EBITDA'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['EBITDA (in $)']
-
-    pass
-public_comps_df = load_public_comps_data()
+    return public_comps_df
 
 def get_public_comps_layout():
     """Render the Public Companies page layout."""
     st.subheader("Public Companies")
-
+    public_comps_df = load_public_comps_data()
     columns_to_display = ['Name', 'Country', 'Industry', 'EV/Revenue', 'EV/EBITDA', 'Business Description']
     filtered_df = public_comps_df[columns_to_display]
 
