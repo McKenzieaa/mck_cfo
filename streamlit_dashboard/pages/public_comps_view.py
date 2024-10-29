@@ -2,25 +2,28 @@
 import os
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sns
+from io import BytesIO
 from pptx import Presentation
 from pptx.util import Inches
-from io import BytesIO
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 path_public_comps= os.path.abspath(r'streamlit_dashboard/data/Public Listed Companies US.xlsx')
-
 @st.cache_data
-def get_public_comps_layout():
+def get_public_comps_data():
+    """Load and process the public companies data."""
+    df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
+    df['Enterprise Value (in $)'] = pd.to_numeric(df['Enterprise Value (in $)'], errors='coerce')
+    df['Revenue (in $)'] = pd.to_numeric(df['Revenue (in $)'], errors='coerce').round(1)
+    df['EBITDA (in $)'] = pd.to_numeric(df['EBITDA (in $)'], errors='coerce').round(1)
+    df['EV/Revenue'] = df['Enterprise Value (in $)'] / df['Revenue (in $)']
+    df['EV/EBITDA'] = df['Enterprise Value (in $)'] / df['EBITDA (in $)']
+    return df
+
+def display_public_comps():
     """Render the Public Companies page layout."""
     st.subheader("Public Companies")
-    public_comps_df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
-    public_comps_df['Enterprise Value (in $)'] = pd.to_numeric(public_comps_df['Enterprise Value (in $)'], errors='coerce')
-    public_comps_df['Revenue (in $)'] = pd.to_numeric(public_comps_df['Revenue (in $)'], errors='coerce').round(1)
-    public_comps_df['EBITDA (in $)'] = pd.to_numeric(public_comps_df['EBITDA (in $)'], errors='coerce').round(1)
-    public_comps_df['EV/Revenue'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['Revenue (in $)']
-    public_comps_df['EV/EBITDA'] = public_comps_df['Enterprise Value (in $)'] / public_comps_df['EBITDA (in $)']
+
+    public_comps_df = get_public_comps_data()
     columns_to_display = ['Name', 'Country', 'Industry', 'EV/Revenue', 'EV/EBITDA', 'Business Description']
     filtered_df = public_comps_df[columns_to_display]
 
@@ -45,60 +48,23 @@ def get_public_comps_layout():
         st.info("Select companies to visualize their data.")   
 
 def plot_public_comps_charts(data):
-    sns.set_style("whitegrid")
-    plt.rc('axes', edgecolor='gray')
-    plt.rc('xtick', color='gray')
-    plt.rc('ytick', color='gray')
+    """Plot EV/Revenue and EV/EBITDA charts using Streamlit native charts."""
+    st.subheader("EV/Revenue Chart")
+    ev_revenue_chart_data = data[['Name', 'EV/Revenue']].set_index('Name')
+    st.bar_chart(ev_revenue_chart_data)
 
-    """Plot EV/Revenue and EV/EBITDA charts."""
-    # EV/Revenue Chart
-    fig1, ax1 = plt.subplots(figsize=(12, 4))
-    sns.barplot(data=data, x='Name', y='EV/Revenue', ax=ax1, color='#032649')
-    for p in ax1.patches:
-        ax1.annotate(f'{p.get_height():.1f}', (p.get_x() + p.get_width() / 2., p.get_height()),
-                     ha='center', va='center', fontsize=10, color='black', xytext=(0, 5), textcoords='offset points')
-    st.pyplot(fig1)
+    st.subheader("EV/EBITDA Chart")
+    ev_ebitda_chart_data = data[['Name', 'EV/EBITDA']].set_index('Name')
+    st.bar_chart(ev_ebitda_chart_data)
 
-    # EV/EBITDA Chart
-    fig2, ax2 = plt.subplots(figsize=(12, 4))
-    sns.barplot(data=data, x='Name', y='EV/EBITDA', ax=ax2, color='#EB8928')
-    for p in ax2.patches:
-        ax2.annotate(f'{p.get_height():.1f}', (p.get_x() + p.get_width() / 2., p.get_height()),
-                     ha='center', va='center', fontsize=10, color='black', xytext=(0, 5), textcoords='offset points')
-    st.pyplot(fig2)
+    return ev_revenue_chart_data, ev_ebitda_chart_data
 
-    return fig1, fig2
-
-def export_chart_options(ev_revenue_fig, ev_ebitda_fig):
-    """Export charts as PNG or PowerPoint."""
+def export_chart_options(ev_revenue_data, ev_ebitda_data):
+    """Provide options to export charts as PowerPoint."""
     st.subheader("Export Charts")
 
-    # Download as PNG
-    png_buffer1 = BytesIO()
-    ev_revenue_fig.savefig(png_buffer1, format="png")
-    png_buffer1.seek(0)
-
-    png_buffer2 = BytesIO()
-    ev_ebitda_fig.savefig(png_buffer2, format="png")
-    png_buffer2.seek(0)
-
-    # st.download_button(
-    #     label="Download EV/Revenue Chart as PNG",
-    #     data=png_buffer1,
-    #     file_name="ev_revenue_chart.png",
-    #     mime="image/png"
-    # )
-
-    # st.download_button(
-    #     label="Download EV/EBITDA Chart as PNG",
-    #     data=png_buffer2,
-    #     file_name="ev_ebitda_chart.png",
-    #     mime="image/png"
-    # )
-
-    # Export to PowerPoint
     if st.button("Export Charts to PowerPoint"):
-        pptx_file = export_to_pptx(ev_revenue_fig, ev_ebitda_fig)
+        pptx_file = export_to_pptx(ev_revenue_data, ev_ebitda_data)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
@@ -106,25 +72,28 @@ def export_chart_options(ev_revenue_fig, ev_ebitda_fig):
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
-def export_to_pptx(ev_revenue_fig, ev_ebitda_fig):
+def export_to_pptx(ev_revenue_data, ev_ebitda_data):
     """Export charts to a PowerPoint presentation."""
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
+    # Slide for EV/Revenue Chart
     slide1 = prs.slides.add_slide(slide_layout)
     title1 = slide1.shapes.title
     title1.text = "EV/Revenue Chart"
     img1 = BytesIO()
-    ev_revenue_fig.savefig(img1, format="png", bbox_inches='tight')
+    ev_revenue_data.plot(kind='bar').get_figure().savefig(img1, format='png', bbox_inches='tight')
     img1.seek(0)
-    slide1.shapes.add_picture(img1, Inches(0.5), Inches(1.15), width=Inches(9), height=Inches(2.8))
-    # slide2 = prs.slides.add_slide(slide_layout)
-    # title2 = slide2.shapes.title
-    # title2.text = "EV/EBITDA Chart"
+    slide1.shapes.add_picture(img1, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+
+    # Slide for EV/EBITDA Chart
+    slide2 = prs.slides.add_slide(slide_layout)
+    title2 = slide2.shapes.title
+    title2.text = "EV/EBITDA Chart"
     img2 = BytesIO()
-    ev_ebitda_fig.savefig(img2, format="png", bbox_inches='tight')
+    ev_ebitda_data.plot(kind='bar').get_figure().savefig(img2, format='png', bbox_inches='tight')
     img2.seek(0)
-    slide1.shapes.add_picture(img2, Inches(0.5), Inches(4.35), width=Inches(9), height=Inches(2.8))
+    slide2.shapes.add_picture(img2, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
