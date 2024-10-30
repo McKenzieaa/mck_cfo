@@ -92,29 +92,43 @@ def load_state_gdp_data():
     """Download and preprocess state-level GDP data."""
     global state_gdp_data
     url = "https://apps.bea.gov/regional/zip/SAGDP.zip"
-    response = requests.get(url)
+    
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                csv_file_name = next(
+                    (name for name in z.namelist() 
+                     if name.startswith("SAGDP1__ALL_AREAS_") and name.endswith(".csv")), 
+                    None
+                )
+                if csv_file_name:
+                    with z.open(csv_file_name) as f:
+                        # Load the CSV and exclude unnecessary columns
+                        df = pd.read_csv(
+                            f, 
+                            usecols=lambda col: col not in [
+                                "GeoFIPS", "Region", "TableName", "LineCode", 
+                                "IndustryClassification", "Unit"
+                            ],
+                            dtype={"Description": str}
+                        )
 
-    if response.status_code == 200:
-        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-            csv_file_name = next((name for name in z.namelist() 
-                                  if name.startswith("SAGDP1__ALL_AREAS_") and name.endswith(".csv")), None)
+                    df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
+                    df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
+                    df.rename(columns={"GeoName": "State"}, inplace=True)
+                    df = df[df["Year"].str.isdigit()]
+                    df["Year"] = df["Year"].astype(int)
+                    df["Value"] = pd.to_numeric(df["Value"], errors='coerce')
+                    df.dropna(subset=["Value"], inplace=True)
+                    state_gdp_data = df[df["State"] != "United States"]
+                else:
+                    st.error("No matching CSV file found in the downloaded ZIP.")
+        else:
+            st.error(f"Failed to download GDP data. Status code: {response.status_code}")
 
-            if csv_file_name:
-                with z.open(csv_file_name) as f:
-                    df = pd.read_csv(f, usecols=lambda col: col not in [
-                        "GeoFIPS", "Region", "TableName", "LineCode", 
-                        "IndustryClassification", "Unit"
-                    ], dtype={"Description": str})
-                df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
-                df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
-                df.rename(columns={"GeoName": "State"}, inplace=True)
-                df = df[df["Year"].str.isdigit()]
-                df["Year"] = df["Year"].astype(int)
-                state_gdp_data = df[df["State"] != "United States"]
-            else:
-                st.error("No CSV file found with the specified prefix.")
-    else:
-        st.error("Failed to download GDP data.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
 load_state_gdp_data()
 
