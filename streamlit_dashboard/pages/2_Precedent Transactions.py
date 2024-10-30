@@ -6,6 +6,32 @@ from pptx import Presentation
 from pptx.util import Inches
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
+st.set_page_config(page_title="Precedent Transactions", layout="wide")
+# Inject CSS to reduce font sizes
+st.markdown(
+    """
+    <style>
+    /* Reduce the default font size of all elements */
+    html, body, [class*="stMarkdown"] {
+        font-size: 14px;
+    }
+    /* Adjust font size of headers */
+    h1, h2, h3, h4, h5, h6 {
+        font-size: 16px !important;
+    }
+    /* Customize sidebar font */
+    [data-testid="stSidebar"] {
+        font-size: 13px;
+    }
+    /* Adjust AgGrid table font */
+    .ag-root-wrapper {
+        font-size: 13px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Path to the Excel file
 path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx'
 
@@ -31,7 +57,7 @@ def get_transactions_data():
 
 def display_transactions():
     """Render the Transactions page layout."""
-    st.subheader("Precedent Transactions")
+    # st.subheader("Precedent Transactions")
 
     transactions_df = get_transactions_data()
 
