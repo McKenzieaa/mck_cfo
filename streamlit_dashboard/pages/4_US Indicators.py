@@ -304,7 +304,8 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Value'],
             mode='lines',
             name='GDP - Value',
-            line=dict(color='blue', width=2, dash='solid'),
+            fill='tozeroy',  # Create area chart by filling to the x-axis
+            line=dict(color='blue', width=2),
             marker=dict(size=6)
         ),
         secondary_y=False
@@ -334,7 +335,8 @@ def plot_gdp_and_industry(selected_industry=None):
                 y=df_industry_filtered['Value'],
                 mode='lines',
                 name=f'{selected_industry} - Value',
-                line=dict(color='red', width=2, dash='solid'),
+                fill='tozeroy',  # Area chart
+                line=dict(color='red', width=2),
                 marker=dict(size=6)
             ),
             secondary_y=False
@@ -356,7 +358,7 @@ def plot_gdp_and_industry(selected_industry=None):
     # Update layout
     fig.update_layout(
         title=f'GDP and {selected_industry or "GDP"} - Value & Percent Change over Years',
-        xaxis_title='',
+        xaxis_title='Year',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
         legend_title='Legend',
