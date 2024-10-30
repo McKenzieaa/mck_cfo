@@ -13,25 +13,25 @@ st.markdown(
     <style>
     /* Reduce the default font size of all elements */
     html, body, [class*="stMarkdown"] {
-        font-size: 12px;
+        font-size: 14px;
     }
     /* Adjust font size of headers */
     h1, h2, h3, h4, h5, h6 {
-        font-size: 14px !important;
+        font-size: 16px !important;
     }
     /* Customize sidebar font */
     [data-testid="stSidebar"] {
-        font-size: 12px;
+        font-size: 13px;
     }
     /* Adjust AgGrid table font */
     .ag-root-wrapper {
-        font-size: 10px !important;
+        font-size: 13px !important;
     }
     .ag-theme-alpine {
-        font-size: 10px !important;  /* Reduce the font size */
+        font-size: 12px !important;  /* Reduce the font size */
     }
     .ag-header-cell-label {
-        font-size: 12px !important; /* Optional: Adjust header font */
+        font-size: 14px !important; /* Optional: Adjust header font */
     }
     </style>
     """,
