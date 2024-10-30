@@ -17,9 +17,6 @@ def get_public_comps_data():
     df['EBITDA (in $)'] = pd.to_numeric(df['EBITDA (in $)'], errors='coerce').round(1)
     df['EV/Revenue'] = df['Enterprise Value (in $)'] / df['Revenue (in $)']
     df['EV/EBITDA'] = df['Enterprise Value (in $)'] / df['EBITDA (in $)']
-    df.replace("-", np.nan, inplace=True)
-    df.dropna(subset=['Country', 'Industry', 'EV/Revenue', 'EV/EBITDA'], inplace=True)
-    df = df[(~df['EV/Revenue'].isin([np.inf, -np.inf])) & (~df['EV/EBITDA'].isin([np.inf, -np.inf]))]
     df = df.dropna(subset=['Country', 'Industry', 'EV/Revenue', 'EV/EBITDA'])
     return df
 
