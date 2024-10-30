@@ -27,6 +27,12 @@ st.markdown(
     .ag-root-wrapper {
         font-size: 13px !important;
     }
+    .ag-theme-alpine {
+        font-size: 12px !important;  /* Reduce the font size */
+    }
+    .ag-header-cell-label {
+        font-size: 14px !important; /* Optional: Adjust header font */
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -71,10 +77,10 @@ def display_transactions():
         transactions_df,
         gridOptions=grid_options,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
-        theme='alpine',
+        theme='alpine',  # Use the same theme as before
         fit_columns_on_grid_load=True,
-        height=500,
-        width='100%'
+        height=500,  # Maintain the height or adjust as needed
+        width='100%'  # Ensure it uses the full available width
     )
 
     selected_rows = pd.DataFrame(grid_response['selected_rows'])
