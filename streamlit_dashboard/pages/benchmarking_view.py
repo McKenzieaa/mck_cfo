@@ -7,7 +7,7 @@ import streamlit as st
 # folder_path = os.path.join(user_profile, 'source', 'mck_setup', 'streamlit_dashboard', 'data')
 
 rma_file_path = r"streamlit_dashboard/data/RMA.xlsx"
-public_comps_file_path = os.path.abspath(r"streamlit_dashboard/data/Public Listed Companies US.xlsx")
+public_comps_file_path = r"streamlit_dashboard/data/Public Listed Companies US.xlsx"
 # Helper functions to load and process data
 def get_industries(file_path, sheet_name):
     try:

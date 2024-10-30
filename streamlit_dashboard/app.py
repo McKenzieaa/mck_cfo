@@ -35,12 +35,17 @@ def render_page(page_name):
         st.error("404: Page not found")
 
 def sidebar_navigation():
-    """Generate sidebar navigation with a selectbox.""" 
+    """Generate a sidebar navigation with clickable buttons instead of a dropdown.""" 
     st.sidebar.title("Navigation")
-    selected_page = st.sidebar.selectbox("Select a Page", options=PAGES.keys())
-    # Store the selected page in the query parameters
-    st.experimental_set_query_params(page=selected_page)
-    return selected_page
+    # Create buttons for each page
+    for page_name in PAGES.keys():
+        if st.sidebar.button(page_name, key=page_name):
+            # Store the selected page in query parameters
+            st.experimental_set_query_params(page=page_name)
+            return page_name
+
+    # Default to the 'Home' page if no button is pressed
+    return get_current_page()
 
 def get_current_page():
     """Retrieve the current page from the URL parameters."""
@@ -58,6 +63,14 @@ hide_sidebar_style = """
     <style>
         [data-testid="collapsedControl"] {
             display: none;
+        }
+        section[data-testid="stSidebar"] {
+            min-width: 250px;
+            max-width: 250px;
+            height: 100vh;
+        }
+        section[data-testid="stSidebar"] div {
+            padding-top: 2rem;
         }
     </style>
 """

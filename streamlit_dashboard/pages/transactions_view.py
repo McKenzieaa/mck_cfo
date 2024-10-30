@@ -7,7 +7,7 @@ from pptx.util import Inches
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 # Path to the Excel file
-path_transaction = os.path.abspath(r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx')
+path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx'
 
 @st.cache_data
 def get_transactions_data():

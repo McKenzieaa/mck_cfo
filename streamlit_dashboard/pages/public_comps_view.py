@@ -7,7 +7,7 @@ from pptx import Presentation
 from pptx.util import Inches
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-path_public_comps= os.path.abspath(r'streamlit_dashboard/data/Public Listed Companies US.xlsx')
+path_public_comps= r'streamlit_dashboard/data/Public Listed Companies US.xlsx'
 @st.cache_data
 def get_public_comps_data():
     """Load and process the public companies data."""

@@ -23,12 +23,6 @@ states_data_id = {
     "Wyoming": {"ur_id": "WYUR", "labour_id": "LBSSA56"}
 }
 
-# Set seaborn and matplotlib configurations
-sns.set_style("white")
-plt.rc('axes', edgecolor='white')
-plt.rc('xtick', color='gray')
-plt.rc('ytick', color='gray')
-
 def download_csv(state_name, data_type):
     data_ids = states_data_id.get(state_name)
     if not data_ids:
