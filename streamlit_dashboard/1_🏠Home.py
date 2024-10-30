@@ -9,7 +9,7 @@ def local_css(file_name):
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Load CSS
-local_css("styles.css")
+local_css("McKenzieaa/mck_cfo/streamlit_dashboard/assets/icons/style.css")
 
 # Header Section
 st.markdown("""
