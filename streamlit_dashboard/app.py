@@ -1,5 +1,4 @@
 import streamlit as st
-from pages.home import get_home_layout
 from pages.public_comps_view import display_public_comps
 from pages.transactions_view import display_transactions
 from pages.us_indicators_view import get_us_indicators_layout
@@ -17,7 +16,7 @@ st.set_page_config(
 
 # Dictionary mapping page names to layout functions
 PAGES = {
-    "Home": (get_home_layout, None),
+    # "Home": (get_home_layout, None),
     "Public Comps": (display_public_comps, None),
     "Precedent Transactions": (display_transactions, None),
     "US Indicators": (get_us_indicators_layout, None),
