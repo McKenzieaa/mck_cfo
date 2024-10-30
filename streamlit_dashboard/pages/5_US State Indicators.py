@@ -7,6 +7,7 @@ from datetime import date
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
+import plotly.graph_objs as go
 import seaborn as sns
 import matplotlib.pyplot as plt
 
