@@ -35,17 +35,12 @@ def render_page(page_name):
         st.error("404: Page not found")
 
 def sidebar_navigation():
-    """Generate a sidebar navigation with clickable buttons instead of a dropdown.""" 
+    """Generate a sidebar navigation with clickable buttons instead of a dropdown."""
     st.sidebar.title("Navigation")
-    # Create buttons for each page
-    for page_name in PAGES.keys():
-        if st.sidebar.button(page_name, key=page_name):
-            # Store the selected page in query parameters
-            st.experimental_set_query_params(page=page_name)
-            return page_name
-
-    # Default to the 'Home' page if no button is pressed
-    return get_current_page()
+    # Ensure only the relevant items appear in the sidebar
+    selected_page = st.sidebar.radio("", options=list(PAGES.keys()), index=0)
+    st.experimental_set_query_params(page=selected_page)  # Store selection in query params
+    return selected_page
 
 def get_current_page():
     """Retrieve the current page from the URL parameters."""
@@ -58,8 +53,8 @@ def main():
     current_page = sidebar_navigation()  # Create sidebar links and get the selected page
     render_page(current_page)  # Render the appropriate page layout
 
-# Hide the sidebar toggle using custom CSS
-hide_sidebar_style = """
+# Custom CSS to hide sidebar toggle and ensure a clean layout
+custom_css = """
     <style>
         [data-testid="collapsedControl"] {
             display: none;
@@ -74,7 +69,7 @@ hide_sidebar_style = """
         }
     </style>
 """
-st.markdown(hide_sidebar_style, unsafe_allow_html=True)
+st.markdown(custom_css, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
