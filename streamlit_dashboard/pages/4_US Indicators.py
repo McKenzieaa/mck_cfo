@@ -489,21 +489,24 @@ def plot_labour_unemployment():
 
     fig.update_layout(
         title='Population, Unemployment Rate, and Labour Force Participation Rate (USA)',
-        xaxis=dict(title=''),
+        xaxis=dict(showgrid=True, showticklabels=True),  # No title
         yaxis=dict(
             title='Population',
             side='left',
-            range=[min_population, merged['population'].max() * 1.1]
+            range=[merged['population'].min(), merged['population'].max() * 1.1]
         ),
         yaxis2=dict(
             title='Rate (%)',
-            overlaying='y', 
+            overlaying='y',  # Overlay on the primary y-axis
             side='right'
         ),
         legend=dict(
-            x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', fontsize=8),
-        hovermode='x'
+            x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
+        ),
+        hovermode='x unified',  # Unified hover mode
+        template='plotly_white'
     )
+
 
     # key = f"labour_unemployment_chart_{st.session_state.counter}"
     # st.session_state.counter += 1 
@@ -535,7 +538,7 @@ def plot_external_driver(selected_indicators):
 
     fig.update_layout(
         title='External Driver Indicators',
-        xaxis=dict(title=''),
+        xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(title='Percent Change'),
         hovermode='x'
     )
@@ -598,7 +601,7 @@ def plot_cpi_ppi(selected_series_id):
     # Configure the layout of the chart
     fig.update_layout(
         title='CPI and PPI Comparison',
-        xaxis=dict(title=''),
+        xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(title='Value'),
         hovermode='x unified'
     )
