@@ -13,25 +13,25 @@ st.markdown(
     <style>
     /* Reduce the default font size of all elements */
     html, body, [class*="stMarkdown"] {
-        font-size: 14px;
+        font-size: 12px;
     }
     /* Adjust font size of headers */
     h1, h2, h3, h4, h5, h6 {
-        font-size: 16px !important;
+        font-size: 14px !important;
     }
     /* Customize sidebar font */
     [data-testid="stSidebar"] {
-        font-size: 13px;
+        font-size: 12px;
     }
     /* Adjust AgGrid table font */
     .ag-root-wrapper {
-        font-size: 13px !important;
+        font-size: 10px !important;
     }
     .ag-theme-alpine {
-        font-size: 12px !important;  /* Reduce the font size */
+        font-size: 10px !important;  /* Reduce the font size */
     }
     .ag-header-cell-label {
-        font-size: 14px !important; /* Optional: Adjust header font */
+        font-size: 12px !important; /* Optional: Adjust header font */
     }
     </style>
     """,
@@ -63,8 +63,7 @@ def get_transactions_data():
 
 def display_transactions():
     """Render the Transactions page layout."""
-    # st.subheader("Precedent Transactions")
-
+    st.subheader("Precedent Transactions")
     transactions_df = get_transactions_data()
 
     # Configure AgGrid
