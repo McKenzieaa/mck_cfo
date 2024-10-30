@@ -128,8 +128,8 @@ def fetch_cpi_data(series_id, df_cleaned):
     selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-01']
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
 
-if 'counter' not in st.session_state:
-    st.session_state.counter = 0
+# if 'counter' not in st.session_state:
+#     st.session_state.counter = 0
 
 def plot_labour_unemployment():
     # Merge unemployment and labour force data
@@ -190,10 +190,10 @@ def plot_labour_unemployment():
         hovermode='x'
     )
 
-    key = f"labour_unemployment_chart_{st.session_state.counter}"
-    st.session_state.counter += 1 
+    # key = f"labour_unemployment_chart_{st.session_state.counter}"
+    # st.session_state.counter += 1 
 
-    st.plotly_chart(fig, use_container_width=True, key=key)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def plot_external_driver(selected_indicators):
@@ -224,10 +224,10 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title='Percent Change'),
         hovermode='x'
     )
-    key = f"external_driver_chart_{st.session_state.counter}"
-    st.session_state.counter += 1
+    # key = f"external_driver_chart_{st.session_state.counter}"
+    # st.session_state.counter += 1
 
-    st.plotly_chart(fig, use_container_width=True, key=key)
+    st.plotly_chart(fig, use_container_width=True)#, key=key)
 
 
 def plot_cpi_ppi(selected_series_id):
@@ -288,10 +288,10 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified'
     )
 
-    key = f"cpi_ppi_chart_{st.session_state.counter}"
-    st.session_state.counter += 1 
+    # key = f"cpi_ppi_chart_{st.session_state.counter}"
+    # st.session_state.counter += 1 
 
-    st.plotly_chart(fig, use_container_width=True, key=key)
+    st.plotly_chart(fig, use_container_width=True)#, key=key)
 
 
 def plot_gdp_and_industry(selected_industry=None):
@@ -363,11 +363,10 @@ def plot_gdp_and_industry(selected_industry=None):
         template='plotly_white'
     )
 
-    key = f"gdp_chart_{st.session_state.counter}"
-    st.session_state.counter += 1 
+    # key = f"gdp_chart_{st.session_state.counter}"
+    # st.session_state.counter += 1 
 
-    st.plotly_chart(fig, use_container_width=True, key=key)
-
+    st.plotly_chart(fig, use_container_width=True)#, key=key)
 def export_all_to_pptx(labour_image, external_driver_image, gdp_image, cpi_ppi_image):
     pptx_io = BytesIO()
     prs = Presentation()
