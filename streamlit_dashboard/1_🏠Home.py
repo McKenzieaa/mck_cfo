@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Ensure that page configuration is the first Streamlit command
-st.set_page_config(page_title="Finance Insights", layout="centered", page_icon="💼")
+st.set_page_config(page_title="McK", layout="centered", page_icon="🧊")
 
 # Custom CSS for styling
 def local_css(file_name):
@@ -13,14 +13,14 @@ local_css("/mount/src/mck_cfo/streamlit_dashboard/style.css")
 
 # Header Section
 st.markdown("""
-# 💼 Finance Insights  
+# 🧊 Mc Kenzie & Associates
 **Your Partner in Data-Driven Financial Solutions**
 """, unsafe_allow_html=True)
 
 # Introductory Section
 st.write(
     """
-Welcome to Finance Insights, where we empower businesses with deep financial analysis. 
+Welcome to Mc Kenzie & Associates, where we empower businesses with deep financial analysis. 
 Our services provide actionable insights through data analytics, predictive modeling, and 
 strategic advisory—helping you make well-informed financial decisions.
 """
@@ -54,7 +54,8 @@ with col2:
 st.markdown(
     """
     **Ready to elevate your financial strategies?**  
-    [Contact us](mailto:info@financeinsights.com) today and discover how we can drive your success.
+    [Contact us](mailto:info@mckenzieaa.com) today and discover how we can drive your success.
+    [Website](www.mckenzieaa.com)
     """
 )
 
