@@ -56,8 +56,8 @@ st.markdown(
     **Ready to elevate your financial strategies?**  
     [Contact us](mailto:info@mckenzieaa.com) today and discover how we can drive your success.
     """
-        """
-    [Website] (www.mckenzieaa.com)
+    """
+    **Website** www.mckenzieaa.com
     """
 )
 
