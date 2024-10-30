@@ -22,7 +22,7 @@ def get_public_comps_data():
 
 def display_public_comps():
     """Render the Public Companies page layout."""
-    st.subheader("Public Companies")
+    st.title("Public Companies")
 
     public_comps_df = get_public_comps_data()
     columns_to_display = ['Name', 'Country', 'Industry', 'EV/Revenue', 'EV/EBITDA', 'Business Description']

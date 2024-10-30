@@ -63,7 +63,7 @@ def get_transactions_data():
 
 def display_transactions():
     """Render the Transactions page layout."""
-    st.subheader("Precedent Transactions")
+    st.title("Precedent Transactions")
     transactions_df = get_transactions_data()
 
     # Configure AgGrid
