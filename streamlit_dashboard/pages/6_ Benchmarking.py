@@ -123,5 +123,5 @@ def get_benchmarking_layout():
         with col2:
             st.write("### Balance Sheet")
             st.dataframe(balance_sheet_df)
-
-
+            
+get_benchmarking_layout()

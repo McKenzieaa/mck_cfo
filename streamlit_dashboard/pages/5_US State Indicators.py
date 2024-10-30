@@ -156,3 +156,4 @@ def get_state_indicators_layout():
             file_name="state_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
+get_state_indicators_layout()

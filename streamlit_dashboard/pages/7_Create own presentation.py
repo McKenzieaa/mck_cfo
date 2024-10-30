@@ -89,5 +89,4 @@ def presentation_view():
                     mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 )
 
-# Run the presentation view function
 presentation_view()

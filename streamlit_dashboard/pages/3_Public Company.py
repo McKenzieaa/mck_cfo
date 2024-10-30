@@ -99,3 +99,4 @@ def export_to_pptx(ev_revenue_data, ev_ebitda_data):
     prs.save(pptx_io)
     pptx_io.seek(0)
     return pptx_io
+display_public_comps()

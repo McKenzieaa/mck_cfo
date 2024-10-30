@@ -433,3 +433,4 @@ def get_us_indicators_layout():
             file_name="us_indicators_dashboard.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
+get_us_indicators_layout()
