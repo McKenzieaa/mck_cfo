@@ -80,7 +80,7 @@ def get_benchmarking_layout():
                 st.dataframe(is_table)
             with col2:
                 st.write("### Balance Sheet")
-                st.dataframe(bs_table)
+                st.dataframe(bs_table,hide_index=True,use_container_width=True)
         else:
             st.info("No matching data found for the selected industries.")
 
@@ -139,6 +139,6 @@ def get_benchmarking_layout():
             st.write("### Balance Sheet")
             st.dataframe(
                 balance_sheet_df.style.format({'Value': format_percentage}),
-                use_container_width=True
+                use_container_width=True,hide_index=True
             )
 get_benchmarking_layout()
