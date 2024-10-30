@@ -85,60 +85,60 @@ def get_benchmarking_layout():
             st.info("No matching data found for the selected industries.")
 
     # Public Comps Benchmarking Tab
-st.subheader("Public Comps Benchmarking")
-selected_public_comps = st.multiselect("Select Industry (Public Comps)", public_comps_industries)
+    st.subheader("Public Comps Benchmarking")
+    selected_public_comps = st.multiselect("Select Industry (Public Comps)", public_comps_industries)
 
-if selected_public_comps:
-    filtered_df = public_comps_data[public_comps_data['Industry'].isin(selected_public_comps)]
+    if selected_public_comps:
+        filtered_df = public_comps_data[public_comps_data['Industry'].isin(selected_public_comps)]
 
-    income_items = [
-        "Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit",
-        "Other Expenses", "Operating Expenses", "Net Income"
-    ]
-    balance_sheet_items = [
-        "Cash", "Accounts Receivables", "Inventories", "Other Current Assets",
-        "Total Current Assets", "Fixed Assets", "PPE", "Total Assets",
-        "Accounts Payable", "Short Term Debt", "Long Term Debt",
-        "Other Current Liabilities", "Total Current Liabilities",
-        "Other Liabilities", "Total Liabilities", "Net Worth",
-        "Total Liabilities & Equity"
-    ]
+        income_items = [
+            "Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit",
+            "Other Expenses", "Operating Expenses", "Net Income"
+        ]
+        balance_sheet_items = [
+            "Cash", "Accounts Receivables", "Inventories", "Other Current Assets",
+            "Total Current Assets", "Fixed Assets", "PPE", "Total Assets",
+            "Accounts Payable", "Short Term Debt", "Long Term Debt",
+            "Other Current Liabilities", "Total Current Liabilities",
+            "Other Liabilities", "Total Liabilities", "Net Worth",
+            "Total Liabilities & Equity"
+        ]
 
-    # Income Statement DataFrame
-    income_statement_df = (
-        filtered_df[filtered_df['LineItems'].isin(income_items)]
-        .groupby('LineItems')['Value']
-        .mean()
-        .reindex(income_items)  # Ensures the order matches 'income_items'
-        .reset_index()
-    )
-
-    # Balance Sheet DataFrame
-    balance_sheet_df = (
-        filtered_df[filtered_df['LineItems'].isin(balance_sheet_items)]
-        .groupby('LineItems')['Value']
-        .mean()
-        .reindex(balance_sheet_items)  # Ensures the order matches 'balance_sheet_items'
-        .reset_index()
-    )
-
-    # Format values as percentages
-    def format_percentage(value):
-        return f"{value:.1f}%" if not pd.isnull(value) else ""
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.write("### Income Statement")
-        st.dataframe(
-            income_statement_df.style.format({'Value': format_percentage}),
-            use_container_width=True
+        # Income Statement DataFrame
+        income_statement_df = (
+            filtered_df[filtered_df['LineItems'].isin(income_items)]
+            .groupby('LineItems')['Value']
+            .mean()
+            .reindex(income_items)  # Ensures the order matches 'income_items'
+            .reset_index()
         )
 
-    with col2:
-        st.write("### Balance Sheet")
-        st.dataframe(
-            balance_sheet_df.style.format({'Value': format_percentage}),
-            use_container_width=True
+        # Balance Sheet DataFrame
+        balance_sheet_df = (
+            filtered_df[filtered_df['LineItems'].isin(balance_sheet_items)]
+            .groupby('LineItems')['Value']
+            .mean()
+            .reindex(balance_sheet_items)  # Ensures the order matches 'balance_sheet_items'
+            .reset_index()
         )
+
+        # Format values as percentages
+        def format_percentage(value):
+            return f"{value:.1f}%" if not pd.isnull(value) else ""
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.write("### Income Statement")
+            st.dataframe(
+                income_statement_df.style.format({'Value': format_percentage}),
+                use_container_width=True
+            )
+
+        with col2:
+            st.write("### Balance Sheet")
+            st.dataframe(
+                balance_sheet_df.style.format({'Value': format_percentage}),
+                use_container_width=True
+            )
 get_benchmarking_layout()
