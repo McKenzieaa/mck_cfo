@@ -53,7 +53,7 @@ def load_public_comps_data():
         )
         df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
         df_unpivoted['Value'] = pd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0)
-
+        df_unpivoted["Value"]= df_unpivoted['Value']*100
         industries = df_unpivoted['Industry'].unique().tolist()
         return industries, df_unpivoted
     except Exception as e:
@@ -131,14 +131,14 @@ def get_benchmarking_layout():
         with col1:
             st.write("### Income Statement")
             st.dataframe(
-                income_statement_df.style.format({'Value'*100: format_percentage}),
+                income_statement_df.style.format({'Value': format_percentage}),
                 use_container_width=True
             )
 
         with col2:
             st.write("### Balance Sheet")
             st.dataframe(
-                balance_sheet_df.style.format({'Value'*100: format_percentage}),
+                balance_sheet_df.style.format({'Value': format_percentage}),
                 use_container_width=True
             )
 get_benchmarking_layout()
