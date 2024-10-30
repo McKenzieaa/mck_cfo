@@ -187,11 +187,11 @@ def get_state_indicators_layout():
     st.title("US State Indicators")
     state_name = st.selectbox("Select State", list(states_data_id.keys()), index=0)
 
-    st.subheader(f"### {state_name} - Unemployment & Labour Force")
+    st.subheader(f"{state_name} - Unemployment & Labour Force")
     labour_data = plot_unemployment_labour_chart(state_name)
 
 
-    st.subheader(f"### {state_name} - GDP Over Time")
+    st.subheader(f"{state_name} - GDP Over Time")
     gdp_data = plot_gdp_chart(state_name)
 
     # Export to PowerPoint button
