@@ -131,14 +131,14 @@ def get_benchmarking_layout():
         with col1:
             st.write("### Income Statement")
             st.dataframe(
-                income_statement_df.style.format({'Value': format_percentage}),
+                income_statement_df.style.format({'Value'*100: format_percentage}),
                 use_container_width=True
             )
 
         with col2:
             st.write("### Balance Sheet")
             st.dataframe(
-                balance_sheet_df.style.format({'Value': format_percentage}),
+                balance_sheet_df.style.format({'Value'*100: format_percentage}),
                 use_container_width=True
             )
 get_benchmarking_layout()
