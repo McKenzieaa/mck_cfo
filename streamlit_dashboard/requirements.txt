@@ -7,3 +7,4 @@ seaborn
 python-pptx
 openpyxl
 streamlit-aggrid
+streamlit-navigation-bar
