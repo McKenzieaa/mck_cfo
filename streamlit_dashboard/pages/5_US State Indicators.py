@@ -158,9 +158,34 @@ def plot_gdp_chart(state_name):
         gdp_data = gdp_data[gdp_data["Year"] >= 2000]
 
         if not gdp_data.empty:
-            gdp_chart_data = gdp_data.set_index('Year')['Value']
-            st.line_chart(gdp_chart_data, use_container_width=True)
-            return gdp_chart_data
+            # Create a Plotly figure for the GDP chart
+            fig = go.Figure()
+
+            # Add GDP data as a line trace
+            fig.add_trace(go.Scatter(
+                x=gdp_data['Year'], 
+                y=gdp_data['Value'], 
+                mode='lines+markers',
+                name=f"{state_name} GDP"
+            ))
+
+            # Update the layout to ensure the x-axis shows years as whole numbers without commas
+            fig.update_layout(
+                title=f"GDP Trends for {state_name}",
+                xaxis=dict(
+                    title='Year',
+                    tickmode='linear',
+                    tickformat='d', 
+                ),
+                yaxis=dict(
+                    title='GDP (Millions of Dollars)'
+                ),
+                template='plotly_white'
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            return gdp_data.set_index('Year')['Value']
         else:
             st.warning(f"No GDP data available for {state_name}.")
             return None
