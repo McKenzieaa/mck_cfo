@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import pygwalker as pyg
 import numpy as np
+from pygwalker.api.streamlit import StreamlitRenderer
 
 # Load the data
 path_public_comps = r'streamlit_dashboard/data/Public Listed Companies US.xlsx'
@@ -26,5 +26,6 @@ df['EV/EBITDA'] = df['EV/EBITDA'].apply(lambda x: f"{x:.1f}x")
 # Display in Streamlit
 st.title("Public Listed Companies in the US - FY 2023")
 
-# Use Pygwalker for interactive visualizations
-pyg.walk(df, appearance='light')
+pyg_app = StreamlitRenderer(df)
+ 
+pyg_app.explorer()
