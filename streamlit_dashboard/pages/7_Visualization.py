@@ -2,7 +2,7 @@ import pandas as pd
 import pygwalker as pyg
 import numpy as np
 
-path_public_comps = r'C:\Users\sindh\source\mck_setup\streamlit_dashboard\data\Public Listed Companies US.xlsx'
+path_public_comps = r'streamlit_dashboard/data/Public Listed Companies US.xlsx'
 
 df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
 df['Enterprise Value (in $)'] = pd.to_numeric(df['Enterprise Value (in $)'], errors='coerce')
