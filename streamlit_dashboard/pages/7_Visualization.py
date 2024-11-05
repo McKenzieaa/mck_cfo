@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from pygwalker.api.streamlit import StreamlitRenderer
 
+st.set_page_config(layout="wide")
+
 # Load the data
 path_public_comps = r'streamlit_dashboard/data/Public Listed Companies US.xlsx'
 df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
@@ -24,7 +26,7 @@ df['EV/Revenue'] = df['EV/Revenue'].apply(lambda x: f"{x:.1f}x")
 df['EV/EBITDA'] = df['EV/EBITDA'].apply(lambda x: f"{x:.1f}x")
 
 # Display in Streamlit
-st.title("Public Listed Companies in the US - FY 2023")
+st.header("Visualisation")
 
 pyg_app = StreamlitRenderer(df)
  
