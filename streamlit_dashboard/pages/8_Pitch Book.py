@@ -219,41 +219,53 @@ def plot_public_comps_charts(data):
 
 def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table):
     prs = Presentation()
-    slide_layout = prs.slide_layouts[5]
+    slide_layout = prs.slide_layouts[5]  # Blank layout for charts/tables
 
     def add_chart_slide(prs, title, fig):
+        """Adds a chart slide to the PowerPoint presentation."""
         slide = prs.slides.add_slide(slide_layout)
-        slide_title = slide.shapes.title
-        slide_title.text = title
+        slide.shapes.title.text = title
+
+        # Convert figure to PNG image
         img = BytesIO()
         fig.savefig(img, format='png', bbox_inches='tight')
         img.seek(0)
         slide.shapes.add_picture(img, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
 
-    if ev_revenue_transactions is not None:
-        add_chart_slide(prs, "Precedent Transactions EV/Revenue Chart", ev_revenue_transactions.plot(kind='bar').get_figure())
-
-    if ev_ebitda_transactions is not None:
-        add_chart_slide(prs, "Precedent Transactions EV/EBITDA Chart", ev_ebitda_transactions.plot(kind='bar').get_figure())
-
-    if ev_revenue_public is not None:
-        add_chart_slide(prs, "Public Companies EV/Revenue Chart", ev_revenue_public.plot(kind='bar').get_figure())
-
-    if ev_ebitda_public is not None:
-        add_chart_slide(prs, "Public Companies EV/EBITDA Chart", ev_ebitda_public.plot(kind='bar').get_figure())
-
     def add_table_slide(prs, title, table_df):
+        """Adds a table slide to the PowerPoint presentation."""
         slide = prs.slides.add_slide(slide_layout)
-        title_shape = slide.shapes.title
-        title_shape.text = title
+        slide.shapes.title.text = title
         rows, cols = table_df.shape
         table = slide.shapes.add_table(rows + 1, cols, Inches(0.5), Inches(1.5), Inches(9), Inches(3)).table
+
+        # Add header
         for col_idx, col_name in enumerate(table_df.columns):
             table.cell(0, col_idx).text = str(col_name)
+
+        # Add table data
         for row_idx, row_data in enumerate(table_df.values):
             for col_idx, value in enumerate(row_data):
                 table.cell(row_idx + 1, col_idx).text = str(value)
 
+    # Add each chart as a slide if it exists
+    if ev_revenue_transactions is not None:
+        fig = ev_revenue_transactions.plot(kind='bar').get_figure()
+        add_chart_slide(prs, "Precedent Transactions EV/Revenue Chart", fig)
+
+    if ev_ebitda_transactions is not None:
+        fig = ev_ebitda_transactions.plot(kind='bar').get_figure()
+        add_chart_slide(prs, "Precedent Transactions EV/EBITDA Chart", fig)
+
+    if ev_revenue_public is not None:
+        fig = ev_revenue_public.plot(kind='bar').get_figure()
+        add_chart_slide(prs, "Public Companies EV/Revenue Chart", fig)
+
+    if ev_ebitda_public is not None:
+        fig = ev_ebitda_public.plot(kind='bar').get_figure()
+        add_chart_slide(prs, "Public Companies EV/EBITDA Chart", fig)
+
+    # Add tables if they are not empty
     if not rma_is_table.empty:
         add_table_slide(prs, "RMA Benchmarking - Income Statement", rma_is_table)
 
@@ -266,6 +278,7 @@ def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_p
     if not pc_bs_table.empty:
         add_table_slide(prs, "PC Benchmarking - Balance Sheet", pc_bs_table)
 
+    # Save the PowerPoint presentation to a BytesIO buffer
     pptx_io = BytesIO()
     prs.save(pptx_io)
     pptx_io.seek(0)
