@@ -676,41 +676,19 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
-    # Slide 1: Unemployment & Labour Force
-    slide1 = prs.slides.add_slide(slide_layout)
-    title1 = slide1.shapes.title
-    title1.text = "Unemployment & Labour Force"
-    img = BytesIO()
-    labour_fig.write_image(img, format="png", engine="kaleido")
-    img.seek(0)
-    slide1.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
+    def add_slide_with_figure(prs, fig, title_text):
+        slide = prs.slides.add_slide(slide_layout)
+        title = slide.shapes.title
+        title.text = title_text
+        img = BytesIO()
+        fig.write_image(img, format="png", engine="kaleido")
+        img.seek(0)
+        slide.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
 
-    # Slide 2: Extrenal Drivers
-    slide2 = prs.slides.add_slide(slide_layout)
-    title2 = slide2.shapes.title
-    title2.text = "Extrenal Drivers"
-    img = BytesIO()
-    external_fig.write_image(img, format="png", engine="kaleido")
-    img.seek(0)
-    slide2.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
-
-    # Slide 3: GDP
-    slide3 = prs.slides.add_slide(slide_layout)
-    title3 = slide3.shapes.title
-    title3.text = "Extrenal Drivers"
-    img = BytesIO()
-    gdp_fig.write_image(img, format="png", engine="kaleido")
-    img.seek(0)
-    slide3.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
-
-    # Slide 4: CPI PPI
-    slide4 = prs.slides.add_slide(slide_layout)
-    title4 = slide4.shapes.title
-    title4.text = "Extrenal Drivers"
-    img = BytesIO()
-    cpi_ppi_fig.write_image(img, format="png", engine="kaleido")
-    img.seek(0)
-    slide4.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
+    add_slide_with_figure(prs, labour_fig, "Unemployment & Labour Force")
+    add_slide_with_figure(prs, external_fig, "External Drivers")
+    add_slide_with_figure(prs, gdp_fig, "GDP and Selected Industry")
+    add_slide_with_figure(prs, cpi_ppi_fig, "CPI and PPI Comparison")
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
@@ -756,13 +734,11 @@ def get_us_indicators_layout():
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
-    if st.button("Export Charts to PowerPoint", key="export_button"):
+    if st.button("Export Charts to PowerPoint"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
-        st.download_button(
-            label="Download PowerPoint",
-            data=pptx_file,
-            file_name="state_indicators.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        )
+        st.download_button(label="Download PowerPoint", data=pptx_file,
+                           file_name="state_indicators.pptx",
+                           mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
+
 
 get_us_indicators_layout()
