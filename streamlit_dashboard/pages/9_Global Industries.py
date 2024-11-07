@@ -168,8 +168,19 @@ with st.expander("Energy", expanded=True):
         locationmode='country names',
         color='electricity_generation',
         title=f'Electricity Generation by Country ({selected_year})',
-        labels={'electricity_generation': 'Electricity Generation (GWh)'}
+        labels={'electricity_generation': 'Electricity Generation (GWh)'},
+        color_continuous_scale="Viridis"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
     )
+
+    # Optional: Update layout to fine-tune the color bar
+    fig4.update_layout(
+        coloraxis_colorbar=dict(
+            title="Electricity Generation (GWh)",
+            tickvals=[df_selected_year['electricity_generation'].min(), df_selected_year['electricity_generation'].max()],
+            ticks="outside"
+        )
+    )
+
     st.plotly_chart(fig4)
 
     # Renewable Share of Electricity
