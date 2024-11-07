@@ -7,6 +7,7 @@ import io
 from io import BytesIO
 from pptx import Presentation
 from pptx.util import Inches
+import plotly.io as pio
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
@@ -241,7 +242,7 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6):
         title = slide.shapes.title
         title.text = title_text
         img_stream = BytesIO()
-        fig.write_image(img_stream, format="png")
+        fig.write_image(img_stream, format="png", engine="kaleido")
         img_stream.seek(0)
         slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
 
