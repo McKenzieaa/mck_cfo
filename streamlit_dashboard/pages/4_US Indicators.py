@@ -699,24 +699,40 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     pptx_io.seek(0)
     return pptx_io
 
-# Function to render the dashboard layout
 def get_us_indicators_layout():
+    """Render the full dashboard layout."""
     st.title("US Indicators Dashboard")
+
     st.subheader("Labour Force & Unemployment Data")
-    labour_fig = plot_labour_unemployment()  # Define this plot function elsewhere in the code
-    st.plotly_chart(labour_fig, use_container_width=True)
+    labour_fig = plot_labour_unemployment()
 
     st.subheader("External Driver Indicators")
-    external_fig = plot_external_driver(["World GDP"])  # Define this plot function as required
-    st.plotly_chart(external_fig, use_container_width=True)
+    selected_indicators = st.multiselect(
+        "Select External Indicators",
+        options=external_driver_df["Indicator"].unique(),
+        default=["World GDP"],
+        key="external_indicators_multiselect"
+    )
+    external_fig = plot_external_driver(selected_indicators)
 
     st.subheader("GDP by Industry")
-    gdp_fig = plot_gdp_and_industry("Selected Industry")  # Define this plot function as needed
-    st.plotly_chart(gdp_fig, use_container_width=True)
+    selected_gdp_industry = st.selectbox(
+        "Select Industry",
+        options=df_combined["Industry"].unique(),
+        index=0,
+        key="gdp_industry_selectbox"
+    )
+    gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
 
     st.subheader("CPI and PPI Comparison")
-    cpi_ppi_fig = plot_cpi_ppi("Selected Series ID")  # Define this plot function as required
-    st.plotly_chart(cpi_ppi_fig, use_container_width=True)
+    selected_cpi_series = st.selectbox(
+        "Select CPI Industry", 
+        list(industry_mapping.keys()), 
+        index=1, 
+        key="cpi_series_selectbox"
+    )
+    selected_series_id = industry_mapping[selected_cpi_series]
+    cpi_ppi_fig = plot_cpi_ppi(industry_mapping[selected_cpi_series])
 
     if st.button("Export All Charts to PPTX"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
