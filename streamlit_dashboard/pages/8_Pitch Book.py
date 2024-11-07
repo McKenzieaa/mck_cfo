@@ -221,16 +221,16 @@ def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_p
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]  # Blank layout for charts/tables
 
-    def add_chart_slide(prs, title, fig):
-        """Adds a chart slide to the PowerPoint presentation."""
+    def add_plotly_chart_slide(prs, title, fig):
+        """Adds a Plotly chart slide to the PowerPoint presentation."""
         slide = prs.slides.add_slide(slide_layout)
         slide.shapes.title.text = title
 
-        # Convert figure to PNG image
+        # Save Plotly figure as an image
         img = BytesIO()
-        fig.savefig(img, format='png', bbox_inches='tight')
+        fig.write_image(img, format='png', engine="kaleido", width=900, height=400)
         img.seek(0)
-        slide.shapes.add_picture(img, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+        slide.shapes.add_picture(img, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(4))
 
     def add_table_slide(prs, title, table_df):
         """Adds a table slide to the PowerPoint presentation."""
@@ -248,22 +248,18 @@ def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_p
             for col_idx, value in enumerate(row_data):
                 table.cell(row_idx + 1, col_idx).text = str(value)
 
-    # Add each chart as a slide if it exists
+    # Add each Plotly chart as a slide if it exists
     if ev_revenue_transactions is not None:
-        fig = ev_revenue_transactions.plot(kind='bar').get_figure()
-        add_chart_slide(prs, "Precedent Transactions EV/Revenue Chart", fig)
+        add_plotly_chart_slide(prs, "Precedent Transactions EV/Revenue Chart", ev_revenue_transactions)
 
     if ev_ebitda_transactions is not None:
-        fig = ev_ebitda_transactions.plot(kind='bar').get_figure()
-        add_chart_slide(prs, "Precedent Transactions EV/EBITDA Chart", fig)
+        add_plotly_chart_slide(prs, "Precedent Transactions EV/EBITDA Chart", ev_ebitda_transactions)
 
     if ev_revenue_public is not None:
-        fig = ev_revenue_public.plot(kind='bar').get_figure()
-        add_chart_slide(prs, "Public Companies EV/Revenue Chart", fig)
+        add_plotly_chart_slide(prs, "Public Companies EV/Revenue Chart", ev_revenue_public)
 
     if ev_ebitda_public is not None:
-        fig = ev_ebitda_public.plot(kind='bar').get_figure()
-        add_chart_slide(prs, "Public Companies EV/EBITDA Chart", fig)
+        add_plotly_chart_slide(prs, "Public Companies EV/EBITDA Chart", ev_ebitda_public)
 
     # Add tables if they are not empty
     if not rma_is_table.empty:
