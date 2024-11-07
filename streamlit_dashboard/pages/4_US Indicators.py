@@ -6,7 +6,7 @@ from pptx.util import Inches
 from io import BytesIO
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from PIL import Image
+
 
 # Define URLs and Paths
 country = "USA"
@@ -537,7 +537,7 @@ def plot_external_driver(selected_indicators):
         hovermode='x'
     )
 
-    st.plotly_chart(fig, use_container_width=True)#, key=key)
+    st.plotly_chart(fig, use_container_width=True)
 
 def plot_cpi_ppi(selected_series_id):
     """
@@ -699,14 +699,14 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     return pptx_io
 
 def get_us_indicators_layout():
-    """Render the full dashboard layout and store data in session state."""
+    """Render the full dashboard layout and export data directly without session state."""
     st.title("US Indicators Dashboard")
 
+    # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment Data")
     labour_fig = plot_labour_unemployment()
-    if labour_fig:
-        st.session_state["labour_fig"] = labour_fig  # Store figure in session_state
 
+    # External Driver Indicators
     st.subheader("External Driver Indicators")
     selected_indicators = st.multiselect(
         "Select External Indicators",
@@ -715,10 +715,8 @@ def get_us_indicators_layout():
         key="external_indicators_multiselect"
     )
     external_fig = plot_external_driver(selected_indicators)
-    if external_fig:
-        st.session_state["external_fig"] = external_fig  # Store figure in session_state
-    st.session_state["selected_indicators"] = selected_indicators  # Store selection in session_state
 
+    # GDP by Industry
     st.subheader("GDP by Industry")
     selected_gdp_industry = st.selectbox(
         "Select Industry",
@@ -727,10 +725,8 @@ def get_us_indicators_layout():
         key="gdp_industry_selectbox"
     )
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
-    if gdp_fig:
-        st.session_state["gdp_fig"] = gdp_fig  # Store figure in session_state
-    st.session_state["selected_gdp_industry"] = selected_gdp_industry  # Store selection in session_state
 
+    # CPI and PPI Comparison
     st.subheader("CPI and PPI Comparison")
     selected_cpi_series = st.selectbox(
         "Select CPI Industry", 
@@ -740,17 +736,14 @@ def get_us_indicators_layout():
     )
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
-    if cpi_ppi_fig:
-        st.session_state["cpi_ppi_fig"] = cpi_ppi_fig  # Store figure in session_state
-    st.session_state["selected_cpi_series"] = selected_cpi_series  # Store selection in session_state
 
-    # Export to PowerPoint if all necessary data exists in session_state
+    # Export to PPTX if all figures are ready
     if st.button("Export All Charts to PPTX", key="export_button"):
         pptx_file = export_all_to_pptx(
-            st.session_state.get("labour_fig"),
-            st.session_state.get("external_fig"),
-            st.session_state.get("gdp_fig"),
-            st.session_state.get("cpi_ppi_fig")
+            labour_fig,
+            external_fig,
+            gdp_fig,
+            cpi_ppi_fig
         )
         st.download_button(
             label="Download PPTX",
