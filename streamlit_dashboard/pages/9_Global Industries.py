@@ -20,7 +20,7 @@ categories = {
     for cat_code, category, data_type, program in category_data
 }
 
-st.sidebar.header("Market Size Selection")
+# st.sidebar.header("Market Size Selection")
 selected_categories = ['Electric Power Generation, Transmission and Distribution']
 # selected_categories = st.sidebar.multiselect(
 #     'Select Categories',
@@ -159,7 +159,7 @@ with st.expander("Energy", expanded=True):
     st.plotly_chart(fig3)
 
     # Electricity Generation Map
-    st.sidebar.header("Electricity Generation")
+    # st.sidebar.header("Electricity Generation")
     selected_year =(2023) #st.sidebar.slider("Select Year", 2000, 2023, 2023)
     df_selected_year = df_electricity_gen[df_electricity_gen["year"] == selected_year]
     fig4 = px.choropleth(
@@ -185,9 +185,8 @@ with st.expander("Energy", expanded=True):
 
     # Renewable Share of Electricity
     # st.sidebar.header("Renewable Share Selection")
-    selected_countries = st.sidebar.multiselect(
-        'Select Countries', df_renew_share['country'].unique(), default=["World"]
-    )
+    selected_countries = ["World"]
+    st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
     if selected_countries:
         filtered_df = df_renew_share[df_renew_share["country"].isin(selected_countries)]
         fig5 = px.line(
