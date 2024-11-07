@@ -186,7 +186,7 @@ with st.expander("Energy", expanded=True):
     # Renewable Share of Electricity
     # st.sidebar.header("Renewable Share Selection")
     selected_countries = ["World"]
-    st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
+    # st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
     if selected_countries:
         filtered_df = df_renew_share[df_renew_share["country"].isin(selected_countries)]
         fig5 = px.line(
