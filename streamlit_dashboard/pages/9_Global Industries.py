@@ -132,7 +132,8 @@ with st.expander("", expanded=True):
             yearly_data,
             x='Year', y='Value', color='Category',
             title="Market Size",
-            labels={'Value': 'Market-Size (in millions)', 'Year': ''}
+            labels={'Value': 'Market-Size (in millions)', 'Year': ''},
+            color_discrete_sequence=["#0068c9"]
         )
 
         fig1.update_layout(
@@ -151,6 +152,7 @@ with st.expander("", expanded=True):
         df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
         title="Electricity End Use (Billion Kilowatthours)"
     )
+    fig2.update_traces(line_color="#0068c9")
     st.plotly_chart(fig2)
 
     # Average Price of Electricity Chart
@@ -158,6 +160,7 @@ with st.expander("", expanded=True):
         df_avg_price, x="Year", y=df_avg_price.columns[1],
         title="Average Price of Electricity (Cents per Kilowatthour)"
     )
+    fig3.update_traces(line_color="#0068c9")
     st.plotly_chart(fig3)
 
     # Electricity Generation Map
@@ -196,6 +199,7 @@ with st.expander("", expanded=True):
             x="year", y="renewables_share_elec", color="country",
             title="Renewable Share of Electricity"
         )
+        fig5.update_traces(line_color="#0068c9")
         st.plotly_chart(fig5)
 
     # Solar Projects Coming Up Next 12 Months
@@ -212,15 +216,17 @@ with st.expander("", expanded=True):
         color='Energy Source',
         orientation='h',  # Horizontal orientation
         title='Electricity Generation per Capita by Energy Source (Top 10 Countries in 2023)',
-        labels={'country': 'Country', 'Per Capita Generation': 'Percentage of Total Generation'}
+        labels={'country': 'Country', 'Per Capita Generation': 'Percentage of Total Generation'},
+        color_discrete_map={
+            'Fossil': '#0068c9',        
+            'Nuclear': '#FFA500',      
+            'Renewables': '#1C798A'     
+        }
     )
-
-    # Adjust layout for a 100% stacked look
     fig6.update_layout(barmode='stack')
     fig6.update_xaxes(title_text="")
-
-    # Display the Plotly chart
     st.plotly_chart(fig6)
+
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
     st.write("Agriculture-related analysis and visualizations go here.")
