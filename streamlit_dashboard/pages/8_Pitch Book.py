@@ -8,6 +8,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
+
 st.set_page_config(page_title="Transaction and Public Company Dashboard", layout="wide")
 
 st.markdown(
@@ -216,7 +217,27 @@ def plot_public_comps_charts(data):
 
     return ev_revenue_chart_data, ev_ebitda_chart_data
 
-def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table):
+def display_shared_data():
+    st.title("Access Shared Data")
+
+    if "labour_fig" in st.session_state:
+        st.subheader("Labour Force & Unemployment Data")
+        st.plotly_chart(st.session_state["labour_fig"])
+
+    if "external_fig" in st.session_state:
+        st.subheader("External Driver Indicators")
+        st.plotly_chart(st.session_state["external_fig"])
+
+    if "gdp_fig" in st.session_state:
+        st.subheader("GDP by Industry")
+        st.plotly_chart(st.session_state["gdp_fig"])
+
+    if "cpi_ppi_fig" in st.session_state:
+        st.subheader("CPI and PPI Comparison")
+        st.plotly_chart(st.session_state["cpi_ppi_fig"])
+
+
+def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,labour_fig,external_fig,gdp_fig,cpi_ppi_fig):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -318,6 +339,8 @@ with st.expander("Public Companies", expanded=False):
 with st.expander("Benchmarking", expanded=False):
     rma_is_table, rma_bs_table, pc_is_table, pc_bs_table = get_benchmarking_layout()
 
+with st.expander("US Indicator", expanded=False):
+    labour_fig,external_fig,gdp_fig,cpi_ppi_fig = display_shared_data()
 if st.button("Export All Charts and Tables to PowerPoint"):
     # Ensure None values are handled properly when exporting
     ev_revenue_transactions = ev_revenue_transactions or pd.DataFrame()
@@ -329,7 +352,7 @@ if st.button("Export All Charts and Tables to PowerPoint"):
     pc_is_table = pc_is_table if pc_is_table is not None else pd.DataFrame()
     pc_bs_table = pc_bs_table if pc_bs_table is not None else pd.DataFrame()
 
-    pptx_file = export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table)
+    pptx_file = export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,labour_fig,external_fig,gdp_fig,cpi_ppi_fig)
     st.download_button(
         label="Download PowerPoint",
         data=pptx_file,
