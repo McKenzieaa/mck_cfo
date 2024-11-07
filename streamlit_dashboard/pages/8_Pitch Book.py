@@ -235,7 +235,7 @@ def display_shared_data():
     if "cpi_ppi_fig" in st.session_state:
         st.subheader("CPI and PPI Comparison")
         st.plotly_chart(st.session_state["cpi_ppi_fig"])
-
+    return labour_fig, external_fig, gdp_fig, cpi_ppi_fig
 
 def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,labour_fig,external_fig,gdp_fig,cpi_ppi_fig):
     prs = Presentation()
