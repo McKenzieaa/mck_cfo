@@ -122,14 +122,15 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
 })
 
 # ENERGY
-with st.expander("Energy", expanded=True):
+st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
+with st.expander("", expanded=True): 
     market_data = get_market_size_data(selected_categories)
     if market_data is not None:
         yearly_data = market_data.groupby(['Year', 'Category'], as_index=False).agg({'Value': 'mean'})
         fig1 = px.bar(
             yearly_data,
             x='Year', y='Value', color='Category',
-            title="Market Size - Yearly",
+            title="Market Size",
             labels={'Value': 'Market-Size (in millions)', 'Year': ''}
         )
 
@@ -219,14 +220,16 @@ with st.expander("Energy", expanded=True):
 
     # Display the Plotly chart
     st.plotly_chart(fig6)
-
-with st.expander("Agriculture"):
+st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
+with st.expander("", expanded=False): 
     st.write("Agriculture-related analysis and visualizations go here.")
 
-with st.expander("Technology"):
+st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Technology</h2>", unsafe_allow_html=True)
+with st.expander("", expanded=False):
     st.write("Technology-related analysis and visualizations go here.")
 
-with st.expander("Automobiles"):
+st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", unsafe_allow_html=True)
+with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
 def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6):
