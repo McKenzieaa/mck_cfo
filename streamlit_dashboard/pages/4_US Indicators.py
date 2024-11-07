@@ -673,23 +673,26 @@ def plot_gdp_and_industry(selected_industry=None):
 
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
-    slide_layout = prs.slide_layouts[5]  # Blank layout for slides
+    slide_layout = prs.slide_layouts[5]  # Use a blank layout for charts
 
     def add_figure_slide(prs, title, fig):
+        """Adds a slide with a Plotly figure image using kaleido."""
         if fig:  # Check if fig is not None
             slide = prs.slides.add_slide(slide_layout)
             title_shape = slide.shapes.title
             title_shape.text = title
             img_buf = BytesIO()
-            fig.savefig(img_buf, format='png', bbox_inches='tight')  # Save figure to buffer
+            fig.write_image(img_buf, format="png", engine="kaleido")  # Save Plotly fig as PNG using kaleido
             img_buf.seek(0)
-            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(4.5))
 
+    # Add each chart as a slide if it exists
     add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
     add_figure_slide(prs, "External Driver Indicators", external_fig)
     add_figure_slide(prs, "GDP by Industry", gdp_fig)
     add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
 
+    # Save the PowerPoint presentation to a BytesIO buffer
     pptx_io = BytesIO()
     prs.save(pptx_io)
     pptx_io.seek(0)
