@@ -6,8 +6,7 @@ from pptx.util import Inches
 from io import BytesIO
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import kaleido
-
+from PIL import Image
 
 # Define URLs and Paths
 country = "USA"
@@ -672,27 +671,25 @@ def plot_gdp_and_industry(selected_industry=None):
 
     st.plotly_chart(fig, use_container_width=True)
 
+    # Function to export charts to PowerPoint
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
-    slide_layout = prs.slide_layouts[5]
+    slide_layout = prs.slide_layouts[5]  # Blank layout for slides
 
-    def add_slide_with_figure(prs, fig, title_text):
-        slide = prs.slides.add_slide(slide_layout)
-        title = slide.shapes.title
-        title.text = title_text
-        img = BytesIO()
-        try:
-            fig.write_image(img, format="png", engine="kaleido")
-            img.seek(0)
-            slide.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
-        except Exception as e:
-            st.error(f"Failed to export figure to image: {e}")
-            slide.shapes.title.text = f"{title_text} (Export Error)"
+    def add_figure_slide(prs, title, fig):
+        if fig:  # Check if fig is not None
+            slide = prs.slides.add_slide(slide_layout)
+            title_shape = slide.shapes.title
+            title_shape.text = title
+            img_buf = BytesIO()
+            fig.savefig(img_buf, format='png', bbox_inches='tight')  # Save figure to buffer
+            img_buf.seek(0)
+            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
 
-    add_slide_with_figure(prs, labour_fig, "Unemployment & Labour Force")
-    add_slide_with_figure(prs, external_fig, "External Drivers")
-    add_slide_with_figure(prs, gdp_fig, "GDP and Selected Industry")
-    add_slide_with_figure(prs, cpi_ppi_fig, "CPI and PPI Comparison")
+    add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
+    add_figure_slide(prs, "External Driver Indicators", external_fig)
+    add_figure_slide(prs, "GDP by Industry", gdp_fig)
+    add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
@@ -700,12 +697,14 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     return pptx_io
 
 def get_us_indicators_layout():
-    """Render the full dashboard layout."""
+    """Render the full dashboard layout and export data directly without session state."""
     st.title("US Indicators Dashboard")
 
+    # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment Data")
     labour_fig = plot_labour_unemployment()
 
+    # External Driver Indicators
     st.subheader("External Driver Indicators")
     selected_indicators = st.multiselect(
         "Select External Indicators",
@@ -715,6 +714,7 @@ def get_us_indicators_layout():
     )
     external_fig = plot_external_driver(selected_indicators)
 
+    # GDP by Industry
     st.subheader("GDP by Industry")
     selected_gdp_industry = st.selectbox(
         "Select Industry",
@@ -724,6 +724,7 @@ def get_us_indicators_layout():
     )
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
 
+    # CPI and PPI Comparison
     st.subheader("CPI and PPI Comparison")
     selected_cpi_series = st.selectbox(
         "Select CPI Industry", 
@@ -732,14 +733,14 @@ def get_us_indicators_layout():
         key="cpi_series_selectbox"
     )
     selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(industry_mapping[selected_cpi_series])
+    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
-    if st.button("Export All Charts to PPTX"):
+    if st.button("Export Charts to PowerPoint", key="export_button"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
         st.download_button(
-            label="Download PPTX",
+            label="Download PowerPoint",
             data=pptx_file,
-            file_name="us_indicators_dashboard.pptx",
+            file_name="state_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
