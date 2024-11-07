@@ -220,106 +220,89 @@ def plot_public_comps_charts(data):
 def display_shared_data():
     st.title("Access Shared Data")
 
-    if "labour_fig" in st.session_state:
+    labour_fig = st.session_state.get("labour_fig", None)
+    external_fig = st.session_state.get("external_fig", None)
+    gdp_fig = st.session_state.get("gdp_fig", None)
+    cpi_ppi_fig = st.session_state.get("cpi_ppi_fig", None)
+
+    if labour_fig:
         st.subheader("Labour Force & Unemployment Data")
-        st.plotly_chart(st.session_state["labour_fig"])
+        st.plotly_chart(labour_fig)
 
-    if "external_fig" in st.session_state:
+    if external_fig:
         st.subheader("External Driver Indicators")
-        st.plotly_chart(st.session_state["external_fig"])
+        st.plotly_chart(external_fig)
 
-    if "gdp_fig" in st.session_state:
+    if gdp_fig:
         st.subheader("GDP by Industry")
-        st.plotly_chart(st.session_state["gdp_fig"])
+        st.plotly_chart(gdp_fig)
 
-    if "cpi_ppi_fig" in st.session_state:
+    if cpi_ppi_fig:
         st.subheader("CPI and PPI Comparison")
-        st.plotly_chart(st.session_state["cpi_ppi_fig"])
+        st.plotly_chart(cpi_ppi_fig)
+
     return labour_fig, external_fig, gdp_fig, cpi_ppi_fig
 
-def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,labour_fig,external_fig,gdp_fig,cpi_ppi_fig):
+def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table, labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
+    def add_chart_slide(prs, title, fig):
+        slide = prs.slides.add_slide(slide_layout)
+        slide_title = slide.shapes.title
+        slide_title.text = title
+        img = BytesIO()
+        fig.savefig(img, format='png', bbox_inches='tight')
+        img.seek(0)
+        slide.shapes.add_picture(img, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+
     if ev_revenue_transactions is not None:
-        slide1 = prs.slides.add_slide(slide_layout)
-        title1 = slide1.shapes.title
-        title1.text = "Precedent Transactions EV/Revenue Chart"
-        img1 = BytesIO()
-        ev_revenue_transactions.plot(kind='bar').get_figure().savefig(img1, format='png', bbox_inches='tight')
-        img1.seek(0)
-        slide1.shapes.add_picture(img1, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+        add_chart_slide(prs, "Precedent Transactions EV/Revenue Chart", ev_revenue_transactions.plot(kind='bar').get_figure())
 
     if ev_ebitda_transactions is not None:
-        slide2 = prs.slides.add_slide(slide_layout)
-        title2 = slide2.shapes.title
-        title2.text = "Precedent Transactions EV/EBITDA Chart"
-        img2 = BytesIO()
-        ev_ebitda_transactions.plot(kind='bar').get_figure().savefig(img2, format='png', bbox_inches='tight')
-        img2.seek(0)
-        slide2.shapes.add_picture(img2, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+        add_chart_slide(prs, "Precedent Transactions EV/EBITDA Chart", ev_ebitda_transactions.plot(kind='bar').get_figure())
 
     if ev_revenue_public is not None:
-        slide3 = prs.slides.add_slide(slide_layout)
-        title3 = slide3.shapes.title
-        title3.text = "Public Companies EV/Revenue Chart"
-        img3 = BytesIO()
-        ev_revenue_public.plot(kind='bar').get_figure().savefig(img3, format='png', bbox_inches='tight')
-        img3.seek(0)
-        slide3.shapes.add_picture(img3, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+        add_chart_slide(prs, "Public Companies EV/Revenue Chart", ev_revenue_public.plot(kind='bar').get_figure())
 
     if ev_ebitda_public is not None:
-        slide4 = prs.slides.add_slide(slide_layout)
-        title4 = slide4.shapes.title
-        title4.text = "Public Companies EV/EBITDA Chart"
-        img4 = BytesIO()
-        ev_ebitda_public.plot(kind='bar').get_figure().savefig(img4, format='png', bbox_inches='tight')
-        img4.seek(0)
-        slide4.shapes.add_picture(img4, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+        add_chart_slide(prs, "Public Companies EV/EBITDA Chart", ev_ebitda_public.plot(kind='bar').get_figure())
+
+    def add_table_slide(prs, title, table_df):
+        slide = prs.slides.add_slide(slide_layout)
+        title_shape = slide.shapes.title
+        title_shape.text = title
+        rows, cols = table_df.shape
+        table = slide.shapes.add_table(rows + 1, cols, Inches(0.5), Inches(1.5), Inches(9), Inches(3)).table
+        for col_idx, col_name in enumerate(table_df.columns):
+            table.cell(0, col_idx).text = str(col_name)
+        for row_idx, row_data in enumerate(table_df.values):
+            for col_idx, value in enumerate(row_data):
+                table.cell(row_idx + 1, col_idx).text = str(value)
 
     if not rma_is_table.empty:
-        slide = prs.slides.add_slide(slide_layout)
-        title = slide.shapes.title
-        title.text = "RMA Benchmarking - Income Statement"
-        table_shape = slide.shapes.add_table(rma_is_table.shape[0]+1, rma_is_table.shape[1], Inches(0.5), Inches(1.5), Inches(9), Inches(3)).table
-        for col_idx, col_name in enumerate(rma_is_table.columns):
-            table_shape.cell(0, col_idx).text = col_name
-        for row_idx, row_data in enumerate(rma_is_table.values):
-            for col_idx, value in enumerate(row_data):
-                table_shape.cell(row_idx+1, col_idx).text = str(value)
+        add_table_slide(prs, "RMA Benchmarking - Income Statement", rma_is_table)
 
     if not pc_is_table.empty:
-        slide6 = prs.slides.add_slide(slide_layout)
-        title6 = slide6.shapes.title
-        title6.text = "PC Benchmarking - Income Statement"
-        table_shape = slide6.shapes.add_table(pc_is_table.shape[0]+1, pc_is_table.shape[1], Inches(0.5), Inches(1.5), Inches(9), Inches(3)).table
-        for col_idx, col_name in enumerate(pc_is_table.columns):
-            table_shape.cell(0, col_idx).text = col_name
-        for row_idx, row_data in enumerate(pc_is_table.values):
-            for col_idx, value in enumerate(row_data):
-                table_shape.cell(row_idx+1, col_idx).text = str(value)
+        add_table_slide(prs, "PC Benchmarking - Income Statement", pc_is_table)
 
     if not rma_bs_table.empty:
-        slide6 = prs.slides.add_slide(slide_layout)
-        title6 = slide6.shapes.title
-        title6.text = "RMA Benchmarking - Balance Sheet"
-        table_shape = slide6.shapes.add_table(rma_bs_table.shape[0]+1, rma_bs_table.shape[1], Inches(0.5), Inches(1.5), Inches(9), Inches(3)).table
-        for col_idx, col_name in enumerate(rma_bs_table.columns):
-            table_shape.cell(0, col_idx).text = col_name
-        for row_idx, row_data in enumerate(rma_bs_table.values):
-            for col_idx, value in enumerate(row_data):
-                table_shape.cell(row_idx+1, col_idx).text = str(value)
+        add_table_slide(prs, "RMA Benchmarking - Balance Sheet", rma_bs_table)
 
     if not pc_bs_table.empty:
-        slide6 = prs.slides.add_slide(slide_layout)
-        title6 = slide6.shapes.title
-        title6.text = "PC Benchmarking - Balance Statement"
-        table_shape = slide6.shapes.add_table(pc_bs_table.shape[0]+1, pc_bs_table.shape[1], Inches(0.5), Inches(1.5), Inches(9), Inches(3)).table
-        for col_idx, col_name in enumerate(pc_bs_table.columns):
-            table_shape.cell(0, col_idx).text = col_name
-        for row_idx, row_data in enumerate(pc_bs_table.values):
-            for col_idx, value in enumerate(row_data):
-                table_shape.cell(row_idx+1, col_idx).text = str(value)
+        add_table_slide(prs, "PC Benchmarking - Balance Sheet", pc_bs_table)
+
+    if labour_fig:
+        add_chart_slide(prs, "Labour Force & Unemployment Data", labour_fig)
+
+    if external_fig:
+        add_chart_slide(prs, "External Driver Indicators", external_fig)
+
+    if gdp_fig:
+        add_chart_slide(prs, "GDP by Industry", gdp_fig)
+
+    if cpi_ppi_fig:
+        add_chart_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
@@ -340,9 +323,9 @@ with st.expander("Benchmarking", expanded=False):
     rma_is_table, rma_bs_table, pc_is_table, pc_bs_table = get_benchmarking_layout()
 
 with st.expander("US Indicator", expanded=False):
-    labour_fig,external_fig,gdp_fig,cpi_ppi_fig = display_shared_data()
+    labour_fig, external_fig, gdp_fig, cpi_ppi_fig = display_shared_data()
+
 if st.button("Export All Charts and Tables to PowerPoint"):
-    # Ensure None values are handled properly when exporting
     ev_revenue_transactions = ev_revenue_transactions or pd.DataFrame()
     ev_ebitda_transactions = ev_ebitda_transactions or pd.DataFrame()
     ev_revenue_public = ev_revenue_public or pd.DataFrame()
@@ -352,7 +335,12 @@ if st.button("Export All Charts and Tables to PowerPoint"):
     pc_is_table = pc_is_table if pc_is_table is not None else pd.DataFrame()
     pc_bs_table = pc_bs_table if pc_bs_table is not None else pd.DataFrame()
 
-    pptx_file = export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,labour_fig,external_fig,gdp_fig,cpi_ppi_fig)
+    pptx_file = export_to_pptx(
+        ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public,
+        rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,
+        labour_fig, external_fig, gdp_fig, cpi_ppi_fig
+    )
+    
     st.download_button(
         label="Download PowerPoint",
         data=pptx_file,
