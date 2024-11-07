@@ -217,33 +217,7 @@ def plot_public_comps_charts(data):
 
     return ev_revenue_chart_data, ev_ebitda_chart_data
 
-def display_shared_data():
-    st.title("Access Shared Data")
-
-    labour_fig = st.session_state.get("labour_fig", None)
-    external_fig = st.session_state.get("external_fig", None)
-    gdp_fig = st.session_state.get("gdp_fig", None)
-    cpi_ppi_fig = st.session_state.get("cpi_ppi_fig", None)
-
-    if labour_fig:
-        st.subheader("Labour Force & Unemployment Data")
-        st.plotly_chart(labour_fig)
-
-    if external_fig:
-        st.subheader("External Driver Indicators")
-        st.plotly_chart(external_fig)
-
-    if gdp_fig:
-        st.subheader("GDP by Industry")
-        st.plotly_chart(gdp_fig)
-
-    if cpi_ppi_fig:
-        st.subheader("CPI and PPI Comparison")
-        st.plotly_chart(cpi_ppi_fig)
-
-    return labour_fig, external_fig, gdp_fig, cpi_ppi_fig
-
-def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table, labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
+def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -292,18 +266,6 @@ def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_p
     if not pc_bs_table.empty:
         add_table_slide(prs, "PC Benchmarking - Balance Sheet", pc_bs_table)
 
-    if labour_fig:
-        add_chart_slide(prs, "Labour Force & Unemployment Data", labour_fig)
-
-    if external_fig:
-        add_chart_slide(prs, "External Driver Indicators", external_fig)
-
-    if gdp_fig:
-        add_chart_slide(prs, "GDP by Industry", gdp_fig)
-
-    if cpi_ppi_fig:
-        add_chart_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
-
     pptx_io = BytesIO()
     prs.save(pptx_io)
     pptx_io.seek(0)
@@ -322,9 +284,6 @@ with st.expander("Public Companies", expanded=False):
 with st.expander("Benchmarking", expanded=False):
     rma_is_table, rma_bs_table, pc_is_table, pc_bs_table = get_benchmarking_layout()
 
-with st.expander("US Indicator", expanded=False):
-    labour_fig, external_fig, gdp_fig, cpi_ppi_fig = display_shared_data()
-
 if st.button("Export All Charts and Tables to PowerPoint"):
     ev_revenue_transactions = ev_revenue_transactions or pd.DataFrame()
     ev_ebitda_transactions = ev_ebitda_transactions or pd.DataFrame()
@@ -337,8 +296,7 @@ if st.button("Export All Charts and Tables to PowerPoint"):
 
     pptx_file = export_to_pptx(
         ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public,
-        rma_is_table, rma_bs_table, pc_is_table, pc_bs_table,
-        labour_fig, external_fig, gdp_fig, cpi_ppi_fig
+        rma_is_table, rma_bs_table, pc_is_table, pc_bs_table
     )
     
     st.download_button(

@@ -670,28 +670,39 @@ def plot_gdp_and_industry(selected_industry=None):
     )
 
     st.plotly_chart(fig, use_container_width=True)
-def export_all_to_pptx(labour_image, external_driver_image, gdp_image, cpi_ppi_image):
-    pptx_io = BytesIO()
+
+def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
-    slide = prs.slides.add_slide(prs.slide_layouts[5])
+    slide_layout = prs.slide_layouts[5]  # Blank layout for slides
 
-    for img in [labour_image, external_driver_image, gdp_image, cpi_ppi_image]:
-        img_buf = BytesIO()
-        img.save(img_buf, format='PNG')
-        img_buf.seek(0)
-        slide.shapes.add_picture(img_buf, Inches(1), Inches(1), width=Inches(6))
+    def add_figure_slide(prs, title, fig):
+        if fig:  # Check if fig is not None
+            slide = prs.slides.add_slide(slide_layout)
+            title_shape = slide.shapes.title
+            title_shape.text = title
+            img_buf = BytesIO()
+            fig.savefig(img_buf, format='png', bbox_inches='tight')  # Save figure to buffer
+            img_buf.seek(0)
+            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
 
+    add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
+    add_figure_slide(prs, "External Driver Indicators", external_fig)
+    add_figure_slide(prs, "GDP by Industry", gdp_fig)
+    add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
+
+    pptx_io = BytesIO()
     prs.save(pptx_io)
     pptx_io.seek(0)
     return pptx_io
 
 def get_us_indicators_layout():
-    """Render the full dashboard layout."""
+    """Render the full dashboard layout and store data in session state."""
     st.title("US Indicators Dashboard")
 
     st.subheader("Labour Force & Unemployment Data")
     labour_fig = plot_labour_unemployment()
-    st.session_state["labour_fig"] = labour_fig  # Store figure in session_state
+    if labour_fig:
+        st.session_state["labour_fig"] = labour_fig  # Store figure in session_state
 
     st.subheader("External Driver Indicators")
     selected_indicators = st.multiselect(
@@ -701,7 +712,8 @@ def get_us_indicators_layout():
         key="external_indicators_multiselect"
     )
     external_fig = plot_external_driver(selected_indicators)
-    st.session_state["external_fig"] = external_fig  # Store figure in session_state
+    if external_fig:
+        st.session_state["external_fig"] = external_fig  # Store figure in session_state
     st.session_state["selected_indicators"] = selected_indicators  # Store selection in session_state
 
     st.subheader("GDP by Industry")
@@ -712,7 +724,8 @@ def get_us_indicators_layout():
         key="gdp_industry_selectbox"
     )
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
-    st.session_state["gdp_fig"] = gdp_fig  # Store figure in session_state
+    if gdp_fig:
+        st.session_state["gdp_fig"] = gdp_fig  # Store figure in session_state
     st.session_state["selected_gdp_industry"] = selected_gdp_industry  # Store selection in session_state
 
     st.subheader("CPI and PPI Comparison")
@@ -723,16 +736,18 @@ def get_us_indicators_layout():
         key="cpi_series_selectbox"
     )
     selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(industry_mapping[selected_cpi_series])
-    st.session_state["cpi_ppi_fig"] = cpi_ppi_fig  # Store figure in session_state
+    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
+    if cpi_ppi_fig:
+        st.session_state["cpi_ppi_fig"] = cpi_ppi_fig  # Store figure in session_state
     st.session_state["selected_cpi_series"] = selected_cpi_series  # Store selection in session_state
 
+    # Export to PowerPoint if all necessary data exists in session_state
     if st.button("Export All Charts to PPTX", key="export_button"):
         pptx_file = export_all_to_pptx(
-            st.session_state["external_fig"],
-            st.session_state["labour_fig"],
-            st.session_state["gdp_fig"],
-            st.session_state["cpi_ppi_fig"]
+            st.session_state.get("labour_fig"),
+            st.session_state.get("external_fig"),
+            st.session_state.get("gdp_fig"),
+            st.session_state.get("cpi_ppi_fig")
         )
         st.download_button(
             label="Download PPTX",
@@ -740,4 +755,5 @@ def get_us_indicators_layout():
             file_name="us_indicators_dashboard.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
+
 get_us_indicators_layout()
