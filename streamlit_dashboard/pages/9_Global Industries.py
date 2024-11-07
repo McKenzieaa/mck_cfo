@@ -167,9 +167,10 @@ with st.expander("Energy", expanded=True):
         locations='country',
         locationmode='country names',
         color='electricity_generation',
+        reversescale=True,
         title=f'Electricity Generation by Country ({selected_year})',
         labels={'electricity_generation': 'Electricity Generation (GWh)'},
-        color_continuous_scale="Viridis"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
+        color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
     )
 
     # Optional: Update layout to fine-tune the color bar
