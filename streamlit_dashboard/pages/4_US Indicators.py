@@ -671,28 +671,47 @@ def plot_gdp_and_industry(selected_industry=None):
 
     st.plotly_chart(fig, use_container_width=True)
 
+    # Function to export charts to PowerPoint
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
-    slide_layout = prs.slide_layouts[5]  # Use a blank layout for charts
+    slide_layout = prs.slide_layouts[5]
 
-    def add_figure_slide(prs, title, fig):
-        """Adds a slide with a Plotly figure image using kaleido."""
-        if fig:  # Check if fig is not None
-            slide = prs.slides.add_slide(slide_layout)
-            title_shape = slide.shapes.title
-            title_shape.text = title
-            img_buf = BytesIO()
-            fig.write_image(img_buf, format="png", engine="kaleido")  # Save Plotly fig as PNG using kaleido
-            img_buf.seek(0)
-            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(4.5))
+    # Slide 1: Unemployment & Labour Force
+    slide1 = prs.slides.add_slide(slide_layout)
+    title1 = slide1.shapes.title
+    title1.text = "Unemployment & Labour Force"
+    img1 = BytesIO()
+    labour_fig.plot().get_figure().savefig(img1, format="png")
+    img1.seek(0)
+    slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
 
-    # Add each chart as a slide if it exists
-    add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
-    add_figure_slide(prs, "External Driver Indicators", external_fig)
-    add_figure_slide(prs, "GDP by Industry", gdp_fig)
-    add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
+    # Slide 2: Extrenal Drivers
+    slide2 = prs.slides.add_slide(slide_layout)
+    title2 = slide2.shapes.title
+    title2.text = "Extrenal Drivers"
+    img2 = BytesIO()
+    external_fig.plot().get_figure().savefig(img2, format="png")
+    img2.seek(0)
+    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
 
-    # Save the PowerPoint presentation to a BytesIO buffer
+    # Slide 3: GDP
+    slide2 = prs.slides.add_slide(slide_layout)
+    title2 = slide2.shapes.title
+    title2.text = "Extrenal Drivers"
+    img2 = BytesIO()
+    gdp_fig.plot().get_figure().savefig(img2, format="png")
+    img2.seek(0)
+    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
+
+    # Slide 4: CPI PPI
+    slide2 = prs.slides.add_slide(slide_layout)
+    title2 = slide2.shapes.title
+    title2.text = "Extrenal Drivers"
+    img2 = BytesIO()
+    cpi_ppi_fig.plot().get_figure().savefig(img2, format="png")
+    img2.seek(0)
+    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
+
     pptx_io = BytesIO()
     prs.save(pptx_io)
     pptx_io.seek(0)
@@ -737,18 +756,12 @@ def get_us_indicators_layout():
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
-    # Export to PPTX if all figures are ready
-    if st.button("Export All Charts to PPTX", key="export_button"):
-        pptx_file = export_all_to_pptx(
-            labour_fig,
-            external_fig,
-            gdp_fig,
-            cpi_ppi_fig
-        )
+    if st.button("Export Charts to PowerPoint", key="export_button"):
+        pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
         st.download_button(
-            label="Download PPTX",
+            label="Download PowerPoint",
             data=pptx_file,
-            file_name="us_indicators_dashboard.pptx",
+            file_name="state_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
