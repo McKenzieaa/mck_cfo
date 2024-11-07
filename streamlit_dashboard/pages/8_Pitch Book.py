@@ -167,8 +167,7 @@ def get_benchmarking_layout():
 rma_industries = get_industries(rma_file_path, sheet_name="Industry Filter")
 public_comps_industries, public_comps_data = load_public_comps_data()
 
-def display_data(df, title, chart_func):
-    st.title(title)
+def display_data(df, chart_func):
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_selection('multiple', use_checkbox=True)
     gb.configure_default_column(editable=True, filter=True, sortable=True, resizable=True)
@@ -187,6 +186,7 @@ def display_data(df, title, chart_func):
         return chart_func(selected_rows)
     else:
         st.info("Select rows to visualize data.")
+        # Ensure it always returns two values
         return None, None
 
 def plot_transactions_charts(data):
@@ -216,7 +216,7 @@ def plot_public_comps_charts(data):
 
     return ev_revenue_chart_data, ev_ebitda_chart_data
 
-def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table,pc_is_table,pc_bs_table):
+def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -319,6 +319,16 @@ with st.expander("Benchmarking", expanded=False):
     rma_is_table, rma_bs_table, pc_is_table, pc_bs_table = get_benchmarking_layout()
 
 if st.button("Export All Charts and Tables to PowerPoint"):
+    # Ensure None values are handled properly when exporting
+    ev_revenue_transactions = ev_revenue_transactions or pd.DataFrame()
+    ev_ebitda_transactions = ev_ebitda_transactions or pd.DataFrame()
+    ev_revenue_public = ev_revenue_public or pd.DataFrame()
+    ev_ebitda_public = ev_ebitda_public or pd.DataFrame()
+    rma_is_table = rma_is_table if rma_is_table is not None else pd.DataFrame()
+    rma_bs_table = rma_bs_table if rma_bs_table is not None else pd.DataFrame()
+    pc_is_table = pc_is_table if pc_is_table is not None else pd.DataFrame()
+    pc_bs_table = pc_bs_table if pc_bs_table is not None else pd.DataFrame()
+
     pptx_file = export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table)
     st.download_button(
         label="Download PowerPoint",
