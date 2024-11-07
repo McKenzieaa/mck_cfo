@@ -681,8 +681,7 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     title1 = slide1.shapes.title
     title1.text = "Unemployment & Labour Force"
     img1 = BytesIO()
-    labour_fig.plot().get_figure().savefig(img1, format="png")
-    img1.seek(0)
+    labour_fig.write_image(img1, format="png")
     slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
 
     # Slide 2: Extrenal Drivers
@@ -690,27 +689,27 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     title2 = slide2.shapes.title
     title2.text = "Extrenal Drivers"
     img2 = BytesIO()
-    external_fig.plot().get_figure().savefig(img2, format="png")
+    external_fig.write_image(img2, format="png")
     img2.seek(0)
     slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
 
     # Slide 3: GDP
-    slide2 = prs.slides.add_slide(slide_layout)
-    title2 = slide2.shapes.title
-    title2.text = "Extrenal Drivers"
-    img2 = BytesIO()
-    gdp_fig.plot().get_figure().savefig(img2, format="png")
-    img2.seek(0)
-    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
+    slide3 = prs.slides.add_slide(slide_layout)
+    title3 = slide3.shapes.title
+    title3.text = "Extrenal Drivers"
+    img3 = BytesIO()
+    gdp_fig.write_image(img3, format="png")
+    img3.seek(0)
+    slide3.shapes.add_picture(img3, Inches(1), Inches(1), width=Inches(10))
 
     # Slide 4: CPI PPI
-    slide2 = prs.slides.add_slide(slide_layout)
-    title2 = slide2.shapes.title
-    title2.text = "Extrenal Drivers"
-    img2 = BytesIO()
-    cpi_ppi_fig.plot().get_figure().savefig(img2, format="png")
-    img2.seek(0)
-    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
+    slide4 = prs.slides.add_slide(slide_layout)
+    title4 = slide4.shapes.title
+    title4.text = "Extrenal Drivers"
+    img4 = BytesIO()
+    cpi_ppi_fig.write_image(img4, format="png")
+    img4.seek(0)
+    slide4.shapes.add_picture(img4, Inches(1), Inches(1), width=Inches(10))
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
