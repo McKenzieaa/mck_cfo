@@ -6,6 +6,7 @@ from pptx.util import Inches
 from io import BytesIO
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import kaleido
 
 
 # Define URLs and Paths
@@ -671,7 +672,6 @@ def plot_gdp_and_industry(selected_industry=None):
 
     st.plotly_chart(fig, use_container_width=True)
 
-    # Function to export charts to PowerPoint
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
@@ -681,9 +681,13 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
         title = slide.shapes.title
         title.text = title_text
         img = BytesIO()
-        fig.write_image(img, format="png", engine="kaleido")
-        img.seek(0)
-        slide.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
+        try:
+            fig.write_image(img, format="png", engine="kaleido")
+            img.seek(0)
+            slide.shapes.add_picture(img, Inches(1), Inches(1), width=Inches(10))
+        except Exception as e:
+            st.error(f"Failed to export figure to image: {e}")
+            slide.shapes.title.text = f"{title_text} (Export Error)"
 
     add_slide_with_figure(prs, labour_fig, "Unemployment & Labour Force")
     add_slide_with_figure(prs, external_fig, "External Drivers")
@@ -695,50 +699,32 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     pptx_io.seek(0)
     return pptx_io
 
+# Function to render the dashboard layout
 def get_us_indicators_layout():
-    """Render the full dashboard layout and export data directly without session state."""
     st.title("US Indicators Dashboard")
-
-    # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment Data")
-    labour_fig = plot_labour_unemployment()
+    labour_fig = plot_labour_unemployment()  # Define this plot function elsewhere in the code
+    st.plotly_chart(labour_fig, use_container_width=True)
 
-    # External Driver Indicators
     st.subheader("External Driver Indicators")
-    selected_indicators = st.multiselect(
-        "Select External Indicators",
-        options=external_driver_df["Indicator"].unique(),
-        default=["World GDP"],
-        key="external_indicators_multiselect"
-    )
-    external_fig = plot_external_driver(selected_indicators)
+    external_fig = plot_external_driver(["World GDP"])  # Define this plot function as required
+    st.plotly_chart(external_fig, use_container_width=True)
 
-    # GDP by Industry
     st.subheader("GDP by Industry")
-    selected_gdp_industry = st.selectbox(
-        "Select Industry",
-        options=df_combined["Industry"].unique(),
-        index=0,
-        key="gdp_industry_selectbox"
-    )
-    gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
+    gdp_fig = plot_gdp_and_industry("Selected Industry")  # Define this plot function as needed
+    st.plotly_chart(gdp_fig, use_container_width=True)
 
-    # CPI and PPI Comparison
     st.subheader("CPI and PPI Comparison")
-    selected_cpi_series = st.selectbox(
-        "Select CPI Industry", 
-        list(industry_mapping.keys()), 
-        index=1, 
-        key="cpi_series_selectbox"
-    )
-    selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
+    cpi_ppi_fig = plot_cpi_ppi("Selected Series ID")  # Define this plot function as required
+    st.plotly_chart(cpi_ppi_fig, use_container_width=True)
 
-    if st.button("Export Charts to PowerPoint"):
+    if st.button("Export All Charts to PPTX"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
-        st.download_button(label="Download PowerPoint", data=pptx_file,
-                           file_name="state_indicators.pptx",
-                           mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
-
+        st.download_button(
+            label="Download PPTX",
+            data=pptx_file,
+            file_name="us_indicators_dashboard.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        )
 
 get_us_indicators_layout()
