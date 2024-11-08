@@ -289,27 +289,27 @@ with st.expander("Public Companies", expanded=False):
 with st.expander("Benchmarking", expanded=False):
     rma_is_table, rma_bs_table, pc_is_table, pc_bs_table = get_benchmarking_layout()
 
-if st.button("Export All Charts and Tables to PowerPoint"):
-    # Check if each DataFrame is None or empty and assign an empty DataFrame if so
-    ev_revenue_transactions = ev_revenue_transactions if ev_revenue_transactions is not None and not ev_revenue_transactions.empty else pd.DataFrame()
-    ev_ebitda_transactions = ev_ebitda_transactions if ev_ebitda_transactions is not None and not ev_ebitda_transactions.empty else pd.DataFrame()
-    ev_revenue_public = ev_revenue_public if ev_revenue_public is not None and not ev_revenue_public.empty else pd.DataFrame()
-    ev_ebitda_public = ev_ebitda_public if ev_ebitda_public is not None and not ev_ebitda_public.empty else pd.DataFrame()
-    rma_is_table = rma_is_table if rma_is_table is not None and not rma_is_table.empty else pd.DataFrame()
-    rma_bs_table = rma_bs_table if rma_bs_table is not None and not rma_bs_table.empty else pd.DataFrame()
-    pc_is_table = pc_is_table if pc_is_table is not None and not pc_is_table.empty else pd.DataFrame()
-    pc_bs_table = pc_bs_table if pc_bs_table is not None and not pc_bs_table.empty else pd.DataFrame()
+if ev_revenue_transactions is None or ev_revenue_transactions.empty:
+    ev_revenue_transactions = pd.DataFrame()
 
-    # Generate the PowerPoint file
-    pptx_file = export_to_pptx(
-        ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public,
-        rma_is_table, rma_bs_table, pc_is_table, pc_bs_table
-    )
+if ev_ebitda_transactions is None or ev_ebitda_transactions.empty:
+    ev_ebitda_transactions = pd.DataFrame()
+
+if ev_revenue_public is None or ev_revenue_public.empty:
+    ev_revenue_public = pd.DataFrame()
+
+if ev_ebitda_public is None or ev_ebitda_public.empty:
+    ev_ebitda_public = pd.DataFrame()
+
+if rma_is_table is None or rma_is_table.empty:
+    rma_is_table = pd.DataFrame()
+
+if rma_bs_table is None or rma_bs_table.empty:
+    rma_bs_table = pd.DataFrame()
+
+if pc_is_table is None or pc_is_table.empty:
+    pc_is_table = pd.DataFrame()
+
+if pc_bs_table is None or pc_bs_table.empty:
+    pc_bs_table = pd.DataFrame()
     
-    # Provide download button for the PowerPoint file
-    st.download_button(
-        label="Download PowerPoint",
-        data=pptx_file,
-        file_name="all_charts_tables.pptx",
-        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-    )
