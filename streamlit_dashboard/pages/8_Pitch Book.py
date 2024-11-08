@@ -31,6 +31,7 @@ path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xl
 path_public_comps = r"streamlit_dashboard/data/Public Listed Companies US.xlsx"
 rma_file_path = r"streamlit_dashboard/data/RMA.xlsx"
 
+@st.experimental_memo
 def get_transactions_data():
     df = pd.read_excel(path_transaction, sheet_name="Final - Precedent Transactions")
     df['Announced Date'] = pd.to_datetime(df['Announced Date'], errors='coerce')
@@ -48,7 +49,7 @@ def get_transactions_data():
         'Business Description': 'Business Description'
     }
     return df[list(columns_to_display.keys())].rename(columns=columns_to_display)
-
+@st.experimental_memo
 def get_public_comps_data():
     df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
     df['Enterprise Value (in $)'] = pd.to_numeric(df['Enterprise Value (in $)'], errors='coerce')
@@ -58,7 +59,7 @@ def get_public_comps_data():
     df['EV/EBITDA'] = df['Enterprise Value (in $)'] / df['EBITDA (in $)']
     df = df.dropna(subset=['Country', 'Industry', 'EV/Revenue', 'EV/EBITDA'])
     return df
-
+@st.experimental_memo
 def get_industries(file_path, sheet_name):
     try:
         df = pd.read_excel(file_path, sheet_name=sheet_name)
@@ -66,7 +67,7 @@ def get_industries(file_path, sheet_name):
     except Exception as e:
         st.error(f"Error loading industries: {str(e)}")
         return []
-
+@st.experimental_memo
 def create_table(file_path, selected_industries):
     try:
         is_rma_df = pd.read_excel(file_path, sheet_name='IS - RMA')
@@ -85,7 +86,7 @@ def create_table(file_path, selected_industries):
     except Exception as e:
         st.error(f"Error creating RMA tables: {str(e)}")
         return pd.DataFrame(), pd.DataFrame()
-
+@st.experimental_memo
 def load_public_comps_data():
     try:
         df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
@@ -104,7 +105,7 @@ def load_public_comps_data():
     except Exception as e:
         st.error(f"Error loading public comps data: {str(e)}")
         return [], pd.DataFrame()
-
+@st.experimental_memo
 def get_benchmarking_layout():
     # st.title("Benchmarking Dashboard")
 
@@ -163,11 +164,11 @@ def get_benchmarking_layout():
 
 rma_industries = get_industries(rma_file_path, sheet_name="Industry Filter")
 public_comps_industries, public_comps_data = load_public_comps_data()
-
+@st.experimental_memo
 def display_data(df, chart_func):
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_selection('multiple', use_checkbox=True)
-    gb.configure_default_column(editable=False, filter=True, sortable=True, resizable=True)
+    gb.configure_default_column(editable=False, filter=True, sortable=True)
     grid_options = gb.build()
     grid_response = AgGrid(
         df,
@@ -185,7 +186,7 @@ def display_data(df, chart_func):
         st.info("Select rows to visualize data.")
         # Ensure it always returns two values
         return None, None
-
+@st.experimental_memo
 def plot_transactions_charts(data):
     grouped_data = data.groupby('Year').agg(
         avg_ev_revenue=('EV/Revenue', 'mean'),
@@ -201,7 +202,7 @@ def plot_transactions_charts(data):
     st.bar_chart(ev_ebitda_chart_data)
 
     return ev_revenue_chart_data, ev_ebitda_chart_data
-
+@st.experimental_memo
 def plot_public_comps_charts(data):
     st.subheader("EV/Revenue Chart")
     ev_revenue_chart_data = data[['Name', 'EV/Revenue']].set_index('Name')
@@ -212,7 +213,7 @@ def plot_public_comps_charts(data):
     st.bar_chart(ev_ebitda_chart_data)
 
     return ev_revenue_chart_data, ev_ebitda_chart_data
-
+@st.experimental_memo
 def export_to_pptx(ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public, rma_is_table, rma_bs_table, pc_is_table, pc_bs_table):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]  # Blank layout for charts/tables
