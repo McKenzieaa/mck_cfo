@@ -314,3 +314,14 @@ if pc_is_table is None or pc_is_table.empty:
 if pc_bs_table is None or pc_bs_table.empty:
     pc_bs_table = pd.DataFrame()
     
+    pptx_file = export_to_pptx(
+        ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public,
+        rma_is_table, rma_bs_table, pc_is_table, pc_bs_table
+    )
+
+    st.download_button(
+        label="Download PowerPoint",
+        data=pptx_file,
+        file_name="all_charts_tables.pptx",
+        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    )
