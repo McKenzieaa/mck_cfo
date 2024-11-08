@@ -8,7 +8,6 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-
 st.set_page_config(page_title="Transaction and Public Company Dashboard", layout="wide")
 
 st.markdown(
@@ -32,7 +31,6 @@ path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xl
 path_public_comps = r"streamlit_dashboard/data/Public Listed Companies US.xlsx"
 rma_file_path = r"streamlit_dashboard/data/RMA.xlsx"
 
-@st.cache_data
 def get_transactions_data():
     df = pd.read_excel(path_transaction, sheet_name="Final - Precedent Transactions")
     df['Announced Date'] = pd.to_datetime(df['Announced Date'], errors='coerce')
@@ -51,7 +49,6 @@ def get_transactions_data():
     }
     return df[list(columns_to_display.keys())].rename(columns=columns_to_display)
 
-@st.cache_data
 def get_public_comps_data():
     df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
     df['Enterprise Value (in $)'] = pd.to_numeric(df['Enterprise Value (in $)'], errors='coerce')
@@ -89,7 +86,6 @@ def create_table(file_path, selected_industries):
         st.error(f"Error creating RMA tables: {str(e)}")
         return pd.DataFrame(), pd.DataFrame()
 
-@st.cache_data
 def load_public_comps_data():
     try:
         df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
@@ -294,20 +290,23 @@ with st.expander("Benchmarking", expanded=False):
     rma_is_table, rma_bs_table, pc_is_table, pc_bs_table = get_benchmarking_layout()
 
 if st.button("Export All Charts and Tables to PowerPoint"):
-    ev_revenue_transactions = ev_revenue_transactions or pd.DataFrame()
-    ev_ebitda_transactions = ev_ebitda_transactions or pd.DataFrame()
-    ev_revenue_public = ev_revenue_public or pd.DataFrame()
-    ev_ebitda_public = ev_ebitda_public or pd.DataFrame()
-    rma_is_table = rma_is_table if rma_is_table is not None else pd.DataFrame()
-    rma_bs_table = rma_bs_table if rma_bs_table is not None else pd.DataFrame()
-    pc_is_table = pc_is_table if pc_is_table is not None else pd.DataFrame()
-    pc_bs_table = pc_bs_table if pc_bs_table is not None else pd.DataFrame()
+    # Check if each DataFrame is None or empty and assign an empty DataFrame if so
+    ev_revenue_transactions = ev_revenue_transactions if ev_revenue_transactions is not None and not ev_revenue_transactions.empty else pd.DataFrame()
+    ev_ebitda_transactions = ev_ebitda_transactions if ev_ebitda_transactions is not None and not ev_ebitda_transactions.empty else pd.DataFrame()
+    ev_revenue_public = ev_revenue_public if ev_revenue_public is not None and not ev_revenue_public.empty else pd.DataFrame()
+    ev_ebitda_public = ev_ebitda_public if ev_ebitda_public is not None and not ev_ebitda_public.empty else pd.DataFrame()
+    rma_is_table = rma_is_table if rma_is_table is not None and not rma_is_table.empty else pd.DataFrame()
+    rma_bs_table = rma_bs_table if rma_bs_table is not None and not rma_bs_table.empty else pd.DataFrame()
+    pc_is_table = pc_is_table if pc_is_table is not None and not pc_is_table.empty else pd.DataFrame()
+    pc_bs_table = pc_bs_table if pc_bs_table is not None and not pc_bs_table.empty else pd.DataFrame()
 
+    # Generate the PowerPoint file
     pptx_file = export_to_pptx(
         ev_revenue_transactions, ev_ebitda_transactions, ev_revenue_public, ev_ebitda_public,
         rma_is_table, rma_bs_table, pc_is_table, pc_bs_table
     )
     
+    # Provide download button for the PowerPoint file
     st.download_button(
         label="Download PowerPoint",
         data=pptx_file,
