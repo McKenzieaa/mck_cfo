@@ -88,10 +88,10 @@ df_renew_share = df_electricity_gen.dropna(subset=['renewables_share_elec'])
 df_electricity_gen = pd.read_csv(url2)
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
-df_per_cap_elec_gen['total_elec_per_capita'] = (
-    df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
-)
-# top_10_countries = df_per_cap_elec_gen.nlargest(15, 'total_elec_per_capita')
+# df_per_cap_elec_gen['total_elec_per_capita'] = (
+#     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
+# )
+# top_10_countries = df_per_cap_elec_gen.nlargest(10, 'total_elec_per_capita')
 # df_per_cap_elec_gen = top_10_countries.melt(
 #     id_vars=['country'],
 #     value_vars=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'],

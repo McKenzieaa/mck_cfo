@@ -171,7 +171,7 @@ public_comps_industries, public_comps_data = load_public_comps_data()
 def display_data(df, chart_func):
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_selection('multiple', use_checkbox=True)
-    gb.configure_default_column(editable=True, filter=True, sortable=True, resizable=True)
+    gb.configure_default_column(editable=False, filter=True, sortable=True, resizable=True)
     grid_options = gb.build()
     grid_response = AgGrid(
         df,
