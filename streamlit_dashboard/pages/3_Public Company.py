@@ -25,7 +25,7 @@ except KeyError:
 # Read Excel file from S3 with Dask
 try:
     df = pd.read_excel(
-        s3_path,
+        s3_path, sheet_name="FY 2023",
         storage_options=storage_options,
         usecols=['Name', 'Country', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry'],
         dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
