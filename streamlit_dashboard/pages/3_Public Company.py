@@ -27,15 +27,21 @@ try:
     df = pd.read_excel(
         s3_path, sheet_name="FY 2023",
         storage_options=storage_options,
-        usecols=['Name', 'Country', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry'],
-        dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
+        usecols=['Name', 'Country', 'Year', 'Enterprise Value', 'Revenue', 'EBITDA', 'Business Description', 'Industry'],
+        dtype={'Enterprise Value': 'float64', 'Revenue': 'float64', 'EBITDA': 'float64'}
     ).rename(columns={
         'Name': 'Company',
         'Country': 'Location'
     })
+    
+    # Calculate EV/Revenue and EV/EBITDA
+    df['EV/Revenue'] = df['Enterprise Value'] / df['Revenue']
+    df['EV/EBITDA'] = df['Enterprise Value'] / df['EBITDA']
+
 except Exception as e:
     st.error(f"Error loading data from S3: {e}")
     st.stop()
+
     
 # Streamlit app title
 st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
