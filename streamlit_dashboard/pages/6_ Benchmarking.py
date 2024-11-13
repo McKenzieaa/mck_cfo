@@ -29,7 +29,7 @@ df_rma = df_rma.rename(columns={
 })
 
 # Load the public company data
-df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options={'anon': False}, engine='openpyxl')
+df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options, engine='openpyxl')
 
 # Filter out any missing or non-string values in the Industry column for both datasets
 industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
