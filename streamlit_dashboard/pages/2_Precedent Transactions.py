@@ -1,150 +1,127 @@
-import os
-import pandas as pd
+import dask.dataframe as dd
 import streamlit as st
-from io import BytesIO
+import plotly.express as px
+import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
-from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+from io import BytesIO
 
+# Load the data with Dask, specifying encoding and data types
+data_path = "C:/Users/sindh/source/mck_setup/industry_dashboard/data/Precedent.csv"
+df = dd.read_csv(data_path, encoding="ISO-8859-1", 
+                 usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
+                 dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'})
+
+# Streamlit app title
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
-# Inject CSS to reduce font sizes
-st.markdown(
-    """
-    <style>
-    /* Reduce the default font size of all elements */
-    html, body, [class*="stMarkdown"] {
-        font-size: 14px;
-    }
-    /* Adjust font size of headers */
-    h1, h2, h3, h4, h5, h6 {
-        font-size: 16px !important;
-    }
-    /* Customize sidebar font */
-    [data-testid="stSidebar"] {
-        font-size: 13px;
-    }
-    /* Adjust AgGrid table font */
-    .ag-root-wrapper {
-        font-size: 13px !important;
-    }
-    .ag-theme-alpine {
-        font-size: 12px !important;  /* Reduce the font size */
-    }
-    .ag-header-cell-label {
-        font-size: 14px !important; /* Optional: Adjust header font */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
-# Path to the Excel file
-path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx'
 
-def get_transactions_data():
-    """Load and preprocess the precedent transactions data."""
-    df = pd.read_excel(path_transaction, sheet_name="Final - Precedent Transactions")
-    df['Announced Date'] = pd.to_datetime(df['Announced Date'], errors='coerce')
-    df.dropna(subset=['Announced Date'], inplace=True)
-    df['Year'] = df['Announced Date'].dt.year.astype(int)
-    df['EV/Revenue'] = pd.to_numeric(df['EV/Revenue'], errors='coerce').fillna(0).round(1)
-    df['EV/EBITDA'] = pd.to_numeric(df['EV/EBITDA'], errors='coerce').fillna(0).round(1)
-    columns_to_display = {
-        'Target': 'Company',
-        'Location': 'Location',
-        'Year': 'Year',
-        'Industry': 'Industry',
-        'EV/Revenue': 'EV/Revenue',
-        'EV/EBITDA': 'EV/EBITDA',
-        'Business Description': 'Business Description'
-    }
-    return df[list(columns_to_display.keys())].rename(columns=columns_to_display)
+# Get unique values for Industry and Location filters
+industries = df['Industry'].unique().compute()
+locations = df['Location'].unique().compute()
 
-def display_transactions():
-    """Render the Transactions page layout."""
+# Display multi-select filters at the top without default selections
+col1, col2 = st.columns(2)
+selected_industries = col1.multiselect("Select Industry", industries)
+selected_locations = col2.multiselect("Select Location", locations)
+
+# Filter data based on multi-selections using .isin()
+if selected_industries and selected_locations:
+    filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
+    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
+    filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
+
+    # Set up Ag-Grid for selection
     st.title("Precedent Transactions")
-    transactions_df = get_transactions_data()
-
-    # Configure AgGrid
-    gb = GridOptionsBuilder.from_dataframe(transactions_df)
-    gb.configure_selection('multiple', use_checkbox=True)
-    gb.configure_default_column(editable=False, filter=True, sortable=True, resizable=True)
+    gb = GridOptionsBuilder.from_dataframe(filtered_df)
+    gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+    gb.configure_column(
+        field="Target",
+        tooltipField="Business Description",
+        maxWidth=400
+    )
+    gb.configure_columns(["Business Description"], hide=False)    
     grid_options = gb.build()
 
+    # Display Ag-Grid table
     grid_response = AgGrid(
-        transactions_df,
+        filtered_df,
         gridOptions=grid_options,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
-        theme='alpine', 
-        fit_columns_on_grid_load=True,
-        height=500,
-        width='100%'
+        height=400,
+        width='100%',
+        theme='streamlit'
     )
 
-    selected_rows = pd.DataFrame(grid_response['selected_rows'])
-    # bar_width = st.sidebar.slider("Select Bar Width", min_value=0.1, max_value=0.9, value=0.5, step=0.1)
+    selected_data = pd.DataFrame(grid_response['selected_rows'])
 
-    if not selected_rows.empty:
-        ev_revenue_data, ev_ebitda_data = plot_transactions_charts(selected_rows)
-        export_chart_options(ev_revenue_data, ev_ebitda_data)
-    else:
-        st.info("Select transactions to visualize their data.")
+    if not selected_data.empty:
 
-def plot_transactions_charts(data):
-    """Plot EV/Revenue and EV/EBITDA charts."""
-    grouped_data = data.groupby('Year').agg(
-        avg_ev_revenue=('EV/Revenue', 'mean'),
-        avg_ev_ebitda=('EV/EBITDA', 'mean')
-    ).reset_index()
+        avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
 
-    st.subheader("EV/Revenue")
-    ev_revenue_chart_data = grouped_data[['Year', 'avg_ev_revenue']].set_index('Year')
-    st.bar_chart(ev_revenue_chart_data)
+        # Define colors
+        color_ev_revenue = "#636EFA"  # Default Plotly blue
+        color_ev_ebitda = "#EF553B"   # Default Plotly red
 
-    st.subheader("EV/EBITDA")
-    ev_ebitda_chart_data = grouped_data[['Year', 'avg_ev_ebitda']].set_index('Year')
-    st.bar_chart(ev_ebitda_chart_data)
+        # Create the EV/Revenue chart with data labels
+        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
+        fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.2f}', textposition='outside')
+        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title="Year")
 
-    return ev_revenue_chart_data, ev_ebitda_chart_data
+        # Display the EV/Revenue chart
+        st.plotly_chart(fig1)
 
-def export_chart_options(ev_revenue_data, ev_ebitda_data):
-    """Export charts as PowerPoint."""
-    st.subheader("Export Charts")
+        # Create the EV/EBITDA chart with data labels
+        fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
+        fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.2f}', textposition='outside')
+        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title="Year")
 
-    if st.button("Export Charts to PowerPoint"):
-        pptx_file = export_to_pptx(ev_revenue_data, ev_ebitda_data)
-        st.download_button(
-            label="Download PowerPoint",
-            data=pptx_file,
-            file_name="transactions_charts.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        )
+        # Display the EV/EBITDA chart
+        st.plotly_chart(fig2)
 
-def export_to_pptx(ev_revenue_data, ev_ebitda_data):
-    """Export charts to a PowerPoint presentation."""
-    prs = Presentation()
-    slide_layout = prs.slide_layouts[5]
+        # Button to export charts to PowerPoint
+        export_ppt = st.button("Export Charts to PowerPoint")
 
-    # EV/Revenue Slide
-    slide1 = prs.slides.add_slide(slide_layout)
-    title1 = slide1.shapes.title
-    title1.text = "EV/Revenue Chart"
-    img1 = BytesIO()
-    ev_revenue_data.plot(kind='bar').get_figure().savefig(img1, format='png', bbox_inches='tight')
-    img1.seek(0)
-    slide1.shapes.add_picture(img1, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+        if export_ppt:
+            # Create a PowerPoint presentation
+            ppt = Presentation()
+            
+            # Add slide for EV/Revenue chart
+            slide_layout = ppt.slide_layouts[5]
+            slide1 = ppt.slides.add_slide(slide_layout)
+            title1 = slide1.shapes.title
+            title1.text = "EV/Revenue by Year"
+            
+            # Save EV/Revenue chart to an image
+            fig1_image = BytesIO()
+            fig1.write_image(fig1_image, format="png", width=800, height=400)
+            fig1_image.seek(0)
+            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(1.5), width=Inches(8))
 
-    # EV/EBITDA Slide
-    slide2 = prs.slides.add_slide(slide_layout)
-    title2 = slide2.shapes.title
-    title2.text = "EV/EBITDA Chart"
-    img2 = BytesIO()
-    ev_ebitda_data.plot(kind='bar').get_figure().savefig(img2, format='png', bbox_inches='tight')
-    img2.seek(0)
-    slide2.shapes.add_picture(img2, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+            # Add slide for EV/EBITDA chart
+            slide2 = ppt.slides.add_slide(slide_layout)
+            title2 = slide2.shapes.title
+            title2.text = "EV/EBITDA by Year"
+            
+            # Save EV/EBITDA chart to an image
+            fig2_image = BytesIO()
+            fig2.write_image(fig2_image, format="png", width=800, height=400)
+            fig2_image.seek(0)
+            slide2.shapes.add_picture(fig2_image, Inches(1), Inches(1.5), width=Inches(8))
 
-    pptx_io = BytesIO()
-    prs.save(pptx_io)
-    pptx_io.seek(0)
-    return pptx_io
-display_transactions()
+            # Save PowerPoint to BytesIO object for download
+            ppt_bytes = BytesIO()
+            ppt.save(ppt_bytes)
+            ppt_bytes.seek(0)
+
+            # Provide download link for PowerPoint
+            st.download_button(
+                label="Download PowerPoint",
+                data=ppt_bytes,
+                file_name="charts_presentation.pptx",
+                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            )
+
+else:
+    st.write("Please select at least one Industry and Location to view data.")
