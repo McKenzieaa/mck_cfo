@@ -41,7 +41,6 @@ st.markdown(
 # Path to the Excel file
 path_transaction = r'streamlit_dashboard/data/Updated - Precedent Transaction.xlsx'
 
-@st.cache_data
 def get_transactions_data():
     """Load and preprocess the precedent transactions data."""
     df = pd.read_excel(path_transaction, sheet_name="Final - Precedent Transactions")
@@ -52,7 +51,7 @@ def get_transactions_data():
     df['EV/EBITDA'] = pd.to_numeric(df['EV/EBITDA'], errors='coerce').fillna(0).round(1)
     columns_to_display = {
         'Target': 'Company',
-        'Geographic Locations': 'Location',
+        'Location': 'Location',
         'Year': 'Year',
         'Industry': 'Industry',
         'EV/Revenue': 'EV/Revenue',
