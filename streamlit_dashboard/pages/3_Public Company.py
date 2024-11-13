@@ -27,8 +27,8 @@ try:
     df = pd.read_excel(
         s3_path, sheet_name="FY 2023",
         storage_options=storage_options,
-        usecols=['Name', 'Country', 'Year', 'Enterprise Value', 'Revenue', 'EBITDA', 'Business Description', 'Industry'],
-        dtype={'Enterprise Value': 'float64', 'Revenue': 'float64', 'EBITDA': 'float64'}
+        usecols=['Name', 'Country', 'Year', 'Enterprise Value (in $)', 'Revenue (in $)', 'EBITDA (in $)', 'Business Description', 'Industry'],
+        dtype={'Enterprise Value (in $)': 'float64', 'Revenue (in $)': 'float64', 'EBITDA (in $)': 'float64'}
     ).rename(columns={
         'Name': 'Company',
         'Country': 'Location'
