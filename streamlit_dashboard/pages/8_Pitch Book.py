@@ -40,7 +40,7 @@ def get_transactions_data():
     df['EV/EBITDA'] = pd.to_numeric(df['EV/EBITDA'], errors='coerce').fillna(0).round(1)
     columns_to_display = {
         'Target': 'Company',
-        # 'Geographic Locations': 'Location',
+        'Location': 'Location',
         'Year': 'Year',
         'Industry': 'Industry',
         'EV/Revenue': 'EV/Revenue',

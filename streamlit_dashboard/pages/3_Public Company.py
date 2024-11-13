@@ -30,7 +30,7 @@ def display_public_comps():
 
     gb = GridOptionsBuilder.from_dataframe(filtered_df)
     gb.configure_selection('multiple', use_checkbox=True)
-    gb.configure_default_column(editable=True, filter=True, sortable=True, resizable=True)
+    gb.configure_default_column(editable=False, filter=True, sortable=True, resizable=True)
     grid_options = gb.build()
     grid_response = AgGrid(
         filtered_df,

@@ -68,17 +68,17 @@ def display_transactions():
     # Configure AgGrid
     gb = GridOptionsBuilder.from_dataframe(transactions_df)
     gb.configure_selection('multiple', use_checkbox=True)
-    gb.configure_default_column(editable=True, filter=True, sortable=True, resizable=True)
+    gb.configure_default_column(editable=False, filter=True, sortable=True, resizable=True)
     grid_options = gb.build()
 
     grid_response = AgGrid(
         transactions_df,
         gridOptions=grid_options,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
-        theme='alpine',  # Use the same theme as before
+        theme='alpine', 
         fit_columns_on_grid_load=True,
-        height=500,  # Maintain the height or adjust as needed
-        width='100%'  # Ensure it uses the full available width
+        height=500,
+        width='100%'
     )
 
     selected_rows = pd.DataFrame(grid_response['selected_rows'])
