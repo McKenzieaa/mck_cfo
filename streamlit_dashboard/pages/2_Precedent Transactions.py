@@ -9,10 +9,10 @@ from io import BytesIO
 import s3fs  # For accessing S3 data
 
 # Define S3 file path
-s3_path = "s3://documentsapi/industry_data/Precedent.csv"
+s3_path = "s3://documentsapi/industry_data/precedent.parquet"
 
 # Load the data from S3 with Dask, specifying encoding and data types
-df = dd.read_csv(s3_path, encoding="ISO-8859-1", 
+df = dd.read_parquet(s3_path, encoding="ISO-8859-1", 
                  storage_options={'anon': False},  # Set to True if the bucket is public
                  usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
                  dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'})
