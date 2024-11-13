@@ -11,6 +11,21 @@ import s3fs  # For accessing S3 data
 # Define S3 file path
 s3_path = "s3://documentsapi/industry_data/precedent.parquet"
 
+# Streamlit secrets can be accessed if credentials are provided there
+storage_options = {
+    'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
+    'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
+    'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
+}
+
+# Read parquet file from S3
+df = dd.read_parquet(
+    s3_path,
+    storage_options=storage_options,
+    usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
+    dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
+)
+
 # Load the data from S3 with Dask, specifying encoding and data types
 df = dd.read_parquet(s3_path, encoding="ISO-8859-1", 
                  storage_options={'anon': False},  # Set to True if the bucket is public
