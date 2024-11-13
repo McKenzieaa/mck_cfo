@@ -7,5 +7,6 @@ seaborn
 python-pptx
 openpyxl
 streamlit-aggrid
-streamlit-navigation-bar
 pygwalker
+s3fs
+dask

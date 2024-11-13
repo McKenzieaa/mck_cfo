@@ -6,16 +6,19 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
+import s3fs  # For accessing S3 data
 
-# Load the data with Dask, specifying encoding and data types
-data_path = "C:/Users/sindh/source/mck_setup/industry_dashboard/data/Precedent.csv"
-df = dd.read_csv(data_path, encoding="ISO-8859-1", 
+# Define S3 file path
+s3_path = "s3://documentsapi/industry_data/Precedent.csv"
+
+# Load the data from S3 with Dask, specifying encoding and data types
+df = dd.read_csv(s3_path, encoding="ISO-8859-1", 
+                 storage_options={'anon': False},  # Set to True if the bucket is public
                  usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
                  dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'})
 
 # Streamlit app title
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
-
 
 # Get unique values for Industry and Location filters
 industries = df['Industry'].unique().compute()
