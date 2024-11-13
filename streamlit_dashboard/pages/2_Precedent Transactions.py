@@ -83,15 +83,15 @@ def display_transactions():
     )
 
     selected_rows = pd.DataFrame(grid_response['selected_rows'])
-    bar_width = st.sidebar.slider("Select Bar Width", min_value=0.1, max_value=0.9, value=0.5, step=0.1)
+    # bar_width = st.sidebar.slider("Select Bar Width", min_value=0.1, max_value=0.9, value=0.5, step=0.1)
 
     if not selected_rows.empty:
-        ev_revenue_data, ev_ebitda_data = plot_transactions_charts(selected_rows, bar_width)
+        ev_revenue_data, ev_ebitda_data = plot_transactions_charts(selected_rows)
         export_chart_options(ev_revenue_data, ev_ebitda_data)
     else:
         st.info("Select transactions to visualize their data.")
 
-def plot_transactions_charts(data, bar_width):
+def plot_transactions_charts(data):
     """Plot EV/Revenue and EV/EBITDA charts."""
     grouped_data = data.groupby('Year').agg(
         avg_ev_revenue=('EV/Revenue', 'mean'),

@@ -8,7 +8,7 @@ from pptx.util import Inches
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 path_public_comps= r'streamlit_dashboard/data/Public Listed Companies US.xlsx'
-@st.cache_data
+# @st.cache_data
 def get_public_comps_data():
     """Load and process the public companies data."""
     df = pd.read_excel(path_public_comps, sheet_name="FY 2023")
