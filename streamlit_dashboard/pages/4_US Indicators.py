@@ -18,32 +18,37 @@ url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&cha
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
 xls = pd.ExcelFile(url_gdp_us)
 
-dtype_dict = {
-    'time': 'object',
-    'ref_area.label': 'object',  # Adjust dtype based on your column names and data
-    'obs_value': 'float64'       # Assuming 'obs_value' is numeric
-}
-
 # Labour Force Participation Rate Data
-df_lfs = dd.read_csv(url_lfs, dtype=dtype_dict, assume_missing=True)
+df_lfs = dd.read_csv(
+    url_lfs,
+    assume_missing=True,
+    dtype={'obs_status.label': 'object'}  # Explicitly setting dtype for problematic column
+)
 df_lfs = df_lfs.rename(columns={'ref_area.label': 'country', 'obs_value': 'labour_force_rate'})
 df_lfs['time'] = df_lfs['time'].astype(str)
 df_lfs = df_lfs.compute()  # Compute to bring data into memory as a Pandas DataFrame
+
+# Explicitly set data types after loading
 df_lfs['labour_force_rate'] = pd.to_numeric(df_lfs['labour_force_rate'], errors='coerce')
 time_split = df_lfs['time'].str.split('M', expand=True)
 df_lfs['year'] = pd.to_numeric(time_split[0], errors='coerce')
 df_lfs['month'] = pd.to_numeric(time_split[1], errors='coerce')
 
 # Unemployment Rate Data
-df_unemp = dd.read_csv(url_unemp, dtype=dtype_dict, assume_missing=True)
+df_unemp = dd.read_csv(
+    url_unemp,
+    assume_missing=True,
+    dtype={'obs_status.label': 'object'}  # Explicitly setting dtype for problematic column
+)
 df_unemp = df_unemp.rename(columns={'ref_area.label': 'country', 'obs_value': 'unemployment_rate'})
 df_unemp['time'] = df_unemp['time'].astype(str)
 df_unemp = df_unemp.compute()  # Compute to bring data into memory as a Pandas DataFrame
+
+# Explicitly set data types after loading
 df_unemp['unemployment_rate'] = pd.to_numeric(df_unemp['unemployment_rate'], errors='coerce')
 time_split_unemp = df_unemp['time'].str.split('M', expand=True)
 df_unemp['year'] = pd.to_numeric(time_split_unemp[0], errors='coerce')
 df_unemp['month'] = pd.to_numeric(time_split_unemp[1], errors='coerce')
-
 # Population Data
 df_pop = pd.read_csv(url_pop)
 df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
