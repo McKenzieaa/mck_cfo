@@ -1,5 +1,4 @@
 import streamlit as st
-import dask.dataframe as dd
 import pandas as pd
 import requests
 import zipfile
@@ -9,7 +8,9 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import plotly.graph_objs as go
+import seaborn as sns
 import matplotlib.pyplot as plt
+import dask.dataframe as dd
 
 # Initialize data
 today_date = date.today().strftime("%Y-%m-%d")
@@ -70,15 +71,6 @@ states_data_id = {
     "Wyoming": {"ur_id": "WYUR", "labour_id": "LBSSA56"}
 }
 
-# Define primary colors
-colors = {
-    "dark_blue": "#032649",
-    "orange": "#EB8928",
-    "dark_grey": "#595959",
-    "light_grey": "#A5A5A5",
-    "turquoise_blue": "#1C798A"
-}
-
 def download_csv(state_name, data_type):
     data_ids = states_data_id.get(state_name)
     if not data_ids:
@@ -93,16 +85,13 @@ def download_csv(state_name, data_type):
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
         csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
-        
-        # Convert the pandas dataframe to a dask dataframe
-        csv_data = dd.from_pandas(csv_data, npartitions=1)
         return csv_data
     else:
         st.error(f"Error downloading {data_type} data for {state_name}.")
         return None
-    
+
 def load_state_gdp_data():
-    """Download and preprocess state-level GDP data using Dask."""
+    """Download and preprocess state-level GDP data."""
     global state_gdp_data
     url = "https://apps.bea.gov/regional/zip/SAGDP.zip"
     
@@ -110,18 +99,16 @@ def load_state_gdp_data():
         response = requests.get(url)
         if response.status_code == 200:
             with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                # Identify the correct file name in the ZIP
                 csv_file_name = next(
                     (name for name in z.namelist() 
                      if name.startswith("SAGDP1__ALL_AREAS_") and name.endswith(".csv")), 
                     None
                 )
-                
                 if csv_file_name:
                     with z.open(csv_file_name) as f:
-                        # Load CSV into a Dask DataFrame and exclude unnecessary columns
-                        df = dd.read_csv(
-                            f,
+                        # Load the CSV and exclude unnecessary columns
+                        df = pd.read_csv(
+                            f, 
                             usecols=lambda col: col not in [
                                 "GeoFIPS", "Region", "TableName", "LineCode", 
                                 "IndustryClassification", "Unit"
@@ -129,39 +116,22 @@ def load_state_gdp_data():
                             dtype={"Description": str}
                         )
 
-                    # Check if data loaded correctly
-                    if df is None or df.shape[0].compute() == 0:
-                        print("No data loaded from CSV file.")
-                        return
-
-                    # Filter rows where 'Description' is the required GDP data
                     df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
-
-                    # Reshape from wide to long format
                     df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
-                    df = df.rename(columns={"GeoName": "State"})
-
-                    # Filter for numeric years and convert columns
+                    df.rename(columns={"GeoName": "State"}, inplace=True)
                     df = df[df["Year"].str.isdigit()]
                     df["Year"] = df["Year"].astype(int)
-                    df["Value"] = dd.to_numeric(df["Value"], errors='coerce')
-                    df = df.dropna(subset=["Value"])
-
-                    # Exclude "United States" rows from the 'State' column
+                    df["Value"] = pd.to_numeric(df["Value"], errors='coerce')
+                    df.dropna(subset=["Value"], inplace=True)
                     state_gdp_data = df[df["State"] != "United States"]
-
-                    # Check if state_gdp_data is populated
-                    if state_gdp_data is None or state_gdp_data.shape[0].compute() == 0:
-                        print("State GDP data is empty after filtering.")
                 else:
-                    print("No matching CSV file found in the downloaded ZIP.")
+                    st.error("No matching CSV file found in the downloaded ZIP.")
         else:
-            print(f"Failed to download GDP data. Status code: {response.status_code}")
+            st.error(f"Failed to download GDP data. Status code: {response.status_code}")
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        st.error(f"An error occurred: {e}")
 
-# Run the function to load data
 load_state_gdp_data()
 
 def plot_unemployment_labour_chart(state_name):
@@ -169,86 +139,73 @@ def plot_unemployment_labour_chart(state_name):
     labour_data = download_csv(state_name, "labour")
 
     if unemployment_data is not None and labour_data is not None:
-        unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000].compute()
-        labour_data = labour_data[labour_data['DATE'].dt.year >= 2000].compute()
+        unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
+        labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
 
-        merged_data = unemployment_data.merge(labour_data, on='DATE', how='inner')
+        merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
 
+        # Plot with Plotly and show the last values as annotations
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=merged_data['DATE'], 
-            y=merged_data['Unemployment'], 
-            mode='lines',
-            line=dict(color=colors["dark_blue"]),
-            name="Unemployment"
-        ))
-        fig.add_trace(go.Scatter(
-            x=merged_data['DATE'], 
-            y=merged_data['Labour Force'], 
-            mode='lines',
-            line=dict(color=colors["orange"]),
-            name="Labour Force"
-        ))
+        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Unemployment'], mode='lines', name="Unemployment"))
+        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Labour Force'], mode='lines', name="Labour Force"))
+        
+        # Add annotations for the last values
+        last_row = merged_data.iloc[-1]
+        fig.add_annotation(
+            x=last_row['DATE'], y=last_row['Unemployment'],
+            text=f"Last: {last_row['Unemployment']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
+        )
+        fig.add_annotation(
+            x=last_row['DATE'], y=last_row['Labour Force'],
+            text=f"Last: {last_row['Labour Force']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=40
+        )
 
         fig.update_layout(
-            title=f"{state_name} Unemployment & Labour Force Trends",
+            title="Unemployment & Labour Force Trends",
             xaxis_title="Date",
             yaxis_title="Rate",
             template="plotly_white"
         )
-        
-        # Save Plotly figure to image
-        img = BytesIO()
-        fig.write_image(img, format="png")
-        img.seek(0)
-        
         st.plotly_chart(fig, use_container_width=True)
-        
-        return merged_data, img
+        return fig
     else:
         st.warning(f"No data available for {state_name}.")
-        return None, None
+        return None
 
 def plot_gdp_chart(state_name):
     global state_gdp_data
 
     if state_gdp_data is not None:
         gdp_data = state_gdp_data[state_gdp_data["State"].str.lower() == state_name.lower()]
-        gdp_data = gdp_data[gdp_data["Year"] >= 2000].compute()
+        gdp_data = gdp_data[gdp_data["Year"] >= 2000]
 
         if not gdp_data.empty:
             fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=gdp_data['Year'], 
-                y=gdp_data['Value'], 
-                mode='lines',
-                line=dict(color=colors["turquoise_blue"]),
-                name=f"{state_name} GDP"
-            ))
+            fig.add_trace(go.Scatter(x=gdp_data['Year'], y=gdp_data['Value'], mode='lines', name=f"{state_name} GDP"))
 
-            fig.update_layout(
-                title=f"GDP Trends for {state_name}",
-                xaxis=dict(title='Year', tickmode='linear', tickformat='d'),
-                yaxis=dict(title='GDP (Millions of Dollars)'),
-                template='plotly_white'
+            # Add annotation for the last value
+            last_row = gdp_data.iloc[-1]
+            fig.add_annotation(
+                x=last_row['Year'], y=last_row['Value'],
+                text=f"Last: {last_row['Value']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
             )
 
-            # Save Plotly figure to image
-            img = BytesIO()
-            fig.write_image(img, format="png")
-            img.seek(0)
-            
+            fig.update_layout(
+                title="GDP Trends",
+                xaxis_title="Year",
+                yaxis_title="GDP (Millions of Dollars)",
+                template="plotly_white"
+            )
             st.plotly_chart(fig, use_container_width=True)
-
-            return gdp_data.set_index('Year')['Value'], img
+            return fig
         else:
             st.warning(f"No GDP data available for {state_name}.")
-            return None, None
+            return None
     else:
         st.warning("State GDP data not loaded.")
-        return None, None
+        return None
 
-def export_to_pptx(labour_img, gdp_img):
+def export_to_pptx(labour_fig, gdp_fig):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -256,13 +213,19 @@ def export_to_pptx(labour_img, gdp_img):
     slide1 = prs.slides.add_slide(slide_layout)
     title1 = slide1.shapes.title
     title1.text = "Unemployment & Labour Force"
-    slide1.shapes.add_picture(labour_img, Inches(1), Inches(1), width=Inches(10))
+    img1 = BytesIO()
+    labour_fig.write_image(img1, format="png")
+    img1.seek(0)
+    slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
 
     # Slide 2: GDP
     slide2 = prs.slides.add_slide(slide_layout)
     title2 = slide2.shapes.title
     title2.text = "GDP"
-    slide2.shapes.add_picture(gdp_img, Inches(1), Inches(1), width=Inches(10))
+    img2 = BytesIO()
+    gdp_fig.write_image(img2, format="png")
+    img2.seek(0)
+    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
@@ -274,14 +237,13 @@ def get_state_indicators_layout():
     state_name = st.selectbox("Select State", list(states_data_id.keys()), index=0)
 
     st.subheader(f"{state_name} - Unemployment & Labour Force")
-    labour_data, labour_img = plot_unemployment_labour_chart(state_name)
+    labour_fig = plot_unemployment_labour_chart(state_name)
 
     st.subheader(f"{state_name} - GDP Over Time")
-    gdp_data, gdp_img = plot_gdp_chart(state_name)
+    gdp_fig = plot_gdp_chart(state_name)
 
-    # Export to PowerPoint button
-    if st.button("Export Charts to PowerPoint") and labour_img is not None and gdp_img is not None:
-        pptx_file = export_to_pptx(labour_img, gdp_img)
+    if st.button("Export Charts to PowerPoint") and labour_fig is not None and gdp_fig is not None:
+        pptx_file = export_to_pptx(labour_fig, gdp_fig)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
