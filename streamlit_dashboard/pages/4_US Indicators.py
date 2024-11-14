@@ -416,6 +416,7 @@ df_ppi_unpivoted["Month & Year"] = dd.to_datetime(df_ppi_unpivoted["Month"] + " 
 df_ppi_unpivoted['Value'] = dd.to_numeric(df_ppi_unpivoted['Value'], errors='coerce')
 df_ppi_unpivoted = df_ppi_unpivoted.dropna(subset=['Month & Year', 'Value'])
 df_ppi_unpivoted = df_ppi_unpivoted[df_ppi_unpivoted["Month & Year"] >= '2010-01-01'].compute()
+df_ppi_unpivoted = df_ppi_unpivoted[['Month & Year', 'Value']].rename(columns={'Month & Year': 'Date', 'Value': 'Value'})
 
 if len(df_cpi) == 0:
     st.warning("No CPI-US All Items data available to display.")
@@ -574,7 +575,7 @@ def plot_cpi_ppi(selected_series_id):
     if len(cpi_data) > 0:
         fig.add_trace(
             go.Scatter(
-                x=cpi_data['date'], y=cpi_data['value'], mode='lines', name='CPI by Industry', line=dict(color='#032649')
+                x=cpi_data['Date'], y=cpi_data['Value'], mode='lines', name='CPI by Industry', line=dict(color='#032649')
             )
         )
     else:
@@ -584,7 +585,7 @@ def plot_cpi_ppi(selected_series_id):
     if len(all_items_data)> 0:
         fig.add_trace(
             go.Scatter(
-                x=all_items_data['Month & Year'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid')
+                x=all_items_data['Date'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid')
             )
         )
     else:
@@ -592,10 +593,10 @@ def plot_cpi_ppi(selected_series_id):
 
     # Plot aggregated PPI data
     if len(df_ppi_unpivoted) > 0:
-        df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
+        df_ppi_aggregated = df_ppi_unpivoted.groupby('Date', as_index=False).agg({'Value': 'mean'})
         fig.add_trace(
             go.Scatter(
-                x=df_ppi_aggregated['Month & Year'], y=df_ppi_aggregated['Value'], mode='lines', name='PPI-US', line=dict(color='#595959')
+                x=df_ppi_aggregated['Date'], y=df_ppi_aggregated['Value'], mode='lines', name='PPI-US', line=dict(color='#595959')
             )
         )
     else:
