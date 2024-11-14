@@ -374,8 +374,8 @@ industry_mapping = {
     'Food at elementary and secondary schools': 'CUSR0000SSFV031A'
     }
 
-file_path = r"streamlit_dashboard/data/CPI_industry.csv"
-ppi_file_path = r"streamlit_dashboard/data/PPI.csv"
+file_path = r"streamlit_dashboard/data/CPI_industry.txt"
+ppi_file_path = r"streamlit_dashboard/data/PPI.txt"
 # Load CPI data
 df = pd.read_csv(file_path, delimiter=',').dropna().reset_index(drop=True)
 df_unpivoted = df.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
@@ -385,8 +385,8 @@ df_unpivoted["Value"] = pd.to_numeric(df_unpivoted["Value"], errors='coerce')
 df_unpivoted["Month & Year"] = pd.to_datetime(df_unpivoted["Month & Year"], format='%b %Y', errors='coerce')
 df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
 all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
-all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-31']
-# Function to fetch CPI data for the selected industry
+all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
+    # Function to fetch CPI data for the selected industry
 
     # Load and clean PPI data
 df_ppi = pd.read_csv(ppi_file_path, delimiter=',').dropna().reset_index(drop=True)
@@ -543,34 +543,54 @@ def plot_cpi_ppi(selected_series_id):
     Plot CPI and PPI data on a single chart for comparison.
     """
     fig = go.Figure()
+
+    # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
     if not cpi_data.empty:
         fig.add_trace(
             go.Scatter(
-                x=cpi_data['date'],y=cpi_data['value'],mode='lines',name='CPI by Industry',line=dict(color='#032649'))
+                x=cpi_data['date'],
+                y=cpi_data['value'],
+                mode='lines',
+                name='CPI by Industry',
+                line=dict(color='blue')
+            )
         )
     else:
         st.warning(f"No data available for the selected CPI series: {selected_series_id}")
 
+    # Plot CPI-US All Items data
     if not all_items_data.empty:
         fig.add_trace(
             go.Scatter(
-                x=all_items_data['Month & Year'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid'))
+                x=all_items_data['Month & Year'],
+                y=all_items_data['Value'],
+                mode='lines',
+                name='CPI-US',
+                line=dict(color='green', dash='solid')
+            )
         )
     else:
         st.warning("No CPI-US All Items data available to display.")
 
+    # Plot aggregated PPI data
     if not df_ppi_unpivoted.empty:
         df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
         fig.add_trace(
             go.Scatter(
-                x=df_ppi_aggregated['Month & Year'],y=df_ppi_aggregated['Value'],mode='lines',name='PPI-US',line=dict(color='#595959'))
+                x=df_ppi_aggregated['Month & Year'],
+                y=df_ppi_aggregated['Value'],
+                mode='lines',
+                name='PPI-US',
+                line=dict(color='red')
+            )
         )
     else:
         st.warning("No PPI data available to display.")
 
+    # Configure the layout of the chart
     fig.update_layout(
-        title='CPI and PPI ',
+        title='CPI and PPI Comparison',
         xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(title='Value'),
         hovermode='x unified'
@@ -589,7 +609,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='tozeroy',  # Create area chart by filling to the x-axis
-            line=dict(color='#032649', width=2),
+            line=dict(color='blue', width=2),
             marker=dict(size=6)
         ),
         secondary_y=False
@@ -602,7 +622,7 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Percent Change'],
             mode='lines',
             name='GDP - Percent Change',
-            line=dict(color='#EB8928', width=2, dash='solid'),
+            line=dict(color='orange', width=2, dash='solid'),
             marker=dict(size=6)
         ),
         secondary_y=True
@@ -620,7 +640,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'{selected_industry} - Value',
                 fill='tozeroy',  # Area chart
-                line=dict(color='#595959', width=2),
+                line=dict(color='red', width=2),
                 marker=dict(size=6)
             ),
             secondary_y=False
@@ -633,7 +653,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
                 name=f'{selected_industry} - Percent Change',
-                line=dict(color='#1C798A', width=2, dash='solid'),
+                line=dict(color='green', width=2, dash='solid'),
                 marker=dict(size=6)
             ),
             secondary_y=True
@@ -653,34 +673,30 @@ def plot_gdp_and_industry(selected_industry=None):
     return fig
 
     # Function to export charts to PowerPoint
+
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
-    ppt = Presentation()
-    slide_layout = ppt.slide_layouts[5]
+    prs = Presentation()
+    slide_layout = prs.slide_layouts[5]  # Blank layout for slides
 
-    def add_figure_slide(ppt, title, fig):
-        if fig is None:
-            print(f"Skipping slide '{title}' because the figure is None.")
-            return  # Skip if fig is None
+    def add_figure_slide(prs, title, fig):
+        if fig:  # Check if fig is not None
+            slide = prs.slides.add_slide(slide_layout)
+            title_shape = slide.shapes.title
+            title_shape.text = title
+            img_buf = BytesIO()
+            fig.savefig(img_buf, format='png', bbox_inches='tight')  # Save figure to buffer
+            img_buf.seek(0)
+            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
 
-        slide = ppt.slides.add_slide(slide_layout)
-        title_shape = slide.shapes.title
-        title_shape.text = title
-        fig_image = BytesIO()
-        fig.write_image(fig_image, format="png", width=800, height=300)
-        fig_image.seek(0)
-        slide.shapes.add_picture(fig_image, Inches(1), Inches(1), width=Inches(8))
-        fig_image.close()
+    add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
+    add_figure_slide(prs, "External Driver Indicators", external_fig)
+    add_figure_slide(prs, "GDP by Industry", gdp_fig)
+    add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
 
-    # Add slides for each figure if they are not None
-    add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig)
-    add_figure_slide(ppt, "External Driver Indicators", external_fig)
-    add_figure_slide(ppt, "GDP by Industry", gdp_fig)
-    add_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig)
-
-    ppt_bytes = BytesIO()
-    ppt.save(ppt_bytes)
-    ppt_bytes.seek(0)
-    return ppt_bytes
+    pptx_io = BytesIO()
+    prs.save(pptx_io)
+    pptx_io.seek(0)
+    return pptx_io
 
 def get_us_indicators_layout():
     """Render the full dashboard layout and export data directly without session state."""
@@ -721,14 +737,13 @@ def get_us_indicators_layout():
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
-    if st.button("Export Charts to PowerPoint"):
+    if st.button("Export Charts to PowerPoint", key="export_button"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
-            file_name="US_indicators.pptx",
+            file_name="state_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
-
 
 get_us_indicators_layout()
