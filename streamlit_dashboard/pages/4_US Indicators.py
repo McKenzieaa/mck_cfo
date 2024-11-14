@@ -400,27 +400,30 @@ cpi_path = "s3://documentsapi/industry_data/CPI_industry.parquet"
 ppi_path = "s3://documentsapi/industry_data/PPI.parquet"
 
 # Load CPI data from S3
-df = dd.read_parquet(cpi_path,storage_options=storage_options).dropna().reset_index(drop=True)
+df = dd.read_parquet(cpi_path, storage_options=storage_options).dropna().reset_index(drop=True)
 df_unpivoted = df.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
 df_unpivoted = df_unpivoted[df_unpivoted["Value"].str.strip() != ""]
 df_unpivoted["Series ID"] = df_unpivoted["Series ID"].astype(str)
 df_unpivoted["Value"] = dd.to_numeric(df_unpivoted["Value"], errors='coerce')
 df_unpivoted["Month & Year"] = dd.to_datetime(df_unpivoted["Month & Year"], format='%b %Y', errors='coerce')
 df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
+
+# Only trigger computation if required
 all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
-all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
+all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01'].compute()
 
 # Load and clean PPI data from S3
-df_ppi = dd.read_parquet(ppi_path,storage_options=storage_options).dropna().reset_index(drop=True)
+df_ppi = dd.read_parquet(ppi_path, storage_options=storage_options).dropna().reset_index(drop=True)
 df_ppi_unpivoted = df_ppi.melt(id_vars=["Year"], var_name="Month", value_name="Value")
 df_ppi_unpivoted["Month & Year"] = dd.to_datetime(df_ppi_unpivoted["Month"] + " " + df_ppi_unpivoted["Year"].astype(str), format='%b %Y', errors='coerce')
 df_ppi_unpivoted['Value'] = dd.to_numeric(df_ppi_unpivoted['Value'], errors='coerce')
 df_ppi_unpivoted = df_ppi_unpivoted.dropna(subset=['Month & Year', 'Value'])
-df_ppi_unpivoted = df_ppi_unpivoted[df_ppi_unpivoted["Month & Year"] >= '2010-01-01']
+df_ppi_unpivoted = df_ppi_unpivoted[df_ppi_unpivoted["Month & Year"] >= '2010-01-01'].compute()
 
-# Optional: Trigger computation if you need the DataFrame in Pandas format
-df_cleaned = df_cleaned.compute()
-df_ppi_unpivoted = df_ppi_unpivoted.compute()
+if len(df_cleaned) == 0:
+    st.warning("No CPI-US All Items data available to display.")
+if len(df_ppi_unpivoted) == 0:
+    st.warning("No PPI data available to display.")
 
     # Clean and reshape GDP data
 df_gdp_us = pd.read_excel(xls, sheet_name="TGO105-A")
