@@ -18,6 +18,12 @@ url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&cha
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
 xls = pd.ExcelFile(url_gdp_us)
 
+storage_options = {
+        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
+        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
+        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
+    }
+
 # Labour Force Participation Rate Data
 df_lfs = dd.read_csv(
     url_lfs,
@@ -57,7 +63,7 @@ df_pop['year'] = df_pop['date'].dt.year
 df_pop['month'] = df_pop['date'].dt.month
 
 external_driver_path = "s3://documentsapi/industry_data/business_enviornmental_profiles.parquet"
-external_driver_df = dd.read_parquet(external_driver_path)
+external_driver_df = dd.read_parquet(external_driver_path,storage_options=storage_options)
 external_driver_df['Year'] = dd.to_numeric(external_driver_df['Year'], errors='coerce')
 indicator_mapping = {indicator: {'label': indicator, 'value': indicator} for indicator in external_driver_df['Indicator'].unique().compute()}
 external_driver_df['Indicator_Options'] = external_driver_df['Indicator'].map(indicator_mapping)
@@ -394,7 +400,7 @@ cpi_path = "s3://documentsapi/industry_data/CPI_industry.parquet"
 ppi_path = "s3://documentsapi/industry_data/PPI.parquet"
 
 # Load CPI data from S3
-df = dd.read_parquet(cpi_path).dropna().reset_index(drop=True)
+df = dd.read_parquet(cpi_path,storage_options=storage_options).dropna().reset_index(drop=True)
 df_unpivoted = df.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
 df_unpivoted = df_unpivoted[df_unpivoted["Value"].str.strip() != ""]
 df_unpivoted["Series ID"] = df_unpivoted["Series ID"].astype(str)
@@ -405,7 +411,7 @@ all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
 all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
 
 # Load and clean PPI data from S3
-df_ppi = dd.read_parquet(ppi_path).dropna().reset_index(drop=True)
+df_ppi = dd.read_parquet(ppi_path,storage_options=storage_options).dropna().reset_index(drop=True)
 df_ppi_unpivoted = df_ppi.melt(id_vars=["Year"], var_name="Month", value_name="Value")
 df_ppi_unpivoted["Month & Year"] = dd.to_datetime(df_ppi_unpivoted["Month"] + " " + df_ppi_unpivoted["Year"].astype(str), format='%b %Y', errors='coerce')
 df_ppi_unpivoted['Value'] = dd.to_numeric(df_ppi_unpivoted['Value'], errors='coerce')
