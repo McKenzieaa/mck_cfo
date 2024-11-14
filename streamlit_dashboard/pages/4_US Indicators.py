@@ -571,27 +571,39 @@ def plot_cpi_ppi(selected_series_id):
 
     # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cpi)
-    fig.add_trace(
+    if len(cpi_data) > 0:
+        fig.add_trace(
             go.Scatter(
                 x=cpi_data['date'], y=cpi_data['value'], mode='lines', name='CPI by Industry', line=dict(color='#032649')
             )
         )
-    
-    fig.add_trace(
+    else:
+        st.warning(f"No data available for the selected CPI series: {selected_series_id}")
+
+    # Plot CPI-US All Items data
+    if len(all_items_data)> 0:
+        fig.add_trace(
             go.Scatter(
                 x=all_items_data['Month & Year'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid')
             )
         )
+    else:
+        st.warning("No CPI-US All Items data available to display.")
 
-    df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
-    fig.add_trace(
+    # Plot aggregated PPI data
+    if len(df_ppi_unpivoted) > 0:
+        df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
+        fig.add_trace(
             go.Scatter(
                 x=df_ppi_aggregated['Month & Year'], y=df_ppi_aggregated['Value'], mode='lines', name='PPI-US', line=dict(color='#595959')
             )
         )
+    else:
+        st.warning("No PPI data available to display.")
 
+    # Configure the layout of the chart
     fig.update_layout(
-        title='CPI by Industry and PPI ',
+        title='CPI and PPI Comparison',
         xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(title='Value'),
         hovermode='x unified'
@@ -731,7 +743,7 @@ def get_us_indicators_layout():
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)  # Returns figure
 
     # CPI and PPI Comparison
-    st.subheader("CPI and PPI Comparison")
+    st.subheader("CPI by Industry & PPI")
     selected_cpi_series = st.selectbox(
         "Select CPI Industry", 
         list(industry_mapping.keys()), 
@@ -739,14 +751,14 @@ def get_us_indicators_layout():
         key="cpi_series_selectbox"
     )
     selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)  # Returns figure
+    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
     if st.button("Export Charts to PowerPoint"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
-            file_name="state_indicators.pptx",
+            file_name="US_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
