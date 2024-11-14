@@ -41,7 +41,7 @@ df_pop['year'] = df_pop['date'].dt.year
 df_pop['month'] = df_pop['date'].dt.month
 
 # External Driver Data
-external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles_final.csv"
+external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles.csv"
 external_driver_df = pd.read_csv(external_driver_path)
 external_driver_df['Year'] = pd.to_numeric(external_driver_df['Year'], errors='coerce')
 indicator_mapping = {indicator: {'label': indicator, 'value': indicator} for indicator in external_driver_df['Indicator'].unique()}
