@@ -18,8 +18,14 @@ url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&cha
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
 xls = pd.ExcelFile(url_gdp_us)
 
+dtype_dict = {
+    'time': 'object',
+    'ref_area.label': 'object',  # Adjust dtype based on your column names and data
+    'obs_value': 'float64'       # Assuming 'obs_value' is numeric
+}
+
 # Labour Force Participation Rate Data
-df_lfs = dd.read_csv(url_lfs)
+df_lfs = dd.read_csv(url_lfs, dtype=dtype_dict, assume_missing=True)
 df_lfs = df_lfs.rename(columns={'ref_area.label': 'country', 'obs_value': 'labour_force_rate'})
 df_lfs['time'] = df_lfs['time'].astype(str)
 df_lfs = df_lfs.compute()
@@ -28,15 +34,14 @@ df_lfs['year'] = dd.to_numeric(time_split[0], errors='coerce')
 df_lfs['month'] = dd.to_numeric(time_split[1], errors='coerce')
 
 # Unemployment Rate Data
-df_unemp = dd.read_csv(url_unemp)
+df_unemp = dd.read_csv(url_unemp, dtype=dtype_dict, assume_missing=True)
 df_unemp = df_unemp.rename(columns={'ref_area.label': 'country', 'obs_value': 'unemployment_rate'})
 df_unemp['time'] = df_unemp['time'].astype(str)
 df_unemp = df_unemp.compute()
 time_split_unemp = df_unemp['time'].str.split('M', expand=True)
 df_unemp['year'] = dd.to_numeric(time_split_unemp[0], errors='coerce')
 df_unemp['month'] = dd.to_numeric(time_split_unemp[1], errors='coerce')
-df_lfs = df_lfs.compute()
-df_unemp = df_unemp.compute()
+
 # Population Data
 df_pop = pd.read_csv(url_pop)
 df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
