@@ -22,10 +22,11 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-# Read Excel file from S3 with Dask
+# Read Parquet file from S3 with Dask
 try:
     df = dd.read_parquet(
-        s3_path,storage_options=storage_options,
+        s3_path,
+        storage_options=storage_options,
         usecols=['Name', 'Country', 'Enterprise Value (in $)', 'Revenue (in $)', 'EBITDA (in $)', 'Business Description', 'Industry']
     ).rename(columns={
         'Name': 'Company',
@@ -34,11 +35,15 @@ try:
         'Revenue (in $)': 'Revenue',
         'EBITDA (in $)': 'EBITDA',
     })
-    # Clean and convert numeric columns
-    df['Enterprise Value'] = pd.to_numeric(df['Enterprise Value'].replace('[\$,]', '', regex=True), errors='coerce')
-    df['Revenue'] = pd.to_numeric(df['Revenue'].replace('[\$,]', '', regex=True), errors='coerce')
-    df['EBITDA'] = pd.to_numeric(df['EBITDA'].replace('[\$,]', '', regex=True), errors='coerce')
     
+    # Convert Dask DataFrame to Pandas DataFrame
+    df = df.compute()
+
+    # Convert columns to numeric
+    df['Enterprise Value'] = pd.to_numeric(df['Enterprise Value'], errors='coerce')
+    df['Revenue'] = pd.to_numeric(df['Revenue'], errors='coerce')
+    df['EBITDA'] = pd.to_numeric(df['EBITDA'], errors='coerce')
+
     # Calculate EV/Revenue and EV/EBITDA
     df['EV/Revenue'] = df['Enterprise Value'] / df['Revenue']
     df['EV/EBITDA'] = df['Enterprise Value'] / df['EBITDA']
@@ -46,7 +51,6 @@ try:
 except Exception as e:
     st.error(f"Error loading data from S3: {e}")
     st.stop()
-
     
 # Streamlit app title
 st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
