@@ -407,7 +407,7 @@ df_cpi['Month & Year'] = dd.to_datetime(df_cpi['Month & Year'],format='%b %Y', e
 df_cpi['Value'] = df_cpi['Value'].astype(float)
 df = df_cpi.dropna(subset=['Series ID', 'Month & Year', 'Value'])
 all_items_data = df_cpi[df_cpi['Series ID'] == 'CUSR0000SA0']
-all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01'].compute()
+all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-31'].compute()
 
 # Load and clean PPI data from S3
 df_ppi = dd.read_parquet(ppi_path, storage_options=storage_options).dropna().reset_index(drop=True)
