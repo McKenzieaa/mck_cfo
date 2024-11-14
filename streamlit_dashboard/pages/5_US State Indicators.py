@@ -89,7 +89,6 @@ def download_csv(state_name, data_type):
 
     response = requests.get(url)
     if response.status_code == 200:
-        # Read using pandas first, then convert to dask dataframe
         csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
@@ -118,8 +117,7 @@ def load_state_gdp_data():
                 )
                 if csv_file_name:
                     with z.open(csv_file_name) as f:
-                        # Load the CSV into a Dask DataFrame and exclude unnecessary columns
-                        df = dd.read_csv(
+                         df = dd.read_csv(
                             f,
                             usecols=lambda col: col not in [
                                 "GeoFIPS", "Region", "TableName", "LineCode", 
@@ -127,21 +125,13 @@ def load_state_gdp_data():
                             ],
                             dtype={"Description": str}
                         )
-
-                    # Filter rows where 'Description' is the required GDP data
                     df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
-
-                    # Reshape from wide to long format
                     df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
                     df = df.rename(columns={"GeoName": "State"})
-
-                    # Filter for numeric years and convert columns
                     df = df[df["Year"].str.isdigit()]
                     df["Year"] = df["Year"].astype(int)
                     df["Value"] = dd.to_numeric(df["Value"], errors='coerce')
                     df = df.dropna(subset=["Value"])
-
-                    # Exclude "United States" rows from the 'State' column
                     state_gdp_data = df[df["State"] != "United States"]
                 else:
                     print("No matching CSV file found in the downloaded ZIP.")
@@ -163,19 +153,18 @@ def plot_unemployment_labour_chart(state_name):
 
         merged_data = unemployment_data.merge(labour_data, on='DATE', how='inner')
 
-        # Plot with Plotly
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=merged_data['DATE'], 
             y=merged_data['Unemployment'], 
-            mode='lines+markers',
+            mode='lines',
             line=dict(color=colors["dark_blue"]),
             name="Unemployment"
         ))
         fig.add_trace(go.Scatter(
             x=merged_data['DATE'], 
             y=merged_data['Labour Force'], 
-            mode='lines+markers',
+            mode='lines',
             line=dict(color=colors["orange"]),
             name="Labour Force"
         ))
@@ -211,7 +200,7 @@ def plot_gdp_chart(state_name):
             fig.add_trace(go.Scatter(
                 x=gdp_data['Year'], 
                 y=gdp_data['Value'], 
-                mode='lines+markers',
+                mode='lines',
                 line=dict(color=colors["turquoise_blue"]),
                 name=f"{state_name} GDP"
             ))
