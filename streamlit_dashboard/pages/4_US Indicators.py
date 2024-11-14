@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import dask.dataframe as dd
 import streamlit as st
 from pptx import Presentation
 from pptx.util import Inches
@@ -17,22 +18,23 @@ url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&cha
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
 xls = pd.ExcelFile(url_gdp_us)
 
-    # Labour Force Participation Rate Data
-df_lfs = pd.read_csv(url_lfs)
+# Labour Force Participation Rate Data
+df_lfs = dd.read_csv(url_lfs)
 df_lfs = df_lfs.rename(columns={'ref_area.label': 'country', 'obs_value': 'labour_force_rate'})
 df_lfs['time'] = df_lfs['time'].astype(str)
 time_split = df_lfs['time'].str.split('M', expand=True)
-df_lfs['year'] = pd.to_numeric(time_split[0], errors='coerce').astype('Int64')
-df_lfs['month'] = pd.to_numeric(time_split[1], errors='coerce').astype('Int64')
+df_lfs['year'] = dd.to_numeric(time_split[0], errors='coerce')
+df_lfs['month'] = dd.to_numeric(time_split[1], errors='coerce')
 
 # Unemployment Rate Data
-df_unemp = pd.read_csv(url_unemp)
+df_unemp = dd.read_csv(url_unemp)
 df_unemp = df_unemp.rename(columns={'ref_area.label': 'country', 'obs_value': 'unemployment_rate'})
 df_unemp['time'] = df_unemp['time'].astype(str)
 time_split_unemp = df_unemp['time'].str.split('M', expand=True)
-df_unemp['year'] = pd.to_numeric(time_split_unemp[0], errors='coerce').astype('Int64')
-df_unemp['month'] = pd.to_numeric(time_split_unemp[1], errors='coerce').astype('Int64')
-
+df_unemp['year'] = dd.to_numeric(time_split_unemp[0], errors='coerce')
+df_unemp['month'] = dd.to_numeric(time_split_unemp[1], errors='coerce')
+df_lfs = df_lfs.compute()
+df_unemp = df_unemp.compute()
 # Population Data
 df_pop = pd.read_csv(url_pop)
 df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
@@ -40,12 +42,12 @@ df_pop['date'] = pd.to_datetime(df_pop['date'])
 df_pop['year'] = df_pop['date'].dt.year
 df_pop['month'] = df_pop['date'].dt.month
 
-# External Driver Data
-external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles_final.xlsx"
-external_driver_df = pd.read_excel(external_driver_path)
-external_driver_df['Year'] = pd.to_numeric(external_driver_df['Year'], errors='coerce')
-indicator_mapping = {indicator: {'label': indicator, 'value': indicator} for indicator in external_driver_df['Indicator'].unique()}
+external_driver_path = "s3://documentsapi/industry_data/business_enviornmental_profiles.parquet"
+external_driver_df = dd.read_parquet(external_driver_path)
+external_driver_df['Year'] = dd.to_numeric(external_driver_df['Year'], errors='coerce')
+indicator_mapping = {indicator: {'label': indicator, 'value': indicator} for indicator in external_driver_df['Indicator'].unique().compute()}
 external_driver_df['Indicator_Options'] = external_driver_df['Indicator'].map(indicator_mapping)
+external_driver_df = external_driver_df.compute()
 
 # CPI Industry Mapping
 industry_mapping = {
@@ -374,27 +376,31 @@ industry_mapping = {
     'Food at elementary and secondary schools': 'CUSR0000SSFV031A'
     }
 
-file_path = r"streamlit_dashboard/data/CPI_industry.txt"
-ppi_file_path = r"streamlit_dashboard/data/PPI.txt"
-# Load CPI data
-df = pd.read_csv(file_path, delimiter=',').dropna().reset_index(drop=True)
+cpi_path = "s3://documentsapi/industry_data/CPI_industry.parquet"
+ppi_path = "s3://documentsapi/industry_data/PPI.parquet"
+
+# Load CPI data from S3
+df = dd.read_parquet(cpi_path).dropna().reset_index(drop=True)
 df_unpivoted = df.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
 df_unpivoted = df_unpivoted[df_unpivoted["Value"].str.strip() != ""]
 df_unpivoted["Series ID"] = df_unpivoted["Series ID"].astype(str)
-df_unpivoted["Value"] = pd.to_numeric(df_unpivoted["Value"], errors='coerce')
-df_unpivoted["Month & Year"] = pd.to_datetime(df_unpivoted["Month & Year"], format='%b %Y', errors='coerce')
+df_unpivoted["Value"] = dd.to_numeric(df_unpivoted["Value"], errors='coerce')
+df_unpivoted["Month & Year"] = dd.to_datetime(df_unpivoted["Month & Year"], format='%b %Y', errors='coerce')
 df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
 all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
 all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
-    # Function to fetch CPI data for the selected industry
 
-    # Load and clean PPI data
-df_ppi = pd.read_csv(ppi_file_path, delimiter=',').dropna().reset_index(drop=True)
+# Load and clean PPI data from S3
+df_ppi = dd.read_parquet(ppi_path).dropna().reset_index(drop=True)
 df_ppi_unpivoted = df_ppi.melt(id_vars=["Year"], var_name="Month", value_name="Value")
-df_ppi_unpivoted["Month & Year"] = pd.to_datetime(df_ppi_unpivoted["Month"] + " " + df_ppi_unpivoted["Year"].astype(str),format='%b %Y', errors='coerce')
-df_ppi_unpivoted['Value'] = pd.to_numeric(df_ppi_unpivoted['Value'], errors='coerce')
+df_ppi_unpivoted["Month & Year"] = dd.to_datetime(df_ppi_unpivoted["Month"] + " " + df_ppi_unpivoted["Year"].astype(str), format='%b %Y', errors='coerce')
+df_ppi_unpivoted['Value'] = dd.to_numeric(df_ppi_unpivoted['Value'], errors='coerce')
 df_ppi_unpivoted = df_ppi_unpivoted.dropna(subset=['Month & Year', 'Value'])
 df_ppi_unpivoted = df_ppi_unpivoted[df_ppi_unpivoted["Month & Year"] >= '2010-01-01']
+
+# Optional: Trigger computation if you need the DataFrame in Pandas format
+df_cleaned = df_cleaned.compute()
+df_ppi_unpivoted = df_ppi_unpivoted.compute()
 
     # Clean and reshape GDP data
 df_gdp_us = pd.read_excel(xls, sheet_name="TGO105-A")
@@ -445,17 +451,14 @@ def fetch_cpi_data(series_id, df_cleaned):
     selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-01']
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
 
-# if 'counter' not in st.session_state:
-#     st.session_state.counter = 0
 
 def plot_labour_unemployment():
-    # Merge unemployment and labour force data
+
     merged = pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner')
     merged = pd.merge(merged, df_pop, on=["year", "month"], how='inner')
 
     fig = go.Figure()
 
-    # Plot population as an area chart on the primary y-axis
     min_population = merged['population'].min()
     fig.add_trace(go.Scatter(
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
@@ -544,54 +547,34 @@ def plot_cpi_ppi(selected_series_id):
     Plot CPI and PPI data on a single chart for comparison.
     """
     fig = go.Figure()
-
-    # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
     if not cpi_data.empty:
         fig.add_trace(
             go.Scatter(
-                x=cpi_data['date'],
-                y=cpi_data['value'],
-                mode='lines',
-                name='CPI by Industry',
-                line=dict(color='blue')
-            )
+                x=cpi_data['date'],y=cpi_data['value'],mode='lines',name='CPI by Industry',line=dict(color='#032649'))
         )
     else:
         st.warning(f"No data available for the selected CPI series: {selected_series_id}")
 
-    # Plot CPI-US All Items data
     if not all_items_data.empty:
         fig.add_trace(
             go.Scatter(
-                x=all_items_data['Month & Year'],
-                y=all_items_data['Value'],
-                mode='lines',
-                name='CPI-US',
-                line=dict(color='green', dash='solid')
-            )
+                x=all_items_data['Month & Year'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid'))
         )
     else:
         st.warning("No CPI-US All Items data available to display.")
 
-    # Plot aggregated PPI data
     if not df_ppi_unpivoted.empty:
         df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
         fig.add_trace(
             go.Scatter(
-                x=df_ppi_aggregated['Month & Year'],
-                y=df_ppi_aggregated['Value'],
-                mode='lines',
-                name='PPI-US',
-                line=dict(color='red')
-            )
+                x=df_ppi_aggregated['Month & Year'],y=df_ppi_aggregated['Value'],mode='lines',name='PPI-US',line=dict(color='#595959'))
         )
     else:
         st.warning("No PPI data available to display.")
 
-    # Configure the layout of the chart
     fig.update_layout(
-        title='CPI and PPI Comparison',
+        title='CPI and PPI ',
         xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(title='Value'),
         hovermode='x unified'
@@ -609,7 +592,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='tozeroy',  # Create area chart by filling to the x-axis
-            line=dict(color='blue', width=2),
+            line=dict(color='#032649', width=2),
             marker=dict(size=6)
         ),
         secondary_y=False
@@ -622,7 +605,7 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Percent Change'],
             mode='lines',
             name='GDP - Percent Change',
-            line=dict(color='orange', width=2, dash='solid'),
+            line=dict(color='#EB8928', width=2, dash='solid'),
             marker=dict(size=6)
         ),
         secondary_y=True
@@ -640,7 +623,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'{selected_industry} - Value',
                 fill='tozeroy',  # Area chart
-                line=dict(color='red', width=2),
+                line=dict(color='#595959', width=2),
                 marker=dict(size=6)
             ),
             secondary_y=False
@@ -653,7 +636,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
                 name=f'{selected_industry} - Percent Change',
-                line=dict(color='green', width=2, dash='solid'),
+                line=dict(color='#1C798A', width=2, dash='solid'),
                 marker=dict(size=6)
             ),
             secondary_y=True
@@ -671,71 +654,62 @@ def plot_gdp_and_industry(selected_industry=None):
 
     st.plotly_chart(fig, use_container_width=True)
 
-    # Function to export charts to PowerPoint
+# Function to export charts to PowerPoint
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
-    prs = Presentation()
-    slide_layout = prs.slide_layouts[5]  # Blank layout for slides
+    ppt = Presentation()
+    slide_layout = ppt.slide_layouts[5]
 
-    def add_figure_slide(prs, title, fig):
-        if fig:  # Check if fig is not None
-            slide = prs.slides.add_slide(slide_layout)
-            title_shape = slide.shapes.title
-            title_shape.text = title
-            img_buf = BytesIO()
-            fig.savefig(img_buf, format='png', bbox_inches='tight')  # Save figure to buffer
-            img_buf.seek(0)
-            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+    def add_figure_slide(ppt, title, fig):
+        slide = ppt.slides.add_slide(slide_layout)
+        title_shape = slide.shapes.title
+        title_shape.text = title
+        fig_image = BytesIO()
+        fig.write_image(fig_image, format="png", width=800, height=300)
+        fig_image.seek(0)
+        slide.shapes.add_picture(fig_image, Inches(1), Inches(1), width=Inches(8))
+        fig_image.close()
 
-    add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
-    add_figure_slide(prs, "External Driver Indicators", external_fig)
-    add_figure_slide(prs, "GDP by Industry", gdp_fig)
-    add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
+    add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig)
+    add_figure_slide(ppt, "External Driver Indicators", external_fig)
+    add_figure_slide(ppt, "GDP by Industry", gdp_fig)
+    add_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig)
 
-    pptx_io = BytesIO()
-    prs.save(pptx_io)
-    pptx_io.seek(0)
-    return pptx_io
+    ppt_bytes = BytesIO()
+    ppt.save(ppt_bytes)
+    ppt_bytes.seek(0)
+    return ppt_bytes
 
+# Main dashboard layout
 def get_us_indicators_layout():
-    """Render the full dashboard layout and export data directly without session state."""
     st.title("US Indicators Dashboard")
 
-    # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment Data")
     labour_fig = plot_labour_unemployment()
 
-    # External Driver Indicators
     st.subheader("External Driver Indicators")
     selected_indicators = st.multiselect(
         "Select External Indicators",
         options=external_driver_df["Indicator"].unique(),
-        default=["World GDP"],
-        key="external_indicators_multiselect"
+        default=["World GDP"]
     )
     external_fig = plot_external_driver(selected_indicators)
 
-    # GDP by Industry
     st.subheader("GDP by Industry")
     selected_gdp_industry = st.selectbox(
         "Select Industry",
-        options=df_combined["Industry"].unique(),
-        index=0,
-        key="gdp_industry_selectbox"
+        options=df_combined["Industry"].unique()
     )
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
 
-    # CPI and PPI Comparison
     st.subheader("CPI and PPI Comparison")
     selected_cpi_series = st.selectbox(
         "Select CPI Industry", 
-        list(industry_mapping.keys()), 
-        index=1, 
-        key="cpi_series_selectbox"
+        list(industry_mapping.keys())
     )
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
-    if st.button("Export Charts to PowerPoint", key="export_button"):
+    if st.button("Export Charts to PowerPoint"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
         st.download_button(
             label="Download PowerPoint",
