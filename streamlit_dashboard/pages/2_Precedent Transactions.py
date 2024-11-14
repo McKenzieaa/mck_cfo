@@ -81,12 +81,12 @@ if selected_industries and selected_locations:
         avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
 
         # Define colors
-        color_ev_revenue = "#636EFA"  # Default Plotly blue
-        color_ev_ebitda = "#EF553B"   # Default Plotly red
+        color_ev_revenue = "#032649"  # Default Plotly blue
+        color_ev_ebitda = "#EB8928"   # Default Plotly red
 
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
-        fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.2f}', textposition='outside')
+        fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='outside')
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title="Year")
 
         # Display the EV/Revenue chart
@@ -94,7 +94,7 @@ if selected_industries and selected_locations:
 
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-        fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.2f}', textposition='outside')
+        fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='outside')
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title="Year")
 
         # Display the EV/EBITDA chart

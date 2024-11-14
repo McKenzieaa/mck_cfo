@@ -31,8 +31,15 @@ try:
         dtype={'Enterprise Value (in $)': 'float64', 'Revenue (in $)': 'float64', 'EBITDA (in $)': 'float64'}
     ).rename(columns={
         'Name': 'Company',
-        'Country': 'Location'
+        'Country': 'Location',
+        'Enterprise Value (in $)': 'Enterprise Value',
+        'Revenue (in $)': 'Revenue',
+        'EBITDA (in $)': 'EBITDA',
     })
+    # Clean and convert numeric columns
+    df['Enterprise Value'] = pd.to_numeric(df['Enterprise Value'].replace('[\$,]', '', regex=True), errors='coerce')
+    df['Revenue'] = pd.to_numeric(df['Revenue'].replace('[\$,]', '', regex=True), errors='coerce')
+    df['EBITDA'] = pd.to_numeric(df['EBITDA'].replace('[\$,]', '', regex=True), errors='coerce')
     
     # Calculate EV/Revenue and EV/EBITDA
     df['EV/Revenue'] = df['Enterprise Value'] / df['Revenue']
