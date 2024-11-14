@@ -468,9 +468,22 @@ industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
 def fetch_cpi_data(selected_series_id, df_cpi):
+
     selected_data = df_cpi[df_cpi['Series ID'] == selected_series_id]
-    selected_data = selected_data['Month & Year']
-    return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'Date', 'Value': 'Value'})
+
+    if selected_data.empty:
+        st.warning(f"No data found for Series ID: {selected_series_id}")
+        return pd.DataFrame(columns=['Date', 'Value'])  
+
+    required_columns = {'Month & Year', 'Value'}
+    if not required_columns.issubset(selected_data.columns):
+        st.warning("Expected columns 'Month & Year' and 'Value' are missing in the data.")
+        print(f"Available columns: {selected_data.columns}")
+        return pd.DataFrame(columns=['Date', 'Value'])
+
+    selected_data = selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'Date', 'Value': 'Value'})
+
+    return selected_data
 
 
 def plot_labour_unemployment():
