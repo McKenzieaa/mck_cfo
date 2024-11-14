@@ -489,7 +489,7 @@ def plot_labour_unemployment():
         fill='tozeroy',  # Area chart
         name='Population',
         mode='lines',
-        line=dict(color='blue'),
+        line=dict(color='#032649'),
         yaxis='y1'
     ))
 
@@ -499,7 +499,7 @@ def plot_labour_unemployment():
         y=merged['unemployment_rate'],
         name='Unemployment Rate',
         mode='lines',
-        line=dict(color='red'),
+        line=dict(color='#EB8928'),
         yaxis='y2'
     ))
 
@@ -509,13 +509,13 @@ def plot_labour_unemployment():
         y=merged['labour_force_rate'],
         name='Labour Force Participation Rate',
         mode='lines',
-        line=dict(color='green'),
+        line=dict(color='#1C798A'),
         yaxis='y2'
     ))
 
     fig.update_layout(
         title='Population, Unemployment Rate, and Labour Force Participation Rate (USA)',
-        xaxis=dict(showgrid=True, showticklabels=True),  # No title
+        xaxis=dict(showgrid=True, showticklabels=True), 
         yaxis=dict(
             title='Population',
             side='left',
@@ -523,13 +523,13 @@ def plot_labour_unemployment():
         ),
         yaxis2=dict(
             title='Rate (%)',
-            overlaying='y',  # Overlay on the primary y-axis
+            overlaying='y',
             side='right'
         ),
         legend=dict(
             x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
         ),
-        hovermode='x unified',  # Unified hover mode
+        hovermode='x unified',
         template='plotly_white'
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -566,13 +566,13 @@ def plot_external_driver(selected_indicators):
     st.plotly_chart(fig, use_container_width=True)
 
 def plot_cpi_ppi(selected_series_id):
+    """
+    Plot CPI and PPI data on a single chart for comparison.
+    """
     fig = go.Figure()
 
-    # Fetch CPI data for the selected series
+    # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
-    if isinstance(cpi_data, dd.DataFrame):
-        cpi_data = cpi_data.compute()
-
     if len(cpi_data) > 0:
         fig.add_trace(
             go.Scatter(
@@ -581,30 +581,20 @@ def plot_cpi_ppi(selected_series_id):
         )
     else:
         st.warning(f"No data available for the selected CPI series: {selected_series_id}")
-        st.write("Available data in df_cleaned:", df_cleaned[df_cleaned['Series ID'] == selected_series_id].head())
 
-    # Filter and display All Items Data for 'CUSR0000SA0'
-    all_items_data_computed = all_items_data
-    if isinstance(all_items_data_computed, dd.DataFrame):
-        all_items_data_computed = all_items_data_computed.compute()
-
-    if len(all_items_data_computed) > 0:
+    # Plot CPI-US All Items data
+    if len(all_items_data)> 0:
         fig.add_trace(
             go.Scatter(
-                x=all_items_data_computed['Month & Year'], y=all_items_data_computed['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid')
+                x=all_items_data['Month & Year'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid')
             )
         )
     else:
         st.warning("No CPI-US All Items data available to display.")
-        st.write("All Items data after filtering:", all_items_data_computed.head())
 
-    # Process and add PPI data
-    df_ppi_unpivoted_computed = df_ppi_unpivoted
-    if isinstance(df_ppi_unpivoted_computed, dd.DataFrame):
-        df_ppi_unpivoted_computed = df_ppi_unpivoted_computed.compute()
-
-    if len(df_ppi_unpivoted_computed) > 0:
-        df_ppi_aggregated = df_ppi_unpivoted_computed.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
+    # Plot aggregated PPI data
+    if len(df_ppi_unpivoted) > 0:
+        df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
         fig.add_trace(
             go.Scatter(
                 x=df_ppi_aggregated['Month & Year'], y=df_ppi_aggregated['Value'], mode='lines', name='PPI-US', line=dict(color='#595959')
@@ -613,14 +603,15 @@ def plot_cpi_ppi(selected_series_id):
     else:
         st.warning("No PPI data available to display.")
 
+    # Configure the layout of the chart
     fig.update_layout(
-        title='CPI and PPI',
+        title='CPI and PPI Comparison',
         xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(title='Value'),
         hovermode='x unified'
     )
     st.plotly_chart(fig, use_container_width=True)
-    
+
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -721,30 +712,40 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
 
 # Main dashboard layout
 def get_us_indicators_layout():
+    """Render the full dashboard layout and export data directly without session state."""
     st.title("US Indicators Dashboard")
 
+    # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment Data")
     labour_fig = plot_labour_unemployment()
 
+    # External Driver Indicators
     st.subheader("External Driver Indicators")
     selected_indicators = st.multiselect(
         "Select External Indicators",
         options=external_driver_df["Indicator"].unique(),
-        default=["World GDP"]
+        default=["World GDP"],
+        key="external_indicators_multiselect"
     )
     external_fig = plot_external_driver(selected_indicators)
 
+    # GDP by Industry
     st.subheader("GDP by Industry")
     selected_gdp_industry = st.selectbox(
         "Select Industry",
-        options=df_combined["Industry"].unique()
+        options=df_combined["Industry"].unique(),
+        index=0,
+        key="gdp_industry_selectbox"
     )
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
 
+    # CPI and PPI Comparison
     st.subheader("CPI and PPI Comparison")
     selected_cpi_series = st.selectbox(
         "Select CPI Industry", 
-        list(industry_mapping.keys())
+        list(industry_mapping.keys()), 
+        index=1, 
+        key="cpi_series_selectbox"
     )
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
