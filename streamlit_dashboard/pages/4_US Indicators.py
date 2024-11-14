@@ -691,6 +691,10 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     slide_layout = ppt.slide_layouts[5]
 
     def add_figure_slide(ppt, title, fig):
+        if fig is None:
+            print(f"Skipping slide '{title}' because the figure is None.")
+            return  # Skip if fig is None
+
         slide = ppt.slides.add_slide(slide_layout)
         title_shape = slide.shapes.title
         title_shape.text = title
@@ -700,6 +704,7 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
         slide.shapes.add_picture(fig_image, Inches(1), Inches(1), width=Inches(8))
         fig_image.close()
 
+    # Add slides for each figure if they are not None
     add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig)
     add_figure_slide(ppt, "External Driver Indicators", external_fig)
     add_figure_slide(ppt, "GDP by Industry", gdp_fig)
@@ -710,14 +715,12 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     ppt_bytes.seek(0)
     return ppt_bytes
 
-# Main dashboard layout
 def get_us_indicators_layout():
-    """Render the full dashboard layout and export data directly without session state."""
     st.title("US Indicators Dashboard")
 
     # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment Data")
-    labour_fig = plot_labour_unemployment()
+    labour_fig = plot_labour_unemployment()  # Returns figure
 
     # External Driver Indicators
     st.subheader("External Driver Indicators")
@@ -727,7 +730,7 @@ def get_us_indicators_layout():
         default=["World GDP"],
         key="external_indicators_multiselect"
     )
-    external_fig = plot_external_driver(selected_indicators)
+    external_fig = plot_external_driver(selected_indicators)  # Returns figure
 
     # GDP by Industry
     st.subheader("GDP by Industry")
@@ -737,7 +740,7 @@ def get_us_indicators_layout():
         index=0,
         key="gdp_industry_selectbox"
     )
-    gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
+    gdp_fig = plot_gdp_and_industry(selected_gdp_industry)  # Returns figure
 
     # CPI and PPI Comparison
     st.subheader("CPI and PPI Comparison")
@@ -748,7 +751,7 @@ def get_us_indicators_layout():
         key="cpi_series_selectbox"
     )
     selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
+    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)  # Returns figure
 
     if st.button("Export Charts to PowerPoint"):
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
