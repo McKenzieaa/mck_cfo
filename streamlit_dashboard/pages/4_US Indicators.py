@@ -452,41 +452,54 @@ def plot_labour_unemployment():
 
     fig = go.Figure()
 
+    # Convert dates to datetime format
+    dates = pd.to_datetime(merged[['year', 'month']].assign(day=1))
+
+    # Get last values
+    last_population = merged['population'].iloc[-1]
+    last_unemployment_rate = merged['unemployment_rate'].iloc[-1]
+    last_labour_force_rate = merged['labour_force_rate'].iloc[-1]
+    
     # Plot population as an area chart on the primary y-axis
-    min_population = merged['population'].min()
     fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
+        x=dates,
         y=merged['population'],
         fill='tozeroy',  # Area chart
         name='Population',
-        mode='lines',
+        mode='lines+text',
         line=dict(color='#032649'),
-        yaxis='y1'
+        yaxis='y1',
+        text=[None] * (len(merged['population']) - 1) + [f"{last_population:.0f}"],  # Show only last value
+        textposition="top right"
     ))
 
     # Plot unemployment rate on the secondary y-axis
     fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
+        x=dates,
         y=merged['unemployment_rate'],
         name='Unemployment Rate',
-        mode='lines',
+        mode='lines+text',
         line=dict(color='#EB8928'),
-        yaxis='y2'
+        yaxis='y2',
+        text=[None] * (len(merged['unemployment_rate']) - 1) + [f"{last_unemployment_rate:.1f}"],  # Show only last value
+        textposition="top right"
     ))
 
     # Plot labour force participation rate on the secondary y-axis
     fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
+        x=dates,
         y=merged['labour_force_rate'],
         name='Labour Force Participation Rate',
-        mode='lines',
+        mode='lines+text',
         line=dict(color='#595959'),
-        yaxis='y2'
+        yaxis='y2',
+        text=[None] * (len(merged['labour_force_rate']) - 1) + [f"{last_labour_force_rate:.1f}"],  # Show only last value
+        textposition="top right"
     ))
 
     fig.update_layout(
         title='Population, Unemployment Rate, and Labour Force Participation Rate (USA)',
-        xaxis=dict(showgrid=True, showticklabels=True),  # No title
+        xaxis=dict(showgrid=True, showticklabels=True),
         yaxis=dict(
             title='Population',
             side='left',
@@ -494,20 +507,20 @@ def plot_labour_unemployment():
         ),
         yaxis2=dict(
             title='Rate (%)',
-            overlaying='y',  # Overlay on the primary y-axis
+            overlaying='y',
             side='right'
         ),
         legend=dict(
             x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
         ),
-        hovermode='x unified',  # Unified hover mode
+        hovermode='x unified',
         template='plotly_white'
     )
+
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
 def plot_external_driver(selected_indicators):
-
     if not selected_indicators:
         selected_indicators = ["World GDP"]
 
@@ -519,12 +532,19 @@ def plot_external_driver(selected_indicators):
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
+        # Get the last value for labeling
+        last_value = indicator_data['% Change'].iloc[-1]
+        last_year = indicator_data['Year'].iloc[-1]
+
         fig.add_trace(
             go.Scatter(
                 x=indicator_data['Year'],
                 y=indicator_data['% Change'],
-                mode='lines',
-                name=indicator
+                mode='lines+text',
+                name=indicator,
+                line=dict(color='#032649'),
+                text=[None] * (len(indicator_data) - 1) + [f"{last_value:.1f}"],  # Show only last value
+                textposition="top right"
             )
         )
 
