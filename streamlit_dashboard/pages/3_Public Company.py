@@ -27,7 +27,7 @@ try:
     df = pd.read_excel(
         s3_path, sheet_name="FY 2023",
         storage_options=storage_options,
-        usecols=['Name', 'Country', 'Year', 'Enterprise Value (in $)', 'Revenue', 'EBITDA', 'Business Description', 'Industry']
+        usecols=['Name', 'Country', 'Enterprise Value (in $)', 'Revenue (in $)', 'EBITDA (in $)', 'Business Description', 'Industry']
     ).rename(columns={
         'Name': 'Company',
         'Country': 'Location',
