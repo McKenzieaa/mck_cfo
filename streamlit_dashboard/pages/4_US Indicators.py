@@ -639,7 +639,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Value'],
                 mode='lines',
-                name=f'{selected_industry} - Value',
+                name=f'GDP Industry - Value',
                 fill='tozeroy',  # Area chart
                 line=dict(color='#EB8928', width=2),
                 marker=dict(size=6)
@@ -653,7 +653,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
-                name=f'{selected_industry} - Percent Change',
+                name=f'GDP Industry - % Change',
                 line=dict(color='#1C798A', width=2, dash='solid'),
                 marker=dict(size=6)
             ),
@@ -662,11 +662,15 @@ def plot_gdp_and_industry(selected_industry=None):
 
     # Update layout
     fig.update_layout(
-        title=f'GDP and {selected_industry} - Value & Percent Change',
+        title=f'GDP and {selected_industry} - Value & Percent',
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend_title='',
+        legend=dict(
+            x=0.01, y=0.99,  
+            bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
+            font=dict(size=10)
+        ),
         template='plotly_white'
     )
 
