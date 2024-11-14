@@ -158,16 +158,16 @@ def plot_unemployment_labour_chart(state_name):
         last_row = merged_data.iloc[-1]
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Unemployment'],
-            text=f"Last: {last_row['Unemployment']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
+            text=f"Last: {last_row['Unemployment']:.1f}"+"%", showarrow=True, arrowhead=1, ax=-40, ay=-40
         )
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Labour Force'],
-            text=f" {last_row['Labour Force']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=40
+            text=f" {last_row['Labour Force']:.1f}"+"%", showarrow=True, arrowhead=1, ax=-40, ay=40
         )
 
         fig.update_layout(
-            title="Unemployment & Labour Force Trends",
-            xaxis_title="Date",
+            title=f"Labour Force & Unemployment Rate - {state_name}",
+            xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
             legend=dict(
@@ -197,12 +197,12 @@ def plot_gdp_chart(state_name):
             last_row = gdp_data.iloc[-1]
             fig.add_annotation(
                 x=last_row['Year'], y=last_row['Value'],
-                text=f" {last_row['Value']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
+                text=f" {last_row['Value']:.0f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
             )
 
             fig.update_layout(
-                title="GDP Trends",
-                xaxis_title="Year",
+                title=(f"GDP - {state_name}"),
+                xaxis_title=" ",
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white"
             )
@@ -221,19 +221,19 @@ def export_to_pptx(labour_fig, gdp_fig):
 
     slide1 = prs.slides.add_slide(slide_layout)
     title1 = slide1.shapes.title
-    title1.text = "Unemployment & Labour Force"
+    title1.text = " "
     img1 = BytesIO()
     labour_fig.write_image(img1, format="png")
     img1.seek(0)
-    slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
+    slide1.shapes.add_picture(img1, Inches(4.7), Inches(0.30), width=Inches(5), height=Inches(3.5))
 
-    slide2 = prs.slides.add_slide(slide_layout)
-    title2 = slide2.shapes.title
-    title2.text = "GDP"
+    # slide2 = prs.slides.add_slide(slide_layout)
+    # title2 = slide2.shapes.title
+    # title2.text = " "
     img2 = BytesIO()
     gdp_fig.write_image(img2, format="png")
     img2.seek(0)
-    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
+    slide1.shapes.add_picture(img2, Inches(4.7), Inches(3.85), width=Inches(5), height=Inches(3.5))
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
