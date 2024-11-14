@@ -14,7 +14,7 @@ import dask.dataframe as dd
 
 # Initialize data
 today_date = date.today().strftime("%Y-%m-%d")
-state_gdp_data = None  # Initialize state GDP data
+state_gdp_data = None 
 
 # State Data IDs
 states_data_id = {
@@ -69,6 +69,12 @@ states_data_id = {
     "West Virginia": {"ur_id": "WVUR", "labour_id": "LBSSA53"},
     "Wisconsin": {"ur_id": "WIUR", "labour_id": "LBSSA55"},
     "Wyoming": {"ur_id": "WYUR", "labour_id": "LBSSA56"}
+}
+
+line_colors = {
+    "unemployment": "#032649",  # Dark blue
+    "labour_force": "#EB8928",  # Orange
+    "gdp": "#032649",  # Dark blue
 }
 
 def download_csv(state_name, data_type):
@@ -144,12 +150,11 @@ def plot_unemployment_labour_chart(state_name):
 
         merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
 
-        # Plot with Plotly and show the last values as annotations
+
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Unemployment'], mode='lines', name="Unemployment"))
-        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Labour Force'], mode='lines', name="Labour Force"))
-        
-        # Add annotations for the last values
+        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Unemployment'], mode='lines',line=dict(color=line_colors["unemployment"]), name="Unemployment"))
+        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Labour Force'], mode='lines',line=dict(color=line_colors["labour_force"]), name="Labour Force"))
+
         last_row = merged_data.iloc[-1]
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Unemployment'],
@@ -157,15 +162,21 @@ def plot_unemployment_labour_chart(state_name):
         )
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Labour Force'],
-            text=f"Last: {last_row['Labour Force']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=40
+            text=f" {last_row['Labour Force']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=40
         )
 
         fig.update_layout(
             title="Unemployment & Labour Force Trends",
             xaxis_title="Date",
             yaxis_title="Rate",
-            template="plotly_white"
+            template="plotly_white",
+            legend=dict(
+                x=0, y=1,  # Upper left corner
+                xanchor='left', yanchor='top',
+                title_text=None 
+            )
         )
+
         st.plotly_chart(fig, use_container_width=True)
         return fig
     else:
@@ -181,13 +192,12 @@ def plot_gdp_chart(state_name):
 
         if not gdp_data.empty:
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=gdp_data['Year'], y=gdp_data['Value'], mode='lines', name=f"{state_name} GDP"))
+            fig.add_trace(go.Scatter(x=gdp_data['Year'], y=gdp_data['Value'], mode='lines',line=dict(color=line_colors["gdp"]), name=f"{state_name} GDP"))
 
-            # Add annotation for the last value
             last_row = gdp_data.iloc[-1]
             fig.add_annotation(
                 x=last_row['Year'], y=last_row['Value'],
-                text=f"Last: {last_row['Value']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
+                text=f" {last_row['Value']:.1f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
             )
 
             fig.update_layout(
@@ -209,7 +219,6 @@ def export_to_pptx(labour_fig, gdp_fig):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
-    # Slide 1: Unemployment & Labour Force
     slide1 = prs.slides.add_slide(slide_layout)
     title1 = slide1.shapes.title
     title1.text = "Unemployment & Labour Force"
@@ -218,7 +227,6 @@ def export_to_pptx(labour_fig, gdp_fig):
     img1.seek(0)
     slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
 
-    # Slide 2: GDP
     slide2 = prs.slides.add_slide(slide_layout)
     title2 = slide2.shapes.title
     title2.text = "GDP"
