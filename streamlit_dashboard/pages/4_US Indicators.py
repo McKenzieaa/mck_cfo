@@ -385,7 +385,7 @@ df_unpivoted["Value"] = pd.to_numeric(df_unpivoted["Value"], errors='coerce')
 df_unpivoted["Month & Year"] = pd.to_datetime(df_unpivoted["Month & Year"], format='%b %Y', errors='coerce')
 df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
 all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
-all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
+all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-31']
 # Function to fetch CPI data for the selected industry
 
     # Load and clean PPI data
