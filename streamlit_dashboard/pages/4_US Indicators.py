@@ -539,44 +539,25 @@ def plot_external_driver(selected_indicators):
     return fig
 
 def plot_cpi_ppi(selected_series_id):
-    """
-    Plot CPI and PPI data on a single chart for comparison.
-    """
     fig = go.Figure()
-
-    # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
-    if len(cpi_data) > 0:
-        fig.add_trace(
+    if not cpi_data.empty: fig.add_trace(
             go.Scatter(
                 x=cpi_data['date'], y=cpi_data['value'], mode='lines', name='CPI by Industry', line=dict(color='#032649')
             )
-        )
-    else:
-        st.warning(f"No data available for the selected CPI series: {selected_series_id}")
-
-    # Plot CPI-US All Items data
-    if len(all_items_data)> 0:
-        fig.add_trace(
+    ) # Add CPI-All Items line
+    if not all_items_data.empty: fig.add_trace(
             go.Scatter(
                 x=all_items_data['Month & Year'], y=all_items_data['Value'], mode='lines', name='CPI-US', line=dict(color='#EB8928', dash='solid')
             )
-        )
-    else:
-        st.warning("No CPI-US All Items data available to display.")
-
-    # Plot aggregated PPI data
-    if len(df_ppi_unpivoted) > 0:
+    ) # Add PPI line
+    if not df_ppi_unpivoted.empty:
         df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
-        fig.add_trace(
+    fig.add_trace(
             go.Scatter(
                 x=df_ppi_aggregated['Month & Year'], y=df_ppi_aggregated['Value'], mode='lines', name='PPI-US', line=dict(color='#595959')
             )
         )
-    else:
-        st.warning("No PPI data available to display.")
-
-    # Configure the layout of the chart
     fig.update_layout(
         title='CPI and PPI Comparison',
         xaxis=dict(showgrid=True, showticklabels=True),
