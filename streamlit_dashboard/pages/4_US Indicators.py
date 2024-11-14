@@ -452,54 +452,41 @@ def plot_labour_unemployment():
 
     fig = go.Figure()
 
-    # Convert dates to datetime format
-    dates = pd.to_datetime(merged[['year', 'month']].assign(day=1))
-
-    # Get last values
-    last_population = merged['population'].iloc[-1]
-    last_unemployment_rate = merged['unemployment_rate'].iloc[-1]
-    last_labour_force_rate = merged['labour_force_rate'].iloc[-1]
-    
     # Plot population as an area chart on the primary y-axis
+    min_population = merged['population'].min()
     fig.add_trace(go.Scatter(
-        x=dates,
+        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['population'],
         fill='tozeroy',  # Area chart
         name='Population',
-        mode='lines+text',
+        mode='lines',
         line=dict(color='#032649'),
-        yaxis='y1',
-        text=[None] * (len(merged['population']) - 1) + [f"{last_population:.0f}"],  # Show only last value
-        textposition="top right"
+        yaxis='y1'
     ))
 
     # Plot unemployment rate on the secondary y-axis
     fig.add_trace(go.Scatter(
-        x=dates,
+        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['unemployment_rate'],
         name='Unemployment Rate',
-        mode='lines+text',
+        mode='lines',
         line=dict(color='#EB8928'),
-        yaxis='y2',
-        text=[None] * (len(merged['unemployment_rate']) - 1) + [f"{last_unemployment_rate:.1f}"],  # Show only last value
-        textposition="top right"
+        yaxis='y2'
     ))
 
     # Plot labour force participation rate on the secondary y-axis
     fig.add_trace(go.Scatter(
-        x=dates,
+        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['labour_force_rate'],
         name='Labour Force Participation Rate',
-        mode='lines+text',
+        mode='lines',
         line=dict(color='#595959'),
-        yaxis='y2',
-        text=[None] * (len(merged['labour_force_rate']) - 1) + [f"{last_labour_force_rate:.1f}"],  # Show only last value
-        textposition="top right"
+        yaxis='y2'
     ))
 
     fig.update_layout(
         title='Population, Unemployment Rate, and Labour Force Participation Rate (USA)',
-        xaxis=dict(showgrid=True, showticklabels=True),
+        xaxis=dict(showgrid=True, showticklabels=True),  # No title
         yaxis=dict(
             title='Population',
             side='left',
@@ -507,20 +494,20 @@ def plot_labour_unemployment():
         ),
         yaxis2=dict(
             title='Rate (%)',
-            overlaying='y',
+            overlaying='y',  # Overlay on the primary y-axis
             side='right'
         ),
         legend=dict(
             x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
         ),
-        hovermode='x unified',
+        hovermode='x unified',  # Unified hover mode
         template='plotly_white'
     )
-
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
 def plot_external_driver(selected_indicators):
+
     if not selected_indicators:
         selected_indicators = ["World GDP"]
 
@@ -532,22 +519,13 @@ def plot_external_driver(selected_indicators):
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
-        # Get the last value and check for None or non-numeric values
-        last_value = indicator_data['% Change'].iloc[-1]
-        last_year = indicator_data['Year'].iloc[-1]
-
-        # Handle non-numeric last values
-        last_value_text = f"{last_value:.2f}" if pd.notnull(last_value) else "N/A"
-
         fig.add_trace(
             go.Scatter(
                 x=indicator_data['Year'],
                 y=indicator_data['% Change'],
-                mode='lines+text',
+                mode='lines',
                 name=indicator,
                 line=dict(color='#032649'),
-                text=[None] * (len(indicator_data) - 1) + [last_value_text],  # Show only last value
-                textposition="top right"
             )
         )
 
@@ -605,7 +583,7 @@ def plot_cpi_ppi(selected_series_id):
                 y=df_ppi_aggregated['Value'],
                 mode='lines',
                 name='PPI-US',
-                line=dict(color='#595959')
+                line=dict(color='#1C798A')
             )
         )
     else:
@@ -632,7 +610,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='tozeroy',  # Create area chart by filling to the x-axis
-            line=dict(color='#1C798A', width=2),
+            line=dict(color='#032649', width=2),
             marker=dict(size=6)
         ),
         secondary_y=False
@@ -676,7 +654,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
                 name=f'{selected_industry} - Percent Change',
-                line=dict(color='#032649', width=2, dash='solid'),
+                line=dict(color='#1C798A', width=2, dash='solid'),
                 marker=dict(size=6)
             ),
             secondary_y=True
@@ -710,9 +688,9 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
         title_shape = slide.shapes.title
         title_shape.text = title
         fig_image = BytesIO()
-        fig.write_image(fig_image, format="png", width=800, height=300)
+        fig.write_image(fig_image, format="png", width=550, height=350)
         fig_image.seek(0)
-        slide.shapes.add_picture(fig_image, Inches(1), Inches(1), width=Inches(8))
+        slide.shapes.add_picture(fig_image, Inches(1), Inches(1), width=Inches(5.5),height=Inches(3.5))
         fig_image.close()
 
     # Add slides for each figure if they are not None
