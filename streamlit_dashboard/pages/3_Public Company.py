@@ -145,7 +145,7 @@ if selected_industries and selected_locations:
             fig2_image = BytesIO()
             fig2.write_image(fig2_image, format="png", width=800, height=300)
             fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(1.5), width=Inches(8))
+            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(3.5), width=Inches(8))
 
             # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
