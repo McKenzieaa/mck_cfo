@@ -53,8 +53,8 @@ except Exception as e:
 st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
 
 # Get unique values for Industry and Location filters
-industries = df['Industry'].unique()
-locations = df['Location'].unique()
+industries = df['Industry'].dropna().unique()
+locations = df['Location'].dropna().unique()
 
 # Display multi-select filters at the top without default selections
 col1, col2 = st.columns(2)
@@ -65,7 +65,7 @@ selected_locations = col2.multiselect("Select Location", locations)
 if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
     filtered_df = filtered_df[['Company',  'EV/Revenue', 'EV/EBITDA', 'Business Description']]
-    filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
+    # filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
 
     # Set up Ag-Grid for selection
     st.title("Public Listed Companies")
