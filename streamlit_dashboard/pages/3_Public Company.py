@@ -90,7 +90,7 @@ if selected_industries and selected_locations:
         update_mode=GridUpdateMode.SELECTION_CHANGED,
         height=400,
         width='100%',
-        theme='alphine'
+        theme='alpine'
     )
 
     selected_data = pd.DataFrame(grid_response['selected_rows'])
