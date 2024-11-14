@@ -532,9 +532,12 @@ def plot_external_driver(selected_indicators):
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
-        # Get the last value for labeling
+        # Get the last value and check for None or non-numeric values
         last_value = indicator_data['% Change'].iloc[-1]
         last_year = indicator_data['Year'].iloc[-1]
+
+        # Handle non-numeric last values
+        last_value_text = f"{last_value:.2f}" if pd.notnull(last_value) else "N/A"
 
         fig.add_trace(
             go.Scatter(
@@ -543,7 +546,7 @@ def plot_external_driver(selected_indicators):
                 mode='lines+text',
                 name=indicator,
                 line=dict(color='#032649'),
-                text=[None] * (len(indicator_data) - 1) + [f"{last_value:.1f}"],  # Show only last value
+                text=[None] * (len(indicator_data) - 1) + [last_value_text],  # Show only last value
                 textposition="top right"
             )
         )
