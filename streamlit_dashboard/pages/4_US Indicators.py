@@ -467,8 +467,8 @@ df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
-def fetch_cpi_data(series_id, df_cpi):
-    selected_data = df_cpi[df_cpi['Series ID'] == series_id]
+def fetch_cpi_data(selected_series_id, df_cpi):
+    selected_data = df_cpi[df_cpi['Series ID'] == selected_series_id]
     selected_data = selected_data['Month & Year']
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'Date', 'Value': 'Value'})
 
