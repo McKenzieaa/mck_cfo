@@ -68,7 +68,7 @@ selected_locations = col2.multiselect("Select Location", locations)
 if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
     filtered_df = filtered_df[['Company',  'EV/Revenue', 'EV/EBITDA', 'Business Description']]
-    filtered_df = filtered_df.compute() 
+    # filtered_df = filtered_df.compute() 
 
     # Set up Ag-Grid for selection
     st.title("Public Listed Companies")
