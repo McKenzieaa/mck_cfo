@@ -89,15 +89,19 @@ def download_csv(state_name, data_type):
 
     response = requests.get(url)
     if response.status_code == 200:
-        csv_data = dd.read_csv(io.StringIO(response.content.decode("utf-8")))
+        # Read using pandas first, then convert to dask dataframe
+        csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
-        csv_data = csv_data.rename(columns={csv_data.columns[1]: column_name})
-        csv_data['DATE'] = dd.to_datetime(csv_data['DATE'])
+        csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
+        csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
+        
+        # Convert the pandas dataframe to a dask dataframe
+        csv_data = dd.from_pandas(csv_data, npartitions=1)
         return csv_data
     else:
         st.error(f"Error downloading {data_type} data for {state_name}.")
         return None
-
+    
 def load_state_gdp_data():
     """Download and preprocess state-level GDP data using Dask."""
     global state_gdp_data
