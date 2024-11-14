@@ -51,6 +51,7 @@ if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
     filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
     filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
+    filtered_df['Year'] = filtered_df['Year'].astype(int)
 
     # Set up Ag-Grid for selection
     st.title("Precedent Transactions")
@@ -71,7 +72,7 @@ if selected_industries and selected_locations:
         update_mode=GridUpdateMode.SELECTION_CHANGED,
         height=400,
         width='100%',
-        theme='streamlit'
+        theme='alphine'
     )
 
     selected_data = pd.DataFrame(grid_response['selected_rows'])
@@ -79,6 +80,7 @@ if selected_industries and selected_locations:
     if not selected_data.empty:
 
         avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
+        avg_data['Year'] = avg_data['Year'].astype(int)
 
         # Define colors
         color_ev_revenue = "#032649"  # Default Plotly blue
@@ -111,7 +113,7 @@ if selected_industries and selected_locations:
             slide_layout = ppt.slide_layouts[5]
             slide1 = ppt.slides.add_slide(slide_layout)
             title1 = slide1.shapes.title
-            title1.text = "EV/Revenue by Year"
+            title1.text = "Precedent Transaction - EV/Revenue"
             
             # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
@@ -122,7 +124,7 @@ if selected_industries and selected_locations:
             # Add slide for EV/EBITDA chart
             slide2 = ppt.slides.add_slide(slide_layout)
             title2 = slide2.shapes.title
-            title2.text = "EV/EBITDA by Year"
+            title2.text = "Precedent Transaction - EV/EBITDA"
             
             # Save EV/EBITDA chart to an image
             fig2_image = BytesIO()

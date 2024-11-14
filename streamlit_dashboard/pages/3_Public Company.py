@@ -68,7 +68,8 @@ selected_locations = col2.multiselect("Select Location", locations)
 if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
     filtered_df = filtered_df[['Company',  'EV/Revenue', 'EV/EBITDA', 'Business Description']]
-    # filtered_df = filtered_df.compute() 
+    filtered_df['EV/Revenue'] = filtered_df['EV/Revenue'].round(1)
+    filtered_df['EV/EBITDA'] = filtered_df['EV/EBITDA'].round(1)
 
     # Set up Ag-Grid for selection
     st.title("Public Listed Companies")
@@ -89,7 +90,7 @@ if selected_industries and selected_locations:
         update_mode=GridUpdateMode.SELECTION_CHANGED,
         height=400,
         width='100%',
-        theme='streamlit'
+        theme='alphine'
     )
 
     selected_data = pd.DataFrame(grid_response['selected_rows'])
@@ -97,9 +98,12 @@ if selected_industries and selected_locations:
     if not selected_data.empty:
         avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
 
+        color_ev_revenue = "#032649"  # Default Plotly blue
+        color_ev_ebitda = "#EB8928"   # Default Plotly red
+
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue by Company", text='EV/Revenue')
-        fig1.update_traces(texttemplate='%{text:.1f}', textposition='outside')
+        fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title="Company")
 
         # Display the EV/Revenue chart
@@ -107,7 +111,7 @@ if selected_industries and selected_locations:
 
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA by Company", text='EV/EBITDA')
-        fig2.update_traces(texttemplate='%{text:.1f}', textposition='outside')
+        fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='inside')
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title="Company")
 
         # Display the EV/EBITDA chart
@@ -124,7 +128,7 @@ if selected_industries and selected_locations:
             slide_layout = ppt.slide_layouts[5]
             slide1 = ppt.slides.add_slide(slide_layout)
             title1 = slide1.shapes.title
-            title1.text = "EV/Revenue by Company"
+            title1.text = "Public Comps - EV/Revenue"
             
             # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
@@ -135,7 +139,7 @@ if selected_industries and selected_locations:
             # Add slide for EV/EBITDA chart
             slide2 = ppt.slides.add_slide(slide_layout)
             title2 = slide2.shapes.title
-            title2.text = "EV/EBITDA by Company"
+            title2.text = "Public Comps - EV/EBITDA"
             
             # Save EV/EBITDA chart to an image
             fig2_image = BytesIO()
