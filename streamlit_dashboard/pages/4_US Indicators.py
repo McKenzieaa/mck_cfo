@@ -570,12 +570,22 @@ def plot_cpi_ppi(selected_series_id):
     Plot CPI and PPI data on a single chart for comparison.
     """
     fig = go.Figure()
-    
-    # Compute the Dask DataFrame to bring it into memory as a Pandas DataFrame
-    cpi_data = fetch_cpi_data(selected_series_id, df_cleaned).compute()
-    all_items_data_computed = all_items_data.compute()
-    df_ppi_unpivoted_computed = df_ppi_unpivoted.compute()
-    
+
+    # Ensure cpi_data is in-memory Pandas DataFrame
+    cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
+    if isinstance(cpi_data, dd.DataFrame):
+        cpi_data = cpi_data.compute()
+
+    # Ensure all_items_data is in-memory Pandas DataFrame
+    all_items_data_computed = all_items_data
+    if isinstance(all_items_data_computed, dd.DataFrame):
+        all_items_data_computed = all_items_data_computed.compute()
+
+    # Ensure df_ppi_unpivoted is in-memory Pandas DataFrame
+    df_ppi_unpivoted_computed = df_ppi_unpivoted
+    if isinstance(df_ppi_unpivoted_computed, dd.DataFrame):
+        df_ppi_unpivoted_computed = df_ppi_unpivoted_computed.compute()
+
     if len(cpi_data) > 0:
         fig.add_trace(
             go.Scatter(
