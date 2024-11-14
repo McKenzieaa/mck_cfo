@@ -460,7 +460,7 @@ def plot_labour_unemployment():
         fill='tozeroy',  # Area chart
         name='Population',
         mode='lines',
-        line=dict(color='blue'),
+        line=dict(color='#032649'),
         yaxis='y1'
     ))
 
@@ -470,7 +470,7 @@ def plot_labour_unemployment():
         y=merged['unemployment_rate'],
         name='Unemployment Rate',
         mode='lines',
-        line=dict(color='red'),
+        line=dict(color='#EB8928'),
         yaxis='y2'
     ))
 
@@ -480,7 +480,7 @@ def plot_labour_unemployment():
         y=merged['labour_force_rate'],
         name='Labour Force Participation Rate',
         mode='lines',
-        line=dict(color='green'),
+        line=dict(color='#595959'),
         yaxis='y2'
     ))
 
@@ -553,7 +553,7 @@ def plot_cpi_ppi(selected_series_id):
                 y=cpi_data['value'],
                 mode='lines',
                 name='CPI by Industry',
-                line=dict(color='blue')
+                line=dict(color='#032649')
             )
         )
     else:
@@ -567,7 +567,7 @@ def plot_cpi_ppi(selected_series_id):
                 y=all_items_data['Value'],
                 mode='lines',
                 name='CPI-US',
-                line=dict(color='green', dash='solid')
+                line=dict(color='#EB8928', dash='solid')
             )
         )
     else:
@@ -582,7 +582,7 @@ def plot_cpi_ppi(selected_series_id):
                 y=df_ppi_aggregated['Value'],
                 mode='lines',
                 name='PPI-US',
-                line=dict(color='red')
+                line=dict(color='#595959')
             )
         )
     else:
@@ -609,7 +609,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='tozeroy',  # Create area chart by filling to the x-axis
-            line=dict(color='blue', width=2),
+            line=dict(color='#1C798A', width=2),
             marker=dict(size=6)
         ),
         secondary_y=False
@@ -622,7 +622,7 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Percent Change'],
             mode='lines',
             name='GDP - Percent Change',
-            line=dict(color='orange', width=2, dash='solid'),
+            line=dict(color='#595959 ', width=2, dash='solid'),
             marker=dict(size=6)
         ),
         secondary_y=True
@@ -640,7 +640,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'{selected_industry} - Value',
                 fill='tozeroy',  # Area chart
-                line=dict(color='red', width=2),
+                line=dict(color='#EB8928', width=2),
                 marker=dict(size=6)
             ),
             secondary_y=False
@@ -653,7 +653,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
                 name=f'{selected_industry} - Percent Change',
-                line=dict(color='green', width=2, dash='solid'),
+                line=dict(color='#032649', width=2, dash='solid'),
                 marker=dict(size=6)
             ),
             secondary_y=True
@@ -675,28 +675,33 @@ def plot_gdp_and_industry(selected_industry=None):
     # Function to export charts to PowerPoint
 
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
-    prs = Presentation()
-    slide_layout = prs.slide_layouts[5]  # Blank layout for slides
+    ppt = Presentation()
+    slide_layout = ppt.slide_layouts[5]
 
-    def add_figure_slide(prs, title, fig):
-        if fig:  # Check if fig is not None
-            slide = prs.slides.add_slide(slide_layout)
-            title_shape = slide.shapes.title
-            title_shape.text = title
-            img_buf = BytesIO()
-            fig.savefig(img_buf, format='png', bbox_inches='tight')  # Save figure to buffer
-            img_buf.seek(0)
-            slide.shapes.add_picture(img_buf, Inches(0.5), Inches(1.5), width=Inches(9), height=Inches(3))
+    def add_figure_slide(ppt, title, fig):
+        if fig is None:
+            print(f"Skipping slide '{title}' because the figure is None.")
+            return  # Skip if fig is None
 
-    add_figure_slide(prs, "Labour Force & Unemployment Data", labour_fig)
-    add_figure_slide(prs, "External Driver Indicators", external_fig)
-    add_figure_slide(prs, "GDP by Industry", gdp_fig)
-    add_figure_slide(prs, "CPI and PPI Comparison", cpi_ppi_fig)
+        slide = ppt.slides.add_slide(slide_layout)
+        title_shape = slide.shapes.title
+        title_shape.text = title
+        fig_image = BytesIO()
+        fig.write_image(fig_image, format="png", width=800, height=300)
+        fig_image.seek(0)
+        slide.shapes.add_picture(fig_image, Inches(1), Inches(1), width=Inches(8))
+        fig_image.close()
 
-    pptx_io = BytesIO()
-    prs.save(pptx_io)
-    pptx_io.seek(0)
-    return pptx_io
+    # Add slides for each figure if they are not None
+    add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig)
+    add_figure_slide(ppt, "External Driver Indicators", external_fig)
+    add_figure_slide(ppt, "GDP by Industry", gdp_fig)
+    add_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig)
+
+    ppt_bytes = BytesIO()
+    ppt.save(ppt_bytes)
+    ppt_bytes.seek(0)
+    return ppt_bytes
 
 def get_us_indicators_layout():
     """Render the full dashboard layout and export data directly without session state."""
