@@ -566,25 +566,12 @@ def plot_external_driver(selected_indicators):
     st.plotly_chart(fig, use_container_width=True)
 
 def plot_cpi_ppi(selected_series_id):
-    """
-    Plot CPI and PPI data on a single chart for comparison.
-    """
     fig = go.Figure()
 
-    # Ensure cpi_data is in-memory Pandas DataFrame
+    # Fetch CPI data for the selected series
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
     if isinstance(cpi_data, dd.DataFrame):
         cpi_data = cpi_data.compute()
-
-    # Ensure all_items_data is in-memory Pandas DataFrame
-    all_items_data_computed = all_items_data
-    if isinstance(all_items_data_computed, dd.DataFrame):
-        all_items_data_computed = all_items_data_computed.compute()
-
-    # Ensure df_ppi_unpivoted is in-memory Pandas DataFrame
-    df_ppi_unpivoted_computed = df_ppi_unpivoted
-    if isinstance(df_ppi_unpivoted_computed, dd.DataFrame):
-        df_ppi_unpivoted_computed = df_ppi_unpivoted_computed.compute()
 
     if len(cpi_data) > 0:
         fig.add_trace(
@@ -594,6 +581,12 @@ def plot_cpi_ppi(selected_series_id):
         )
     else:
         st.warning(f"No data available for the selected CPI series: {selected_series_id}")
+        st.write("Available data in df_cleaned:", df_cleaned[df_cleaned['Series ID'] == selected_series_id].head())
+
+    # Filter and display All Items Data for 'CUSR0000SA0'
+    all_items_data_computed = all_items_data
+    if isinstance(all_items_data_computed, dd.DataFrame):
+        all_items_data_computed = all_items_data_computed.compute()
 
     if len(all_items_data_computed) > 0:
         fig.add_trace(
@@ -603,6 +596,12 @@ def plot_cpi_ppi(selected_series_id):
         )
     else:
         st.warning("No CPI-US All Items data available to display.")
+        st.write("All Items data after filtering:", all_items_data_computed.head())
+
+    # Process and add PPI data
+    df_ppi_unpivoted_computed = df_ppi_unpivoted
+    if isinstance(df_ppi_unpivoted_computed, dd.DataFrame):
+        df_ppi_unpivoted_computed = df_ppi_unpivoted_computed.compute()
 
     if len(df_ppi_unpivoted_computed) > 0:
         df_ppi_aggregated = df_ppi_unpivoted_computed.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
@@ -621,7 +620,7 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified'
     )
     st.plotly_chart(fig, use_container_width=True)
-
+    
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
