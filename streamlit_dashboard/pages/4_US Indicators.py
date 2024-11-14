@@ -466,9 +466,9 @@ df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
-def fetch_cpi_data(series_id, df_cleaned):
-    selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
-    selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-01']
+def fetch_cpi_data(series_id, df_cpi):
+    selected_data = df_cpi[df_cpi['Series ID'] == series_id]
+    selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-31']
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
 
 
@@ -530,6 +530,7 @@ def plot_labour_unemployment():
         template='plotly_white'
     )
     st.plotly_chart(fig, use_container_width=True)
+    return fig 
 
 def plot_external_driver(selected_indicators):
 
@@ -608,6 +609,7 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified'
     )
     st.plotly_chart(fig, use_container_width=True)
+    return fig 
 
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -681,6 +683,7 @@ def plot_gdp_and_industry(selected_industry=None):
     )
 
     st.plotly_chart(fig, use_container_width=True)
+    return fig 
 
 # Function to export charts to PowerPoint
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
