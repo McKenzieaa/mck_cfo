@@ -402,13 +402,12 @@ ppi_path = "s3://documentsapi/industry_data/PPI.parquet"
 # Load CPI data from S3
 df_cpi = dd.read_parquet(cpi_path, storage_options=storage_options).dropna().reset_index(drop=True)
 df_cpi = df_cpi.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
-df_cpi['Series ID'] =df_cpi['Series ID'].astype(str)
-df_cpi['Month & Year'] = dd.to_datetime(df_cpi['Month & Year'],format='%b %Y', errors='coerce')
-df_cpi['Value'] = df_cpi['Value'].str.strip().replace('', np.nan)
-df_cpi['Value'] = pd.to_numeric(df_cpi['Value'], errors='coerce')
+df_cpi['Series ID'] = df_cpi['Series ID'].astype(str)
+df_cpi['Month & Year'] = dd.to_datetime(df_cpi['Month & Year'], format='%b %Y', errors='coerce')
+df_cpi = df_cpi.compute()
+df_cpi['Value'] = pd.to_numeric(df_cpi['Value'], errors='coerce').fillna(0)
 df_cpi = df_cpi.dropna(subset=['Series ID', 'Month & Year', 'Value'])
-all_items_data = df_cpi[df_cpi['Series ID'] == 'CUSR0000SA0']
-all_items_data = all_items_data[all_items_data['Month & Year']].compute()
+all_items_data = df_cpi.loc[df_cpi['Series ID'] == 'CUSR0000SA0']
 
 # Load and clean PPI data from S3
 df_ppi = dd.read_parquet(ppi_path, storage_options=storage_options).dropna().reset_index(drop=True)
