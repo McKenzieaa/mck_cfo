@@ -56,8 +56,8 @@ except Exception as e:
 st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
 
 # Get unique values for Industry and Location filters
-industries = df['Industry'].dropna().unique().compute()
-locations = df['Location'].dropna().unique().compute()
+industries = df['Industry'].dropna().unique()
+locations = df['Location'].dropna().unique()
 
 # Display multi-select filters at the top without default selections
 col1, col2 = st.columns(2)
