@@ -110,14 +110,17 @@ def load_state_gdp_data():
         response = requests.get(url)
         if response.status_code == 200:
             with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                # Identify the correct file name in the ZIP
                 csv_file_name = next(
                     (name for name in z.namelist() 
                      if name.startswith("SAGDP1__ALL_AREAS_") and name.endswith(".csv")), 
                     None
                 )
+                
                 if csv_file_name:
                     with z.open(csv_file_name) as f:
-                         df = dd.read_csv(
+                        # Load CSV into a Dask DataFrame and exclude unnecessary columns
+                        df = dd.read_csv(
                             f,
                             usecols=lambda col: col not in [
                                 "GeoFIPS", "Region", "TableName", "LineCode", 
@@ -125,14 +128,31 @@ def load_state_gdp_data():
                             ],
                             dtype={"Description": str}
                         )
+
+                    # Check if data loaded correctly
+                    if df is None or df.shape[0].compute() == 0:
+                        print("No data loaded from CSV file.")
+                        return
+
+                    # Filter rows where 'Description' is the required GDP data
                     df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
+
+                    # Reshape from wide to long format
                     df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
                     df = df.rename(columns={"GeoName": "State"})
+
+                    # Filter for numeric years and convert columns
                     df = df[df["Year"].str.isdigit()]
                     df["Year"] = df["Year"].astype(int)
                     df["Value"] = dd.to_numeric(df["Value"], errors='coerce')
                     df = df.dropna(subset=["Value"])
+
+                    # Exclude "United States" rows from the 'State' column
                     state_gdp_data = df[df["State"] != "United States"]
+
+                    # Check if state_gdp_data is populated
+                    if state_gdp_data is None or state_gdp_data.shape[0].compute() == 0:
+                        print("State GDP data is empty after filtering.")
                 else:
                     print("No matching CSV file found in the downloaded ZIP.")
         else:
@@ -141,6 +161,7 @@ def load_state_gdp_data():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+# Run the function to load data
 load_state_gdp_data()
 
 def plot_unemployment_labour_chart(state_name):
