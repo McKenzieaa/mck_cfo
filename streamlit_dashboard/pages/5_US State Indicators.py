@@ -163,33 +163,51 @@ def plot_unemployment_labour_chart(state_name):
 
         merged_data = unemployment_data.merge(labour_data, on='DATE', how='inner')
 
-        # Customize line chart with colors
-        fig, ax = plt.subplots()
-        ax.plot(merged_data['DATE'], merged_data['Unemployment'], color=colors["dark_blue"], label="Unemployment")
-        ax.plot(merged_data['DATE'], merged_data['Labour Force'], color=colors["orange"], label="Labour Force")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Rate")
-        ax.legend()
+        # Plot with Plotly
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=merged_data['DATE'], 
+            y=merged_data['Unemployment'], 
+            mode='lines+markers',
+            line=dict(color=colors["dark_blue"]),
+            name="Unemployment"
+        ))
+        fig.add_trace(go.Scatter(
+            x=merged_data['DATE'], 
+            y=merged_data['Labour Force'], 
+            mode='lines+markers',
+            line=dict(color=colors["orange"]),
+            name="Labour Force"
+        ))
 
-        st.pyplot(fig)
-        return merged_data
+        fig.update_layout(
+            title=f"{state_name} Unemployment & Labour Force Trends",
+            xaxis_title="Date",
+            yaxis_title="Rate",
+            template="plotly_white"
+        )
+        
+        # Save Plotly figure to image
+        img = BytesIO()
+        fig.write_image(img, format="png")
+        img.seek(0)
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        return merged_data, img
     else:
         st.warning(f"No data available for {state_name}.")
-        return None
+        return None, None
 
-# Function to plot GDP trends using Streamlit native charts
 def plot_gdp_chart(state_name):
-    global state_gdp_data  # Assume `state_gdp_data` is loaded elsewhere
+    global state_gdp_data
 
     if state_gdp_data is not None:
         gdp_data = state_gdp_data[state_gdp_data["State"].str.lower() == state_name.lower()]
         gdp_data = gdp_data[gdp_data["Year"] >= 2000].compute()
 
         if not gdp_data.empty:
-            # Create a Plotly figure for the GDP chart with customized color
             fig = go.Figure()
-
-            # Add GDP data as a line trace
             fig.add_trace(go.Scatter(
                 x=gdp_data['Year'], 
                 y=gdp_data['Value'], 
@@ -198,32 +216,29 @@ def plot_gdp_chart(state_name):
                 name=f"{state_name} GDP"
             ))
 
-            # Update the layout to ensure the x-axis shows years as whole numbers without commas
             fig.update_layout(
                 title=f"GDP Trends for {state_name}",
-                xaxis=dict(
-                    title='Year',
-                    tickmode='linear',
-                    tickformat='d', 
-                ),
-                yaxis=dict(
-                    title='GDP (Millions of Dollars)'
-                ),
+                xaxis=dict(title='Year', tickmode='linear', tickformat='d'),
+                yaxis=dict(title='GDP (Millions of Dollars)'),
                 template='plotly_white'
             )
 
+            # Save Plotly figure to image
+            img = BytesIO()
+            fig.write_image(img, format="png")
+            img.seek(0)
+            
             st.plotly_chart(fig, use_container_width=True)
 
-            return gdp_data.set_index('Year')['Value']
+            return gdp_data.set_index('Year')['Value'], img
         else:
             st.warning(f"No GDP data available for {state_name}.")
-            return None
+            return None, None
     else:
         st.warning("State GDP data not loaded.")
-        return None
+        return None, None
 
-# Function to export charts to PowerPoint
-def export_to_pptx(labour_data, gdp_data):
+def export_to_pptx(labour_img, gdp_img):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -231,40 +246,32 @@ def export_to_pptx(labour_data, gdp_data):
     slide1 = prs.slides.add_slide(slide_layout)
     title1 = slide1.shapes.title
     title1.text = "Unemployment & Labour Force"
-    img1 = BytesIO()
-    labour_data.plot().get_figure().savefig(img1, format="png")
-    img1.seek(0)
-    slide1.shapes.add_picture(img1, Inches(1), Inches(1), width=Inches(10))
+    slide1.shapes.add_picture(labour_img, Inches(1), Inches(1), width=Inches(10))
 
     # Slide 2: GDP
     slide2 = prs.slides.add_slide(slide_layout)
     title2 = slide2.shapes.title
     title2.text = "GDP"
-    img2 = BytesIO()
-    gdp_data.plot().get_figure().savefig(img2, format="png")
-    img2.seek(0)
-    slide2.shapes.add_picture(img2, Inches(1), Inches(1), width=Inches(10))
+    slide2.shapes.add_picture(gdp_img, Inches(1), Inches(1), width=Inches(10))
 
     pptx_io = BytesIO()
     prs.save(pptx_io)
     pptx_io.seek(0)
     return pptx_io
 
-# Layout for the state indicators page
 def get_state_indicators_layout():
     st.title("US State Indicators")
     state_name = st.selectbox("Select State", list(states_data_id.keys()), index=0)
 
     st.subheader(f"{state_name} - Unemployment & Labour Force")
-    labour_data = plot_unemployment_labour_chart(state_name)
-
+    labour_data, labour_img = plot_unemployment_labour_chart(state_name)
 
     st.subheader(f"{state_name} - GDP Over Time")
-    gdp_data = plot_gdp_chart(state_name)
+    gdp_data, gdp_img = plot_gdp_chart(state_name)
 
     # Export to PowerPoint button
-    if st.button("Export Charts to PowerPoint") and labour_data is not None and gdp_data is not None:
-        pptx_file = export_to_pptx(labour_data, gdp_data)
+    if st.button("Export Charts to PowerPoint") and labour_img is not None and gdp_img is not None:
+        pptx_file = export_to_pptx(labour_img, gdp_img)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
