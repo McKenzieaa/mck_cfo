@@ -1,4 +1,5 @@
 import streamlit as st
+import dask.dataframe as dd
 import pandas as pd
 import requests
 import zipfile
@@ -8,7 +9,6 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import plotly.graph_objs as go
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Initialize data
@@ -70,6 +70,15 @@ states_data_id = {
     "Wyoming": {"ur_id": "WYUR", "labour_id": "LBSSA56"}
 }
 
+# Define primary colors
+colors = {
+    "dark_blue": "#032649",
+    "orange": "#EB8928",
+    "dark_grey": "#595959",
+    "light_grey": "#A5A5A5",
+    "turquoise_blue": "#1C798A"
+}
+
 def download_csv(state_name, data_type):
     data_ids = states_data_id.get(state_name)
     if not data_ids:
@@ -80,17 +89,17 @@ def download_csv(state_name, data_type):
 
     response = requests.get(url)
     if response.status_code == 200:
-        csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
+        csv_data = dd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
-        csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
-        csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
+        csv_data = csv_data.rename(columns={csv_data.columns[1]: column_name})
+        csv_data['DATE'] = dd.to_datetime(csv_data['DATE'])
         return csv_data
     else:
         st.error(f"Error downloading {data_type} data for {state_name}.")
         return None
 
 def load_state_gdp_data():
-    """Download and preprocess state-level GDP data."""
+    """Download and preprocess state-level GDP data using Dask."""
     global state_gdp_data
     url = "https://apps.bea.gov/regional/zip/SAGDP.zip"
     
@@ -105,9 +114,9 @@ def load_state_gdp_data():
                 )
                 if csv_file_name:
                     with z.open(csv_file_name) as f:
-                        # Load the CSV and exclude unnecessary columns
-                        df = pd.read_csv(
-                            f, 
+                        # Load the CSV into a Dask DataFrame and exclude unnecessary columns
+                        df = dd.read_csv(
+                            f,
                             usecols=lambda col: col not in [
                                 "GeoFIPS", "Region", "TableName", "LineCode", 
                                 "IndustryClassification", "Unit"
@@ -115,21 +124,28 @@ def load_state_gdp_data():
                             dtype={"Description": str}
                         )
 
+                    # Filter rows where 'Description' is the required GDP data
                     df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
+
+                    # Reshape from wide to long format
                     df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
-                    df.rename(columns={"GeoName": "State"}, inplace=True)
+                    df = df.rename(columns={"GeoName": "State"})
+
+                    # Filter for numeric years and convert columns
                     df = df[df["Year"].str.isdigit()]
                     df["Year"] = df["Year"].astype(int)
-                    df["Value"] = pd.to_numeric(df["Value"], errors='coerce')
-                    df.dropna(subset=["Value"], inplace=True)
+                    df["Value"] = dd.to_numeric(df["Value"], errors='coerce')
+                    df = df.dropna(subset=["Value"])
+
+                    # Exclude "United States" rows from the 'State' column
                     state_gdp_data = df[df["State"] != "United States"]
                 else:
-                    st.error("No matching CSV file found in the downloaded ZIP.")
+                    print("No matching CSV file found in the downloaded ZIP.")
         else:
-            st.error(f"Failed to download GDP data. Status code: {response.status_code}")
+            print(f"Failed to download GDP data. Status code: {response.status_code}")
 
     except Exception as e:
-        st.error(f"An error occurred: {e}")
+        print(f"An error occurred: {e}")
 
 load_state_gdp_data()
 
@@ -138,13 +154,20 @@ def plot_unemployment_labour_chart(state_name):
     labour_data = download_csv(state_name, "labour")
 
     if unemployment_data is not None and labour_data is not None:
-        unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
-        labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
+        unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000].compute()
+        labour_data = labour_data[labour_data['DATE'].dt.year >= 2000].compute()
 
-        merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
+        merged_data = unemployment_data.merge(labour_data, on='DATE', how='inner')
 
-        # Use Streamlit's native line chart
-        st.line_chart(merged_data.set_index('DATE'), use_container_width=True)
+        # Customize line chart with colors
+        fig, ax = plt.subplots()
+        ax.plot(merged_data['DATE'], merged_data['Unemployment'], color=colors["dark_blue"], label="Unemployment")
+        ax.plot(merged_data['DATE'], merged_data['Labour Force'], color=colors["orange"], label="Labour Force")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Rate")
+        ax.legend()
+
+        st.pyplot(fig)
         return merged_data
     else:
         st.warning(f"No data available for {state_name}.")
@@ -156,10 +179,10 @@ def plot_gdp_chart(state_name):
 
     if state_gdp_data is not None:
         gdp_data = state_gdp_data[state_gdp_data["State"].str.lower() == state_name.lower()]
-        gdp_data = gdp_data[gdp_data["Year"] >= 2000]
+        gdp_data = gdp_data[gdp_data["Year"] >= 2000].compute()
 
         if not gdp_data.empty:
-            # Create a Plotly figure for the GDP chart
+            # Create a Plotly figure for the GDP chart with customized color
             fig = go.Figure()
 
             # Add GDP data as a line trace
@@ -167,6 +190,7 @@ def plot_gdp_chart(state_name):
                 x=gdp_data['Year'], 
                 y=gdp_data['Value'], 
                 mode='lines+markers',
+                line=dict(color=colors["turquoise_blue"]),
                 name=f"{state_name} GDP"
             ))
 
@@ -243,4 +267,5 @@ def get_state_indicators_layout():
             file_name="state_indicators.pptx",
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
+
 get_state_indicators_layout()

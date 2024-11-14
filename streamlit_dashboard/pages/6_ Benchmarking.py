@@ -109,30 +109,62 @@ if selected_industry:
     st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
         # Function to create and download PowerPoint presentation
-    def create_ppt(income_df, balance_df):
-        prs = Presentation()
-        slide_layout = prs.slide_layouts[5]  # Title and Content layout
+def create_ppt(income_df, balance_df):
+    prs = Presentation()
+    slide_layout = prs.slide_layouts[5]  # Title and Content layout
 
-        # Income Statement slide
-        slide = prs.slides.add_slide(slide_layout)
-        title = slide.shapes.title
-        title.text = "Income Statement"
-        for i, row in income_df.iterrows():
-            slide.shapes.add_textbox(Inches(1), Inches(1 + i * 0.5), Inches(8), Inches(0.5)).text = f"{row['LineItems']}: {row['RMA Percent']} | {row['Public Comp Percent']}"
+    # Income Statement slide with table
+    slide = prs.slides.add_slide(slide_layout)
+    title = slide.shapes.title
+    title.text = " "
 
-        # Balance Sheet slide
-        slide = prs.slides.add_slide(slide_layout)
-        title = slide.shapes.title
-        title.text = "Balance Sheet"
-        for i, row in balance_df.iterrows():
-            slide.shapes.add_textbox(Inches(1), Inches(1 + i * 0.5), Inches(8), Inches(0.5)).text = f"{row['LineItems']}: {row['RMA Percent']} | {row['Public Comp Percent']}"
+    # Define table dimensions
+    rows = len(income_df) + 1  # +1 for the header row
+    cols = 3  # LineItems, RMA Percent, Public Comp Percent
 
-        # Save to a BytesIO object
-        ppt_bytes = BytesIO()
-        prs.save(ppt_bytes)
-        ppt_bytes.seek(0)
-        return ppt_bytes
+    # Add table to slide
+    table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
 
-    # Button to download the PowerPoint file
-    ppt_bytes = create_ppt(income_statement_df, balance_sheet_df)
-    st.download_button(label="Download PowerPoint", data=ppt_bytes, file_name="Benchmarking_Report.pptx", mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
+    # Set table headers
+    table.cell(0, 0).text = "Income Statement"
+    table.cell(0, 1).text = "RMA"
+    table.cell(0, 2).text = "Public Comps"
+
+    # Fill table rows with data
+    for i, row in income_df.iterrows():
+        table.cell(i + 1, 0).text = str(row['LineItems'])
+        table.cell(i + 1, 1).text = str(row['RMA Percent'] if pd.notnull(row['RMA Percent']) else 'N/A')
+        table.cell(i + 1, 2).text = str(row['Public Comp Percent'] if pd.notnull(row['Public Comp Percent']) else 'N/A')
+
+    # Balance Sheet slide with table
+    slide = prs.slides.add_slide(slide_layout)
+    title = slide.shapes.title
+    title.text = " "
+
+    # Define table dimensions
+    rows = len(balance_df) + 1  # +1 for the header row
+    cols = 3  # LineItems, RMA Percent, Public Comp Percent
+
+    # Add table to slide
+    table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
+
+    # Set table headers
+    table.cell(0, 0).text = "Balance Sheet"
+    table.cell(0, 1).text = "RMA"
+    table.cell(0, 2).text = "Public Comps"
+
+    # Fill table rows with data
+    for i, row in balance_df.iterrows():
+        table.cell(i + 1, 0).text = str(row['LineItems'])
+        table.cell(i + 1, 1).text = str(row['RMA Percent'] if pd.notnull(row['RMA Percent']) else 'N/A')
+        table.cell(i + 1, 2).text = str(row['Public Comp Percent'] if pd.notnull(row['Public Comp Percent']) else 'N/A')
+
+    # Save to a BytesIO object
+    ppt_bytes = BytesIO()
+    prs.save(ppt_bytes)
+    ppt_bytes.seek(0)
+    return ppt_bytes
+
+# Button to download the PowerPoint file
+ppt_bytes = create_ppt(income_statement_df, balance_sheet_df)
+st.download_button(label="Download PowerPoint", data=ppt_bytes, file_name="Benchmarking_Report.pptx", mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
