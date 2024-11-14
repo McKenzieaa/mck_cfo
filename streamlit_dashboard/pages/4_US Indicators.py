@@ -374,8 +374,8 @@ industry_mapping = {
     'Food at elementary and secondary schools': 'CUSR0000SSFV031A'
     }
 
-file_path = r"streamlit_dashboard/data/CPI_industry.txt"
-ppi_file_path = r"streamlit_dashboard/data/PPI.txt"
+file_path = r"streamlit_dashboard/data/CPI_industry.csv"
+ppi_file_path = r"streamlit_dashboard/data/PPI.csv"
 # Load CPI data
 df = pd.read_csv(file_path, delimiter=',').dropna().reset_index(drop=True)
 df_unpivoted = df.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
