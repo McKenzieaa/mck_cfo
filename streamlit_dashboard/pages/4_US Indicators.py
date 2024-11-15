@@ -540,7 +540,7 @@ def plot_external_driver(selected_indicators):
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
-def plot_cpi_ppi(selected_series_id):
+def plot_cpi_ppi(selected_series_id,selected_cpi_series):
     """
     Plot CPI and PPI data on a single chart for comparison.
     """
@@ -592,7 +592,7 @@ def plot_cpi_ppi(selected_series_id):
 
     # Configure the layout of the chart
     fig.update_layout(
-        title=f'CPI-US, CPI-{selected_series_id} & PPI-US',
+        title=f'CPI-US, CPI-{selected_cpi_series} & PPI-US',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
