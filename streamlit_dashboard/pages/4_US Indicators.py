@@ -458,6 +458,7 @@ def plot_labour_unemployment():
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['population'],
         fill='tozeroy',  # Area chart
+        fillcolor='#032649', 
         name='Population',
         mode='lines',
         line=dict(color='#032649'),
@@ -498,7 +499,7 @@ def plot_labour_unemployment():
             side='right'
         ),
         legend=dict(
-            x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
+            orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
         ),
         hovermode='x unified',  # Unified hover mode
         template='plotly_white'
@@ -594,6 +595,13 @@ def plot_cpi_ppi(selected_series_id):
         title='CPI and PPI Comparison',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
+        legend=dict(
+            orientation="h",  # Set legend to horizontal
+            x=0.01,  # Adjust x position (left margin)
+            y=0.99,  # Adjust y position (top margin)
+            bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
+            font=dict(size=8)
+    ),
         hovermode='x unified'
     )
     st.plotly_chart(fig, use_container_width=True)#, key=key)
@@ -610,6 +618,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='tozeroy',  # Create area chart by filling to the x-axis
+            fillcolor='#032649', 
             line=dict(color='#032649', width=2),
             marker=dict(size=6)
         ),
@@ -641,6 +650,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'GDP Industry - Value',
                 fill='tozeroy',  # Area chart
+                fillcolor='#032649', 
                 line=dict(color='#EB8928', width=2),
                 marker=dict(size=6)
             ),
@@ -667,9 +677,10 @@ def plot_gdp_and_industry(selected_industry=None):
         yaxis_title='Value',
         yaxis2_title='Percent Change',
         legend=dict(
+            orientation="h",
             x=0.01, y=0.99,  
             bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
-            font=dict(size=10)
+            font=dict(size=8)
         ),
         template='plotly_white'
     )
