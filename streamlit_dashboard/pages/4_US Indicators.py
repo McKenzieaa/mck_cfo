@@ -434,7 +434,7 @@ df_combined = pd.merge(
    )
 
     # Filter GDP data
-df_gdp_filtered = df_combined[df_combined['Industry'] == 'Private industries']
+df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 
     # Create a list of industries excluding GDP for the dropdown
 industry_options = df_combined['Industry'].unique().tolist()
@@ -592,7 +592,7 @@ def plot_cpi_ppi(selected_series_id):
 
     # Configure the layout of the chart
     fig.update_layout(
-        title=f'CPI-US, CPI-{selected_series_id} & PPI-US',
+        title=f'CPI-US, CPI by Industry & PPI-US',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
@@ -672,7 +672,7 @@ def plot_gdp_and_industry(selected_industry=None):
 
     # Update layout
     fig.update_layout(
-        title=f'GDP and {selected_industry} - Value & Percent',
+        title=f'GDP-US & {selected_industry}-Value & Percent',
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
