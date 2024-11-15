@@ -78,10 +78,14 @@ try:
     public_comp_df['EV/Revenue'] = public_comp_df['Enterprise Value'] / public_comp_df['Revenue']
     public_comp_df['EV/EBITDA'] = public_comp_df['Enterprise Value'] / public_comp_df['EBITDA']
 
-    # Compute the DataFrame for use
+    # Get unique industries and locations from Public Comps
+    public_industries = public_comp_df['Industry'].dropna().unique().compute().tolist()
+    public_locations = public_comp_df['Location'].dropna().unique().compute().tolist()
+
+    # Compute the DataFrame for use in Streamlit
     precedent_df = precedent_df.compute()
     public_comp_df = public_comp_df.compute()
-
+    
 except Exception as e:
     st.error(f"Error loading data from S3: {e}")
     st.stop()
