@@ -245,7 +245,7 @@ df_rma = df_rma.rename(columns={
     'Value': 'Value',
     'Percent': 'Percent'
 })
-df_public_comp = pd.read_excel(public_comp_path, sheet_name="FY 2023", storage_options=storage_options, engine='openpyxl')
+df_public_comp = dd.read_parquet(public_comp_path, storage_options=storage_options)
 
 # Load data for both Public Comps and Precedent Transactions
 try:
