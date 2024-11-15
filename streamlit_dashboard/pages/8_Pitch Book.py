@@ -262,7 +262,7 @@ if missing_cols:
 valid_cols = [col for col in usecols if col in df_public_comp.columns]
 df_public_comp = df_public_comp[valid_cols]
 df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
-df_public_comp = df_public_comp[df_public_comp[valid_cols].notnull().all(axis=1)]
+df_public_comp = df_public_comp[df_public_comp[valid_cols].notnull()]
 df_public_comp = df_public_comp.compute()
 
 # Load data for both Public Comps and Precedent Transactions
