@@ -647,7 +647,7 @@ def plot_gdp_and_industry(selected_industry=None):
             go.Scatter(
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Value'],
-                mode='none',
+                mode='lines',
                 name=f'GDP Industry - Value',
                 fill='tozeroy',  # Area chart
                 fillcolor='rgba(3,38,73,1)', 
