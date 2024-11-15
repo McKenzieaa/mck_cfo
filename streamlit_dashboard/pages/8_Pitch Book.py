@@ -1226,18 +1226,62 @@ with st.expander("Benchmarking"):
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-if st.button("Export Pitchbook"):
-    slides_data = [
-        ("Precedent Transactions", [fig1_precedent,fig2_precedent]),
-        ("Public Comps", [fig1_public,fig2_public]),
-        ("US Indicators",[labour_fig, external_fig, gdp_fig, cpi_ppi_fig])
-        (f"{state_name} - State Indicators", [labour_fig, gdp_fig]),
-        ("Benchmarking", [income_statement_df, balance_sheet_df])
-    ]
+# if st.button("Export Pitchbook"):
+#     slides_data = [
+#         ("Precedent Transactions", [fig1_precedent,fig2_precedent]),
+#         ("Public Comps", [fig1_public,fig2_public]),
+#         ("US Indicators",[labour_fig, external_fig, gdp_fig, cpi_ppi_fig])
+#         (f"{state_name} - State Indicators", [labour_fig, gdp_fig]),
+#         ("Benchmarking", [income_statement_df, balance_sheet_df])
+#     ]
+#     ppt_bytes = export_charts_to_ppt(slides_data)
+#     st.download_button(
+#         label="Download PowerPoint",
+#         data=ppt_bytes,
+#         file_name=f"pitch_book{today}.pptx",
+#         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+#     )
+# # Check and add valid charts to slides_data
+slides_data = []
+
+# Precedent Transactions Charts
+if 'fig1_precedent' in locals() and fig1_precedent:
+    slides_data.append(("Precedent Transactions", [fig1_precedent, fig2_precedent]))
+
+# Public Comps Charts
+if 'fig1_public' in locals() and fig1_public:
+    slides_data.append(("Public Comps", [fig1_public, fig2_public]))
+
+# State Indicators Charts
+if 'labour_fig' in locals() and labour_fig:
+    slides_data.append(("State Indicators", [labour_fig, gdp_fig]))
+
+# Benchmarking Charts
+if 'income_statement_df' in locals() and not income_statement_df.empty:
+    slides_data.append(("Benchmarking", [income_statement_df, balance_sheet_df]))
+
+# US Indicators Charts
+us_indicators_charts = []
+if 'labour_fig' in locals() and labour_fig:
+    us_indicators_charts.append(labour_fig)
+if 'external_fig' in locals() and external_fig:
+    us_indicators_charts.append(external_fig)
+if 'gdp_fig' in locals() and gdp_fig:
+    us_indicators_charts.append(gdp_fig)
+if 'cpi_ppi_fig' in locals() and cpi_ppi_fig:
+    us_indicators_charts.append(cpi_ppi_fig)
+
+if us_indicators_charts:
+    slides_data.append(("US Indicators", us_indicators_charts))
+
+# Ensure there are slides to export
+if slides_data:
     ppt_bytes = export_charts_to_ppt(slides_data)
     st.download_button(
-        label="Download PowerPoint",
+        label="Download Pitch Book",
         data=ppt_bytes,
-        file_name=f"pitch_book{today}.pptx",
+        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
     )
+else:
+    st.warning("No valid charts or tables to export.")
