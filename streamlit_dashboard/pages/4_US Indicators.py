@@ -458,7 +458,7 @@ def plot_labour_unemployment():
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['population'],
         fill='toself',  # Area chart
-        fillcolor='#032649', 
+        fillcolor='rgba(3,38,73,1)', 
         name='Population',
         mode='lines',
         line=dict(color='#032649'),
@@ -618,7 +618,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='toself',  # Create area chart by filling to the x-axis
-            fillcolor='#032649', 
+            fillcolor='rgba(235, 137, 40, 1)', 
             line=dict(color='#032649', width=2),
             marker=dict(size=6)
         ),
@@ -650,7 +650,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'GDP Industry - Value',
                 fill='tozeroy',  # Area chart
-                fillcolor='#032649', 
+                fillcolor='rgba(3,38,73,1)', 
                 line=dict(color='#EB8928', width=2),
                 marker=dict(size=6)
             ),
