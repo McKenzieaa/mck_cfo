@@ -7,7 +7,9 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import s3fs  # For accessing S3 data
+from datetime import date
 
+today = date.today().strftime("%Y-%m-%d")
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(slides_data):
     ppt = Presentation()
@@ -26,7 +28,7 @@ def export_charts_to_ppt(slides_data):
     return ppt_bytes
 
 # Streamlit page configuration
-st.set_page_config(page_title="Valuation Analysis", layout="wide")
+st.set_page_config(page_title="Pitch Book", layout="wide")
 
 # Define S3 file paths
 precedent_path = "s3://documentsapi/industry_data/precedent.parquet"
@@ -103,7 +105,8 @@ with st.expander("Precedent Transactions"):
         ]
         filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
         filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
-        st.title("Precedent Transactions")
+        
+        st.subheader("Precedent Transactions")
         gb = GridOptionsBuilder.from_dataframe(filtered_precedent_df)
         gb.configure_selection(selection_mode="multiple", use_checkbox=True)
         gb.configure_column(
@@ -155,25 +158,67 @@ with st.expander("Public Comps"):
     selected_industries = col1.multiselect("Select Industry", public_industries, key="public_industries")
     selected_locations = col2.multiselect("Select Location", public_locations, key="public_locations")
     if selected_industries and selected_locations:
-        filtered_public_df = public_comp_df[
-            public_comp_df['Industry'].isin(selected_industries) & public_comp_df['Location'].isin(selected_locations)
-        ]
-        st.title("Public Comps")
-        AgGrid(filtered_public_df, height=400, width='100%')
-        # Example chart
-        fig1_public = px.bar(filtered_public_df, x="Company", y="EV/Revenue", title="EV/Revenue - Public Comps")
-        st.plotly_chart(fig1_public)
+        filtered_df = public_comp_df[public_comp_df['Industry'].isin(selected_industries) & public_comp_df['Location'].isin(selected_locations)]
+        filtered_df = filtered_df[['Company',  'EV/Revenue', 'EV/EBITDA', 'Business Description']]
+        filtered_df['EV/Revenue'] = filtered_df['EV/Revenue'].round(1)
+        filtered_df['EV/EBITDA'] = filtered_df['EV/EBITDA'].round(1)
+
+        # Set up Ag-Grid for selection
+        st.subheader("Public Listed Companies")
+        gb = GridOptionsBuilder.from_dataframe(filtered_df)
+        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        gb.configure_column(
+            field="Company",
+            tooltipField="Business Description",
+            maxWidth=400
+        )
+        gb.configure_columns(["Business Description"], hide=False)    
+        grid_options = gb.build()
+
+        # Display Ag-Grid table
+        grid_response = AgGrid(
+            filtered_df,
+            gridOptions=grid_options,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            height=400,
+            width='100%',
+            theme='streamlit'
+        )
+
+        selected_data = pd.DataFrame(grid_response['selected_rows'])
+
+        if not selected_data.empty:
+            avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
+
+            color_ev_revenue = "#032649"  # Default Plotly blue
+            color_ev_ebitda = "#032649"   # Default Plotly red
+
+            # Create the EV/Revenue chart with data labels
+            fig1_public = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
+            fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
+            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
+
+            # Display the EV/Revenue chart
+            st.plotly_chart(fig1_public)
+
+            # Create the EV/EBITDA chart with data labels
+            fig2_public = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
+            fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='inside')
+            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
+
+            # Display the EV/EBITDA chart
+            st.plotly_chart(fig2_public)
 
 # Button to export combined PowerPoint
-if st.button("Export Combined PowerPoint"):
+if st.button("Export Pitchbook"):
     slides_data = [
         ("Precedent Transactions", [fig1_precedent],[fig2_precedent]),
-        ("Public Comps", [fig1_public])
+        ("Public Comps", [fig1_public],[fig2_public])
     ]
     ppt_bytes = export_charts_to_ppt(slides_data)
     st.download_button(
         label="Download PowerPoint",
         data=ppt_bytes,
-        file_name="valuation_analysis.pptx",
+        file_name=f"pitch_book{today}.pptx",
         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
     )
