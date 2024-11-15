@@ -85,15 +85,15 @@ try:
     # Compute the DataFrame for use in Streamlit
     precedent_df = precedent_df.compute()
     public_comp_df = public_comp_df.compute()
-    
+
 except Exception as e:
     st.error(f"Error loading data from S3: {e}")
     st.stop()
 
 # Accordion for Precedent Transactions
 with st.expander("Precedent Transactions"):
-    industries = precedent_df['Industry'].unique().compute()
-    locations = precedent_df['Location'].unique().compute()
+    industries = precedent_df['Industry'].dropna().unique()
+    locations = precedent_df['Location'].dropna().unique()
     col1, col2 = st.columns(2)
     selected_industries = col1.multiselect("Select Industry", industries, key="precedent_industries")
     selected_locations = col2.multiselect("Select Location", locations, key="precedent_locations")
