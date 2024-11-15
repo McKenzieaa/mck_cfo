@@ -434,7 +434,7 @@ df_combined = pd.merge(
    )
 
     # Filter GDP data
-df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
+df_gdp_filtered = df_combined[df_combined['Industry'] == 'Private industries']
 
     # Create a list of industries excluding GDP for the dropdown
 industry_options = df_combined['Industry'].unique().tolist()
@@ -457,7 +457,7 @@ def plot_labour_unemployment():
     fig.add_trace(go.Scatter(
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['population'],
-        fill='toself',  # Area chart
+        fill='tozeroy',  # Area chart
         fillcolor='rgba(235, 137, 40, 1)', 
         name='Population',
         mode='none',
