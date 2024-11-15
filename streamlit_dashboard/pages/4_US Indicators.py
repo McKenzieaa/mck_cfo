@@ -540,7 +540,7 @@ def plot_external_driver(selected_indicators):
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
-def plot_cpi_ppi(selected_series_id,selected_cpi_series):
+def plot_cpi_ppi(selected_series_id):
     """
     Plot CPI and PPI data on a single chart for comparison.
     """
@@ -592,7 +592,7 @@ def plot_cpi_ppi(selected_series_id,selected_cpi_series):
 
     # Configure the layout of the chart
     fig.update_layout(
-        title=f'CPI-US, CPI-{selected_cpi_series} & PPI-US',
+        title=f'CPI-US, CPI-{selected_series_id} & PPI-US',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
@@ -724,7 +724,7 @@ def get_us_indicators_layout():
     st.title("US Indicators Dashboard")
 
     # Labour Force & Unemployment Data
-    st.subheader("Labour Force & Unemployment Data")
+    st.subheader("Labour Force & Unemployment")
     labour_fig = plot_labour_unemployment()
 
     # External Driver Indicators
@@ -748,7 +748,7 @@ def get_us_indicators_layout():
     gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
 
     # CPI and PPI Comparison
-    st.subheader("CPI and PPI Comparison")
+    st.subheader("CPI & PPI")
     selected_cpi_series = st.selectbox(
         "Select CPI Industry", 
         list(industry_mapping.keys()), 
