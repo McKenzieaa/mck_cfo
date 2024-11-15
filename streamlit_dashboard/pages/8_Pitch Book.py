@@ -436,29 +436,30 @@ with st.expander("State Indicators"):
     gdp_fig = plot_gdp_chart(state_name)
 
 with st.expander("Benchmarking"):
-
+    # Create dropdown and process data for RMA and public comps
     industries_rma = df_rma[df_rma['Industry'].notnull()]['Industry'].compute().unique()
     industries_public = df_public_comp[df_public_comp['Industry'].notnull()]['Industry'].unique()
     industries = sorted(set(industries_rma).union(set(industries_public)))
+
     selected_industry = st.selectbox("Select Industry", industries)
     if selected_industry:
         filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
         filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
+
+        # Income Statement and Balance Sheet filtering and processing
         income_statement_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Income Statement'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
         balance_sheet_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Balance Sheet'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
-        filtered_df_public = df_public_comp[df_public_comp['Industry'] == selected_industry]
-        df_unpivoted = pd.melt(
-            filtered_df_public,
-            id_vars=["Name", "Country", "Industry", "Business Description", "SIC Code"],
-            var_name="LineItems",
-            value_name="Value"
-        )
-        df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
-        df_unpivoted['Value'] = pd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0) * 100
-        df_unpivoted = df_unpivoted.groupby('LineItems')['Value'].mean().reset_index()
-        df_unpivoted = df_unpivoted.rename(columns={'Value': 'Public Comp Percent'})
-        df_unpivoted['Public Comp Percent'] = df_unpivoted['Public Comp Percent'].round(0).astype(int).astype(str) + '%'
 
+        filtered_df_public = df_public_comp[df_public_comp['Industry'] == selected_industry]
+        df_unpivoted = dd.melt(filtered_df_public,id_vars=["Name", "Industry"],var_name="LineItems",value_name="Value")
+        df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
+        df_unpivoted['Value'] = dd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0) * 100
+        df_unpivoted = df_unpivoted.groupby('LineItems').agg({'Value': 'mean'}).reset_index()
+        df_unpivoted = df_unpivoted.rename(columns={'Value': 'Public Comp Percent'})
+        df_unpivoted['Public Comp Percent'] = (df_unpivoted['Public Comp Percent'].round(0).astype(int).astype(str) + '%')
+        df_unpivoted = df_unpivoted.compute()
+
+        # Prepare final dataframes
         income_statement_df = pd.merge(
             pd.DataFrame({'LineItems': ["Revenue", "COGS", "Gross Profit", "EBITDA", "Net Income"]}),
             income_statement_df_rma,
@@ -480,8 +481,10 @@ with st.expander("Benchmarking"):
             on='LineItems',
             how='left'
         )
+
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna("N/A"), hide_index=True)
+
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna("N/A"), hide_index=True)
 
