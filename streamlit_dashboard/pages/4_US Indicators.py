@@ -618,7 +618,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Value',
             fill='toself',  # Create area chart by filling to the x-axis
-            fillcolor='rgba(235, 137, 40, 0.6)', 
+            fillcolor='#032649', #'rgba(235, 137, 40, 0.6)', 
             line=dict(color='#032649', width=2),
             marker=dict(size=6)
         ),
@@ -632,7 +632,7 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Percent Change'],
             mode='lines',
             name='GDP - Percent Change',
-            line=dict(color='#595959 ', width=2, dash='solid'),
+            line=dict(color='#A5A5A5', width=2, dash='solid'),
             marker=dict(size=6)
         ),
         secondary_y=True
