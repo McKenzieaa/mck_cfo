@@ -102,7 +102,6 @@ with st.expander("Precedent Transactions"):
             precedent_df['Industry'].isin(selected_industries) & precedent_df['Location'].isin(selected_locations)
         ]
         filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
-        filtered_precedent_df = filtered_precedent_df.compute()
         filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
         st.title("Precedent Transactions")
         gb = GridOptionsBuilder.from_dataframe(filtered_precedent_df)
