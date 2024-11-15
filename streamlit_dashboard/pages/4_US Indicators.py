@@ -457,7 +457,7 @@ def plot_labour_unemployment():
     fig.add_trace(go.Scatter(
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['population'],
-        fill='tozeroy',  # Area chart
+        fill='toself',  # Area chart
         fillcolor='#032649', 
         name='Population',
         mode='lines',
@@ -617,7 +617,7 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Value'],
             mode='lines',
             name='GDP - Value',
-            fill='tozeroy',  # Create area chart by filling to the x-axis
+            fill='toself',  # Create area chart by filling to the x-axis
             fillcolor='#032649', 
             line=dict(color='#032649', width=2),
             marker=dict(size=6)
