@@ -101,11 +101,54 @@ with st.expander("Precedent Transactions"):
         filtered_precedent_df = precedent_df[
             precedent_df['Industry'].isin(selected_industries) & precedent_df['Location'].isin(selected_locations)
         ]
+        filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
+        filtered_precedent_df = filtered_precedent_df.compute()
+        filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
         st.title("Precedent Transactions")
-        AgGrid(filtered_precedent_df, height=400, width='100%')
-        # Example chart
-        fig1_precedent = px.bar(filtered_precedent_df, x="Year", y="EV/Revenue", title="EV/Revenue - Precedent Transactions")
+        gb = GridOptionsBuilder.from_dataframe(filtered_precedent_df)
+        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        gb.configure_column(
+            field="Target",
+            tooltipField="Business Description",
+            maxWidth=400
+            )
+        gb.configure_columns(["Business Description"], hide=False)    
+        grid_options = gb.build()
+
+        # Display Ag-Grid table
+        grid_response = AgGrid(
+            filtered_precedent_df,
+            gridOptions=grid_options,
+            update_mode=GridUpdateMode.SELECTION_CHANGED,
+            height=400,
+            width='100%',
+            theme='streamlit'
+        )
+        selected_data = pd.DataFrame(grid_response['selected_rows'])
+    if not selected_data.empty:
+
+        avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
+        avg_data['Year'] = avg_data['Year'].astype(int)
+
+        # Define colors
+        color_ev_revenue = "#032649"  # Default Plotly blue
+        color_ev_ebitda = "#032649"   # Default Plotly red
+
+        # Create the EV/Revenue chart with data labels
+        fig1_precedent = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
+        fig1_precedent.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
+        fig1_precedent.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
+
+        # Display the EV/Revenue chart
         st.plotly_chart(fig1_precedent)
+
+        # Create the EV/EBITDA chart with data labels
+        fig2_precedent = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
+        fig2_precedent.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='inside')
+        fig2_precedent.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
+
+        # Display the EV/EBITDA chart
+        st.plotly_chart(fig2_precedent)
 
 # Accordion for Public Comps
 with st.expander("Public Comps"):
@@ -125,7 +168,7 @@ with st.expander("Public Comps"):
 # Button to export combined PowerPoint
 if st.button("Export Combined PowerPoint"):
     slides_data = [
-        ("Precedent Transactions", [fig1_precedent]),
+        ("Precedent Transactions", [fig1_precedent],[fig2_precedent]),
         ("Public Comps", [fig1_public])
     ]
     ppt_bytes = export_charts_to_ppt(slides_data)
