@@ -158,7 +158,7 @@ def plot_unemployment_labour_chart(state_name):
         last_row = merged_data.iloc[-1]
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Unemployment'],
-            text=f"Last: {last_row['Unemployment']:.1f}"+"%", showarrow=True, arrowhead=1, ax=-40, ay=-40
+            text=f" {last_row['Unemployment']:.1f}"+"%", showarrow=True, arrowhead=1, ax=-40, ay=-40
         )
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Labour Force'],
