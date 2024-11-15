@@ -592,7 +592,7 @@ def plot_cpi_ppi(selected_series_id):
 
     # Configure the layout of the chart
     fig.update_layout(
-        title=f'CPI-US, CPI-{selected_series_id} and PPI Comparison',
+        title=f'CPI-US, CPI-{selected_series_id} & PPI-US',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
