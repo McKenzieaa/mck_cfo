@@ -19,8 +19,6 @@ s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies U
 
 # Load the RMA data from S3 with Dask
 df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)  # Set to True if the bucket is public
-
-# Rename columns if needed
 df_rma = df_rma.rename(columns={
     'ReportID': 'Report_ID',      
     'Line Items': 'LineItems',    
@@ -57,7 +55,7 @@ balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Cur
 
 # Filter and prepare data only if an industry is selected
 if selected_industry:
-    # Filter RMA data
+
     filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
 
     # Map "Assets" and "Liabilities & Equity" to "Balance Sheet" if applicable

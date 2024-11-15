@@ -1,4 +1,5 @@
 import requests
+import numpy as np
 import zipfile
 import io
 import dask.dataframe as dd
@@ -237,15 +238,15 @@ def plot_gdp_chart(state_name):
 precedent_path = "s3://documentsapi/industry_data/precedent.parquet"
 public_comp_path = "s3://documentsapi/industry_data/public_comp_data.parquet"
 s3_path_rma = "s3://documentsapi/industry_data/rma_data.parquet"
+s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
 
-df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)
+df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)  # Set to True if the bucket is public
 df_rma = df_rma.rename(columns={
-    'ReportID': 'Report_ID',
-    'Line Items': 'LineItems',
-    'Value': 'Value',
-    'Percent': 'Percent'
+    'ReportID': 'Report_ID',      
+    'Line Items': 'LineItems',    
+    'Value': 'Value',             
+    'Percent': 'Percent' 
 })
-df_public_comp = dd.read_parquet(public_comp_path, storage_options=storage_options)
 usecols = [
     "Name", "Industry", "Revenue (in %)", "COGS (in %)", "Gross Profit (in %)", "EBITDA (in %)",
     "Operating Profit (in %)", "Other Expenses (in %)", "Operating Expenses (in %)", "Net Income (in %)",
@@ -255,14 +256,9 @@ usecols = [
     "Total Current Liabilities (in %)", "Other Liabilities (in %)", "Total Liabilities (in %)",
     "Net Worth (in %)", "Total Liabilities & Equity (in %)"
 ]
-valid_cols = [col for col in usecols if col in df_public_comp.columns]
-missing_cols = [col for col in usecols if col not in df_public_comp.columns]
-if missing_cols:
-    st.warning(f"The following columns are missing in the data: {missing_cols}")
-valid_cols = [col for col in usecols if col in df_public_comp.columns]
-df_public_comp = df_public_comp[valid_cols]
+# Load the public company data
+df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options,usecols=usecols, engine='openpyxl')
 df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
-df_public_comp = df_public_comp.compute()
 
 # Load data for both Public Comps and Precedent Transactions
 try:
@@ -437,58 +433,69 @@ with st.expander("State Indicators"):
 
 with st.expander("Benchmarking"):
     # Create dropdown and process data for RMA and public comps
-    industries_rma = df_rma[df_rma['Industry'].notnull()]['Industry'].compute().unique()
-    industries_public = df_public_comp[df_public_comp['Industry'].notnull()]['Industry'].unique()
+    industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
+    industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries = sorted(set(industries_rma).union(set(industries_public)))
-
+    
+    income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses","Profit Before Taxes", "Net Income"]
+    balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets","Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
+    
     selected_industry = st.selectbox("Select Industry", industries)
     if selected_industry:
-        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
-        filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
 
-        # Income Statement and Balance Sheet filtering and processing
+        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
+
+        if 'Report_ID' in filtered_df_rma.columns:
+            filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
+
         income_statement_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Income Statement'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
         balance_sheet_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Balance Sheet'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
 
         filtered_df_public = df_public_comp[df_public_comp['Industry'] == selected_industry]
-        df_unpivoted = dd.melt(filtered_df_public,id_vars=["Name", "Industry"],var_name="LineItems",value_name="Value")
-        df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
-        df_unpivoted['Value'] = dd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0) * 100
-        df_unpivoted = df_unpivoted.groupby('LineItems').agg({'Value': 'mean'}).reset_index()
-        df_unpivoted = df_unpivoted.rename(columns={'Value': 'Public Comp Percent'})
-        df_unpivoted['Public Comp Percent'] = (df_unpivoted['Public Comp Percent'].round(0).astype(int).astype(str) + '%')
-        df_unpivoted = df_unpivoted.compute()
 
-        # Prepare final dataframes
+        df_unpivoted = pd.melt(
+            filtered_df_public,
+            id_vars=["Name", "Industry"],
+            var_name="LineItems",
+            value_name="Value"
+        )
+        df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
+        df_unpivoted['Value'] = pd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0) * 100
+        df_unpivoted = df_unpivoted.groupby('LineItems')['Value'].mean().reset_index()
+        df_unpivoted = df_unpivoted.rename(columns={'Value': 'Public Comp Percent'})
+        df_unpivoted['Public Comp Percent'] = df_unpivoted['Public Comp Percent'].round(0).astype(int).astype(str) + '%'
+
+        income_statement_df_public = df_unpivoted[df_unpivoted['LineItems'].isin(income_statement_items)]
+        balance_sheet_df_public = df_unpivoted[df_unpivoted['LineItems'].isin(balance_sheet_items)]
+
         income_statement_df = pd.merge(
-            pd.DataFrame({'LineItems': ["Revenue", "COGS", "Gross Profit", "EBITDA", "Net Income"]}),
+            pd.DataFrame({'LineItems': income_statement_items}),
             income_statement_df_rma,
             on='LineItems',
             how='left'
         ).merge(
-            df_unpivoted,
+            income_statement_df_public,
             on='LineItems',
             how='left'
         )
 
         balance_sheet_df = pd.merge(
-            pd.DataFrame({'LineItems': ["Cash", "Total Current Assets", "PPE", "Total Liabilities", "Net Worth"]}),
+            pd.DataFrame({'LineItems': balance_sheet_items}),
             balance_sheet_df_rma,
             on='LineItems',
             how='left'
         ).merge(
-            df_unpivoted,
+            balance_sheet_df_public,
             on='LineItems',
             how='left'
         )
 
         st.write("Income Statement")
-        st.dataframe(income_statement_df.fillna("N/A"), hide_index=True)
+        st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
         st.write("Balance Sheet")
-        st.dataframe(balance_sheet_df.fillna("N/A"), hide_index=True)
+        st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-# Button to export combined PowerPoint
 if st.button("Export Pitchbook"):
     slides_data = [
         ("Precedent Transactions", [fig1_precedent],[fig2_precedent]),
