@@ -72,7 +72,7 @@ if selected_industry:
 
     df_unpivoted = pd.melt(
         filtered_df_public,
-        id_vars=["Name", "Country", "Industry", "Business Description", "SIC Code"],
+        id_vars=["Name", "Industry"],
         var_name="LineItems",
         value_name="Value"
     )
