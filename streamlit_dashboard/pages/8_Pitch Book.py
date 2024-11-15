@@ -79,8 +79,8 @@ try:
     public_comp_df['EV/EBITDA'] = public_comp_df['Enterprise Value'] / public_comp_df['EBITDA']
 
     # Get unique industries and locations from Public Comps
-    public_industries = public_comp_df['Industry'].dropna().unique().compute().tolist()
-    public_locations = public_comp_df['Location'].dropna().unique().compute().tolist()
+    public_industries = public_comp_df['Industry'].dropna().compute().unique().tolist()
+    public_locations = public_comp_df['Location'].dropna().compute().unique().tolist()
 
     # Compute the DataFrame for use in Streamlit
     precedent_df = precedent_df.compute()
@@ -100,7 +100,7 @@ with st.expander("Precedent Transactions"):
     if selected_industries and selected_locations:
         filtered_precedent_df = precedent_df[
             precedent_df['Industry'].isin(selected_industries) & precedent_df['Location'].isin(selected_locations)
-        ].compute()
+        ]
         st.title("Precedent Transactions")
         AgGrid(filtered_precedent_df, height=400, width='100%')
         # Example chart
@@ -109,11 +109,9 @@ with st.expander("Precedent Transactions"):
 
 # Accordion for Public Comps
 with st.expander("Public Comps"):
-    industries = public_comp_df['Industry'].dropna().unique()
-    locations = public_comp_df['Location'].dropna().unique()
     col1, col2 = st.columns(2)
-    selected_industries = col1.multiselect("Select Industry", industries, key="public_industries")
-    selected_locations = col2.multiselect("Select Location", locations, key="public_locations")
+    selected_industries = col1.multiselect("Select Industry", public_industries, key="public_industries")
+    selected_locations = col2.multiselect("Select Location", public_locations, key="public_locations")
     if selected_industries and selected_locations:
         filtered_public_df = public_comp_df[
             public_comp_df['Industry'].isin(selected_industries) & public_comp_df['Location'].isin(selected_locations)
