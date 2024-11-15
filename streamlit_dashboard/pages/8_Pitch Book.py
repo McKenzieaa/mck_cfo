@@ -255,15 +255,15 @@ usecols = [
     "Total Current Liabilities (in %)", "Other Liabilities (in %)", "Total Liabilities (in %)",
     "Net Worth (in %)", "Total Liabilities & Equity (in %)"
 ]
-
+valid_cols = [col for col in usecols if col in df_public_comp.columns]
 missing_cols = [col for col in usecols if col not in df_public_comp.columns]
 if missing_cols:
     st.warning(f"The following columns are missing in the data: {missing_cols}")
-
+meta = {col: df_public_comp.dtypes[col] for col in valid_cols}
 valid_cols = [col for col in usecols if col in df_public_comp.columns]
 df_public_comp = df_public_comp[valid_cols]
-df_public_comp.columns = df_public_comp.columns.str.replace(r" \(in %\)", "", regex=True)
-df_public_comp = df_public_comp.dropna(subset=valid_cols)
+df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
+df_public_comp = df_public_comp.dropna(subset=valid_cols, meta=pd.DataFrame(columns=valid_cols).astype(meta))
 df_public_comp = df_public_comp.compute()
 
 # Load data for both Public Comps and Precedent Transactions
