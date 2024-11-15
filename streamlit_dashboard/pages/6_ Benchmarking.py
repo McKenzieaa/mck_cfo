@@ -27,9 +27,18 @@ df_rma = df_rma.rename(columns={
     'Value': 'Value',             
     'Percent': 'Percent' 
 })
-
+usecols = [
+    "Name", "Industry", "Revenue (in %)", "COGS (in %)", "Gross Profit (in %)", "EBITDA (in %)",
+    "Operating Profit (in %)", "Other Expenses (in %)", "Operating Expenses (in %)", "Net Income (in %)",
+    "Cash (in %)", "Accounts Receivables (in %)", "Inventories (in %)", "Other Current Assets (in %)",
+    "Total Current Assets (in %)", "Fixed Assets (in %)", "PPE (in %)", "Total Assets (in %)",
+    "Accounts Payable (in %)", "Short Term Debt (in %)", "Long Term Debt (in %)", "Other Current Liabilities (in %)",
+    "Total Current Liabilities (in %)", "Other Liabilities (in %)", "Total Liabilities (in %)",
+    "Net Worth (in %)", "Total Liabilities & Equity (in %)"
+]
 # Load the public company data
-df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options, engine='openpyxl')
+df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options,usecols=usecols, engine='openpyxl')
+df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
 
 # Filter out any missing or non-string values in the Industry column for both datasets
 industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
