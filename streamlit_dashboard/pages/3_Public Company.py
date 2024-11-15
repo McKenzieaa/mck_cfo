@@ -99,7 +99,7 @@ if selected_industries and selected_locations:
         avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
 
         color_ev_revenue = "#032649"  # Default Plotly blue
-        color_ev_ebitda = "#EB8928"   # Default Plotly red
+        color_ev_ebitda = "#032649"   # Default Plotly red
 
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
