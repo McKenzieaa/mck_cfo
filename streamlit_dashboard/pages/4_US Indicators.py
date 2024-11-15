@@ -458,7 +458,7 @@ def plot_labour_unemployment():
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
         y=merged['population'],
         fill='tozeroy',  # Area chart
-        fillcolor='rgba(235, 137, 40, 1)', 
+        fillcolor='#032649', 
         name='Population',
         mode='none',
         line=dict(color='#032649'),

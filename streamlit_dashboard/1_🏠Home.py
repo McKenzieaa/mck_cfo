@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Ensure that page configuration is the first Streamlit command
-st.set_page_config(page_title="McK", layout="wide", page_icon="🧊")
+st.set_page_config(page_title="mck", layout="wide", page_icon="🧊")
 
 # Custom CSS for styling
 def local_css(file_name):
