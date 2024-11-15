@@ -650,7 +650,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='none',
                 name=f'GDP Industry - Value',
                 fill='tozeroy',  # Area chart
-                fillcolor='rgba(3,38,73,1)', 
+                fillcolor='#EB8928', 
                 line=dict(color='#EB8928', width=2),
                 marker=dict(size=6)
             ),
