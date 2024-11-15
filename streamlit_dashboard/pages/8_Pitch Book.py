@@ -245,8 +245,8 @@ df_rma = df_rma.rename(columns={
     'Value': 'Value',
     'Percent': 'Percent'
 })
-df_public_comp = dd.read_parquet(public_comp_path, storage_options=storage_options)
-
+df_public_comp = dd.read_parquet(public_comp_path, storage_options=storage_options,usecols=["Name", "Industry", "Revenue (in %)", "COGS (in %)", "Gross Profit (in %)", "EBITDA (in %)",  "Operating Profit (in %)", "Other Expenses (in %)", "Operating Expenses (in %)", "Net Income (in %)", "Cash (in %)", "Accounts Receivables (in %)", "Inventories (in %)", "Other Current Assets (in %)", "Total Current Assets (in %)", "Fixed Assets (in %)", "PPE (in %)", "Total Assets (in %)",  "Accounts Payable (in %)", "Short Term Debt (in %)", "Long Term Debt (in %)", "Other Current Liabilities (in %)","Total Current Liabilities (in %)", "Other Liabilities (in %)", "Total Liabilities (in %)", "Net Worth (in %)", "Total Liabilities & Equity (in %)"])
+df_public_comp.columns = df_public_comp.columns.str.replace(" \(in %\)", "", regex=True)
 # Load data for both Public Comps and Precedent Transactions
 try:
     # Load Precedent Transactions Data
