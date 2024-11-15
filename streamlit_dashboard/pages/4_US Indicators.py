@@ -460,7 +460,7 @@ def plot_labour_unemployment():
         fill='toself',  # Area chart
         fillcolor='rgba(235, 137, 40, 1)', 
         name='Population',
-        mode='lines',
+        mode='none',
         line=dict(color='#032649'),
         yaxis='y1'
     ))
@@ -615,7 +615,7 @@ def plot_gdp_and_industry(selected_industry=None):
         go.Scatter(
             x=df_gdp_filtered['Year'],
             y=df_gdp_filtered['Value'],
-            mode='lines',
+            mode='none',
             name='GDP - Value',
             fill='toself',  # Create area chart by filling to the x-axis
             fillcolor='rgba(235, 137, 40, 1)', 
@@ -647,7 +647,7 @@ def plot_gdp_and_industry(selected_industry=None):
             go.Scatter(
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Value'],
-                mode='lines',
+                mode='none',
                 name=f'GDP Industry - Value',
                 fill='tozeroy',  # Area chart
                 fillcolor='rgba(3,38,73,1)', 
