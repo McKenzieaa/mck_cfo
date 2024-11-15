@@ -45,12 +45,15 @@ except KeyError:
 
 # Load data for both Public Comps and Precedent Transactions
 try:
+    # Load Precedent Transactions Data
     precedent_df = dd.read_parquet(
         precedent_path,
         storage_options=storage_options,
         usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
         dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
     )
+
+    # Load Public Comps Data
     public_comp_df = dd.read_parquet(
         public_comp_path,
         storage_options=storage_options,
@@ -62,8 +65,23 @@ try:
         'Revenue (in $)': 'Revenue',
         'EBITDA (in $)': 'EBITDA'
     })
+
+    # Ensure numeric conversion
+    public_comp_df['Enterprise Value'] = dd.to_numeric(public_comp_df['Enterprise Value'], errors='coerce')
+    public_comp_df['Revenue'] = dd.to_numeric(public_comp_df['Revenue'], errors='coerce')
+    public_comp_df['EBITDA'] = dd.to_numeric(public_comp_df['EBITDA'], errors='coerce')
+
+    # Drop rows with invalid data for division
+    public_comp_df = public_comp_df.dropna(subset=['Enterprise Value', 'Revenue', 'EBITDA'])
+
+    # Calculate EV/Revenue and EV/EBITDA
     public_comp_df['EV/Revenue'] = public_comp_df['Enterprise Value'] / public_comp_df['Revenue']
     public_comp_df['EV/EBITDA'] = public_comp_df['Enterprise Value'] / public_comp_df['EBITDA']
+
+    # Compute the DataFrame for use
+    precedent_df = precedent_df.compute()
+    public_comp_df = public_comp_df.compute()
+
 except Exception as e:
     st.error(f"Error loading data from S3: {e}")
     st.stop()
