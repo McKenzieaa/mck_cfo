@@ -1114,8 +1114,8 @@ with st.expander("Public Comps"):
             # Display the EV/EBITDA chart
             st.plotly_chart(fig2_public)
 
-with st.expander("US Indicators Dashboard"):
-    st.title("US Indicators Dashboard")
+with st.expander("US Indicators"):
+    st.subheader("US Indicators")
 
     # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment")
@@ -1152,8 +1152,8 @@ with st.expander("US Indicators Dashboard"):
     selected_series_id = industry_mapping[selected_cpi_series]
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
-
 with st.expander("State Indicators"):
+    st.subheader("State Indicators - US")
     state_name = st.selectbox("Select State", list(states_data_id.keys()), index=0)
     st.subheader(f"{state_name} - Unemployment & Labour Force")
     labour_fig = plot_unemployment_labour_chart(state_name)
@@ -1161,6 +1161,7 @@ with st.expander("State Indicators"):
     gdp_fig = plot_gdp_chart(state_name)
 
 with st.expander("Benchmarking"):
+    st.subheader("Benchmarking")
     # Create dropdown and process data for RMA and public comps
     industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
     industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
