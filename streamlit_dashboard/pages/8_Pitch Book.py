@@ -15,6 +15,16 @@ from datetime import date
 
 today = date.today().strftime("%Y-%m-%d")
 state_gdp_data = None
+try:
+    storage_options = {
+        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
+        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
+        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
+    }
+except KeyError:
+    st.error("AWS credentials are not configured correctly in Streamlit secrets.")
+    st.stop()
+
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(slides_data):
     ppt = Presentation()
@@ -93,6 +103,7 @@ line_colors = {
     "labour_force": "#EB8928",  # Orange
     "gdp": "#032649",  # Dark blue
 }
+
 def download_csv(state_name, data_type):
     data_ids = states_data_id.get(state_name)
     if not data_ids:
@@ -225,17 +236,16 @@ def plot_gdp_chart(state_name):
 # Define S3 file paths
 precedent_path = "s3://documentsapi/industry_data/precedent.parquet"
 public_comp_path = "s3://documentsapi/industry_data/public_comp_data.parquet"
+s3_path_rma = "s3://documentsapi/industry_data/rma_data.parquet"
 
-# Streamlit secrets for AWS credentials
-try:
-    storage_options = {
-        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
-        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
-        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
-    }
-except KeyError:
-    st.error("AWS credentials are not configured correctly in Streamlit secrets.")
-    st.stop()
+df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)
+df_rma = df_rma.rename(columns={
+    'ReportID': 'Report_ID',
+    'Line Items': 'LineItems',
+    'Value': 'Value',
+    'Percent': 'Percent'
+})
+df_public_comp = pd.read_excel(public_comp_path, sheet_name="FY 2023", storage_options=storage_options, engine='openpyxl')
 
 # Load data for both Public Comps and Precedent Transactions
 try:
@@ -408,12 +418,70 @@ with st.expander("State Indicators"):
     st.subheader(f"{state_name} - GDP Over Time")
     gdp_fig = plot_gdp_chart(state_name)
 
+with st.expander("Benchmarking"):
+    # Create dropdown and process data for RMA and public comps
+    industries_rma = df_rma[df_rma['Industry'].notnull()]['Industry'].compute().unique()
+    industries_public = df_public_comp[df_public_comp['Industry'].notnull()]['Industry'].unique()
+    industries = sorted(set(industries_rma).union(set(industries_public)))
+
+    selected_industry = st.selectbox("Select Industry", industries)
+    if selected_industry:
+        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
+        filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
+
+        # Income Statement and Balance Sheet filtering and processing
+        income_statement_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Income Statement'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
+        balance_sheet_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Balance Sheet'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
+
+        filtered_df_public = df_public_comp[df_public_comp['Industry'] == selected_industry]
+        df_unpivoted = pd.melt(
+            filtered_df_public,
+            id_vars=["Name", "Country", "Industry", "Business Description", "SIC Code"],
+            var_name="LineItems",
+            value_name="Value"
+        )
+        df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
+        df_unpivoted['Value'] = pd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0) * 100
+        df_unpivoted = df_unpivoted.groupby('LineItems')['Value'].mean().reset_index()
+        df_unpivoted = df_unpivoted.rename(columns={'Value': 'Public Comp Percent'})
+        df_unpivoted['Public Comp Percent'] = df_unpivoted['Public Comp Percent'].round(0).astype(int).astype(str) + '%'
+
+        # Prepare final dataframes
+        income_statement_df = pd.merge(
+            pd.DataFrame({'LineItems': ["Revenue", "COGS", "Gross Profit", "EBITDA", "Net Income"]}),
+            income_statement_df_rma,
+            on='LineItems',
+            how='left'
+        ).merge(
+            df_unpivoted,
+            on='LineItems',
+            how='left'
+        )
+
+        balance_sheet_df = pd.merge(
+            pd.DataFrame({'LineItems': ["Cash", "Total Current Assets", "PPE", "Total Liabilities", "Net Worth"]}),
+            balance_sheet_df_rma,
+            on='LineItems',
+            how='left'
+        ).merge(
+            df_unpivoted,
+            on='LineItems',
+            how='left'
+        )
+
+        st.write("Income Statement")
+        st.dataframe(income_statement_df.fillna("N/A"), hide_index=True)
+
+        st.write("Balance Sheet")
+        st.dataframe(balance_sheet_df.fillna("N/A"), hide_index=True)
+
 # Button to export combined PowerPoint
 if st.button("Export Pitchbook"):
     slides_data = [
         ("Precedent Transactions", [fig1_precedent],[fig2_precedent]),
         ("Public Comps", [fig1_public],[fig2_public]),
-        (f"{state_name} - State Indicators", [labour_fig, gdp_fig])
+        (f"{state_name} - State Indicators", [labour_fig, gdp_fig]),
+        ("Benchmarking", [income_statement_df, balance_sheet_df])
     ]
     ppt_bytes = export_charts_to_ppt(slides_data)
     st.download_button(
