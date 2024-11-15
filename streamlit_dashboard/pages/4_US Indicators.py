@@ -617,7 +617,7 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Value'],
             mode='lines',
             name='GDP - Value',
-            fill='toself',  # Create area chart by filling to the x-axis
+            fill='tozeroy',  # Create area chart by filling to the x-axis
             fillcolor='#032649', #'rgba(235, 137, 40, 0.6)', 
             line=dict(color='#032649', width=2),
             marker=dict(size=6)
