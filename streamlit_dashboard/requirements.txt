@@ -10,3 +10,4 @@ streamlit-aggrid
 pygwalker
 s3fs
 dask
+boto3
