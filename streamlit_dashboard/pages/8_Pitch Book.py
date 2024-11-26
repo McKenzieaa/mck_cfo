@@ -28,6 +28,7 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
+# Initialize S3 client
 s3 = boto3.client(
     's3',
     aws_access_key_id=st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
@@ -35,31 +36,27 @@ s3 = boto3.client(
     region_name=st.secrets["aws"]["AWS_DEFAULT_REGION"]
 )
 
+# S3 file details
 template_s3_path = "documentsapi/industry_data/pitch_template.pptx"
 bucket_name = "documentsapi"
 
-# Fetch the file from S3
+# Fetch the PowerPoint template from S3
 try:
     ppt_data = BytesIO()
-    s3.download_fileobj(Bucket=bucket_name, Key="industry_data/pitch_template.pptx", Fileobj=ppt_data)
+    s3.download_fileobj(Bucket=bucket_name, Key=template_s3_path, Fileobj=ppt_data)
     ppt_data.seek(0)  # Reset the stream position
+    ppt_template = Presentation(ppt_data)  # Load the template
 except Exception as e:
     st.error(f"Failed to load the PowerPoint template from S3: {str(e)}")
     st.stop()
 
-try:
-    ppt_template = Presentation(ppt_data)
-except Exception as e:
-    st.error(f"Failed to process the PowerPoint template: {str(e)}")
-    st.stop()
-
 def export_charts_to_ppt(slides_data, ppt_template):
     try:
-        # Load the template PowerPoint file
-        ppt = Presentation(ppt_template)
-        slide_layout = ppt.slide_layouts[5]  # Choose an appropriate slide layout
+        # Work with the existing PowerPoint template
+        ppt = ppt_template
 
         for slide_title, charts_or_tables in slides_data:
+            slide_layout = ppt.slide_layouts[5]  # Choose a suitable slide layout
             slide = ppt.slides.add_slide(slide_layout)
             slide.shapes.title.text = slide_title
 
@@ -73,7 +70,7 @@ def export_charts_to_ppt(slides_data, ppt_template):
                     rows, cols = content.shape[0] + 1, content.shape[1]
                     table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
 
-                    # Add table header
+                    # Add table headers
                     for col_idx, col_name in enumerate(content.columns):
                         table.cell(0, col_idx).text = col_name
                     
@@ -82,18 +79,14 @@ def export_charts_to_ppt(slides_data, ppt_template):
                         for col_idx, value in enumerate(row):
                             table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
 
-        # Save PowerPoint to BytesIO
+        # Save PowerPoint to BytesIO for download
         ppt_bytes = BytesIO()
         ppt.save(ppt_bytes)
         ppt_bytes.seek(0)
         return ppt_bytes
-
-    except FileNotFoundError as fnf_error:
-        st.error(f"Template file not found: {ppt_template}")
-        raise fnf_error
     except Exception as e:
-        st.error(f"An error occurred: {e}")
-        raise e
+        st.error(f"An error occurred while exporting to PowerPoint: {e}")
+        raise
 
 # Streamlit page configuration
 st.set_page_config(page_title="Pitch Book", layout="wide")
@@ -1284,26 +1277,22 @@ with st.expander("Benchmarking"):
 #         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
 #     )
 
-# Slides data preparation
+# Prepare slide data
 slides_data = []
 
-# Precedent Transactions Charts
+# Add slide data dynamically based on charts or tables
 if 'fig1_precedent' in locals() and fig1_precedent:
     slides_data.append(("Precedent Transactions", [fig1_precedent, fig2_precedent]))
 
-# Public Comps Charts
 if 'fig1_public' in locals() and fig1_public:
     slides_data.append(("Public Comps", [fig1_public, fig2_public]))
 
-# State Indicators Charts
 if 'labour_fig' in locals() and labour_fig:
     slides_data.append(("State Indicators", [labour_fig, gdp_fig]))
 
-# Benchmarking Charts
 if 'income_statement_df' in locals() and not income_statement_df.empty:
     slides_data.append(("Benchmarking", [income_statement_df, balance_sheet_df]))
 
-# US Indicators Charts
 us_indicators_charts = []
 if 'labour_fig' in locals() and labour_fig:
     us_indicators_charts.append(labour_fig)
@@ -1319,12 +1308,15 @@ if us_indicators_charts:
 
 # Export slides to PowerPoint
 if slides_data:
-    ppt_bytes = export_charts_to_ppt(slides_data, ppt_template)
-    st.download_button(
-        label="Download Pitch Book",
-        data=ppt_bytes,
-        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
-        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-    )
+    try:
+        ppt_bytes = export_charts_to_ppt(slides_data, ppt_template)
+        st.download_button(
+            label="Download Pitch Book",
+            data=ppt_bytes,
+            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        )
+    except Exception as e:
+        st.error(f"An error occurred while preparing the PowerPoint file: {str(e)}")
 else:
     st.warning("No valid charts or tables to export.")
