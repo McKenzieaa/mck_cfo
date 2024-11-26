@@ -29,25 +29,37 @@ except KeyError:
     st.stop()
 
 # Initialize S3 client
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
-    aws_secret_access_key=st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
-    region_name=st.secrets["aws"]["AWS_DEFAULT_REGION"]
-)
+try:
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=storage_options['key'],
+        aws_secret_access_key=storage_options['secret'],
+        region_name=storage_options['client_kwargs']
+    )
+except Exception as e:
+    st.error(f"Failed to initialize the S3 client: {str(e)}")
+    st.stop()
 
 # S3 file details
-template_s3_path = "documentsapi/industry_data/pitch_template.pptx"
+template_s3_path = "industry_data/pitch_template.pptx"  # Ensure correct path
 bucket_name = "documentsapi"
 
 # Fetch the PowerPoint template from S3
 try:
-    ppt_data = BytesIO()
+    ppt_data = BytesIO()  # Buffer to hold the file data
     s3.download_fileobj(Bucket=bucket_name, Key=template_s3_path, Fileobj=ppt_data)
-    ppt_data.seek(0)  # Reset the stream position
-    ppt_template = Presentation(ppt_data)  # Load the template
+    ppt_data.seek(0)  # Reset the stream position to the beginning
+
+    # Load the template into a Presentation object
+    ppt_template = Presentation(ppt_data)
+except s3.exceptions.NoSuchKey:
+    st.error(f"The specified file '{template_s3_path}' does not exist in the bucket '{bucket_name}'.")
+    st.stop()
+except s3.exceptions.ClientError as e:
+    st.error(f"Failed to fetch the file from S3: {str(e)}")
+    st.stop()
 except Exception as e:
-    st.error(f"Failed to load the PowerPoint template from S3: {str(e)}")
+    st.error(f"An unexpected error occurred while processing the template: {str(e)}")
     st.stop()
 
 def export_charts_to_ppt(slides_data, ppt_template):
