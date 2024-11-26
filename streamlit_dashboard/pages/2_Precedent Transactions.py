@@ -22,21 +22,18 @@ except KeyError:
     st.stop()
 
 # Connect to the MySQL database
-engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
-
-# SQL query to fetch data
-query = """
-SELECT 
-    Year, Target, `EV/Revenue`, `EV/EBITDA`, `Business Description`, Industry, Location
-FROM precedent
-"""
+try:
+    engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+except Exception as e:
+    st.error(f"Failed to connect to the database: {e}")
+    st.stop()
 
 # Read data into a Dask DataFrame
 try:
     df = dd.read_sql_table(
-        table="precedent_transactions",
-        uri=f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}",
-        index_col="id",  # Assuming your table has an `id` column as the index
+        table_name="precedent_transactions",  # Replace with your table name
+        con=engine,
+        index_col="id",  # Ensure this column exists and is unique
         columns=["Year", "Target", "EV/Revenue", "EV/EBITDA", "Business Description", "Industry", "Location"]
     )
 except Exception as e:
@@ -44,9 +41,12 @@ except Exception as e:
     st.stop()
 
 # Get unique values for Industry and Location filters
-industries = df['Industry'].unique().compute()
-locations = df['Location'].unique().compute()
-
+try:
+    industries = df['Industry'].unique().compute()
+    locations = df['Location'].unique().compute()
+except Exception as e:
+    st.error(f"Error computing unique filter values: {e}")
+    st.stop()
 # Display multi-select filters at the top without default selections
 col1, col2 = st.columns(2)
 selected_industries = col1.multiselect("Select Industry", industries)
