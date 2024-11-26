@@ -6,36 +6,42 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
-import s3fs  # For accessing S3 data
+from sqlalchemy import create_engine
 
-# Define S3 file path
-s3_path = "s3://documentsapi/industry_data/precedent.parquet"
+# Streamlit app title and layout
+st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
-# Streamlit secrets can be accessed if credentials are provided there
+# Database connection details from Streamlit secrets
 try:
-    storage_options = {
-        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
-        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
-        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
-    }
+    db_user = st.secrets["mysql"]["user"]
+    db_password = st.secrets["mysql"]["password"]
+    db_host = st.secrets["mysql"]["host"]
+    db_name = st.secrets["mysql"]["database"]
 except KeyError:
-    st.error("AWS credentials are not configured correctly in Streamlit secrets.")
+    st.error("MySQL credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-# Read parquet file from S3 with Dask
+# Connect to the MySQL database
+engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+
+# SQL query to fetch data
+query = """
+SELECT 
+    Year, Target, `EV/Revenue`, `EV/EBITDA`, `Business Description`, Industry, Location
+FROM precedent_transactions
+"""
+
+# Read data into a Dask DataFrame
 try:
-    df = dd.read_parquet(
-        s3_path,
-        storage_options=storage_options,
-        usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
-        dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
+    df = dd.read_sql_table(
+        table="precedent_transactions",
+        uri=f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}",
+        index_col="id",  # Assuming your table has an `id` column as the index
+        columns=["Year", "Target", "EV/Revenue", "EV/EBITDA", "Business Description", "Industry", "Location"]
     )
 except Exception as e:
-    st.error(f"Error loading data from S3: {e}")
+    st.error(f"Error loading data from MySQL: {e}")
     st.stop()
-    
-# Streamlit app title
-st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
 # Get unique values for Industry and Location filters
 industries = df['Industry'].unique().compute()
@@ -49,7 +55,7 @@ selected_locations = col2.multiselect("Select Location", locations)
 # Filter data based on multi-selections using .isin()
 if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
-    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
+    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
     filtered_df['Year'] = filtered_df['Year'].astype(int)
 
@@ -78,25 +84,20 @@ if selected_industries and selected_locations:
     selected_data = pd.DataFrame(grid_response['selected_rows'])
 
     if not selected_data.empty:
-
         avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
         avg_data['Year'] = avg_data['Year'].astype(int)
 
-        # Define colors
-        color_ev_revenue = "#032649"  # Default Plotly blue
-        color_ev_ebitda = "#032649"   # Default Plotly red
-
-        # Create the EV/Revenue chart with data labels
+        # Create the EV/Revenue chart
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
-        fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
+        fig1.update_traces(texttemplate='%{text:.1f}x', textposition='inside')
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
 
         # Display the EV/Revenue chart
         st.plotly_chart(fig1)
 
-        # Create the EV/EBITDA chart with data labels
+        # Create the EV/EBITDA chart
         fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-        fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='inside')
+        fig2.update_traces(texttemplate='%{text:.1f}x', textposition='inside')
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
 
         # Display the EV/EBITDA chart
@@ -106,38 +107,29 @@ if selected_industries and selected_locations:
         export_ppt = st.button("Export Charts to PowerPoint")
 
         if export_ppt:
-            # Create a PowerPoint presentation
             ppt = Presentation()
             
-            # Add slide for EV/Revenue chart
+            # Add EV/Revenue chart slide
             slide_layout = ppt.slide_layouts[5]
             slide1 = ppt.slides.add_slide(slide_layout)
             title1 = slide1.shapes.title
-            title1.text = "Precedent Transaction"
-            
-            # Save EV/Revenue chart to an image
-            fig1_image = BytesIO()
-            fig1.write_image(fig1_image, format="png", width=800, height=300)
-            fig1_image.seek(0)
-            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(0.5), width=Inches(8))
+            title1.text = "Precedent Transactions"
 
-            # # Add slide for EV/EBITDA chart
-            # slide2 = ppt.slides.add_slide(slide_layout)
-            # title2 = slide2.shapes.title
-            # title2.text = "Precedent Transaction - EV/EBITDA"
-            
-            # Save EV/EBITDA chart to an image
+            fig1_image = BytesIO()
+            fig1.write_image(fig1_image, format="png")
+            fig1_image.seek(0)
+            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(1), width=Inches(8))
+
+            # Add EV/EBITDA chart slide
             fig2_image = BytesIO()
-            fig2.write_image(fig2_image, format="png", width=800, height=300)
+            fig2.write_image(fig2_image, format="png")
             fig2_image.seek(0)
             slide1.shapes.add_picture(fig2_image, Inches(1), Inches(3.5), width=Inches(8))
 
-            # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
             ppt.save(ppt_bytes)
             ppt_bytes.seek(0)
 
-            # Provide download link for PowerPoint
             st.download_button(
                 label="Download PowerPoint",
                 data=ppt_bytes,

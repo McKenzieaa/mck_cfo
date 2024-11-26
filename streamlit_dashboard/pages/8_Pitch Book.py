@@ -1226,22 +1226,6 @@ with st.expander("Benchmarking"):
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-# if st.button("Export Pitchbook"):
-#     slides_data = [
-#         ("Precedent Transactions", [fig1_precedent,fig2_precedent]),
-#         ("Public Comps", [fig1_public,fig2_public]),
-#         ("US Indicators",[labour_fig, external_fig, gdp_fig, cpi_ppi_fig])
-#         (f"{state_name} - State Indicators", [labour_fig, gdp_fig]),
-#         ("Benchmarking", [income_statement_df, balance_sheet_df])
-#     ]
-#     ppt_bytes = export_charts_to_ppt(slides_data)
-#     st.download_button(
-#         label="Download PowerPoint",
-#         data=ppt_bytes,
-#         file_name=f"pitch_book{today}.pptx",
-#         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-#     )
-# # Check and add valid charts to slides_data
 slides_data = []
 
 # Precedent Transactions Charts
