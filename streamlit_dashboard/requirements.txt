@@ -11,3 +11,5 @@ pygwalker
 s3fs
 dask
 boto3
+sqlalchemy
+pymysql
