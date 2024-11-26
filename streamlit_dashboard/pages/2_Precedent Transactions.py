@@ -34,13 +34,14 @@ try:
     FROM precedent
     """
     df = pd.read_sql_query(query, con=engine)
-    df.columns = df.columns.str.strip()
-    df['Announced Date'] = pd.to_datetime(df['Announced Date'], errors='coerce')
-    df['Year'] = df['Announced Date'].dt.year
-
 except Exception as e:
     st.error(f"Error loading data from MySQL: {e}")
     st.stop()
+
+df.columns = df.columns.str.strip()
+df['Announced Date'] = pd.to_datetime(df['Announced Date'], errors='coerce')
+df['Year'] = df['Announced Date'].dt.year
+
 
 # Get unique values for Industry and Location filters
 try:
