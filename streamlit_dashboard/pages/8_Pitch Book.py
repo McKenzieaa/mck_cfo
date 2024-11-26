@@ -27,34 +27,47 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-# Function to export charts to PowerPoint
 def export_charts_to_ppt(slides_data, template_path):
+    try:
+        # Load the template PowerPoint file
+        ppt = Presentation(template_path)
+        slide_layout = ppt.slide_layouts[5]  # Choose an appropriate slide layout
 
-    ppt = Presentation(template_path)  # Load the template PowerPoint file
-    slide_layout = ppt.slide_layouts[5]  # Default layout to use for new slides if needed
-    
-    for slide_title, charts_or_tables in slides_data:
-        slide = ppt.slides.add_slide(slide_layout)  # Add a slide based on the template layout
-        slide.shapes.title.text = slide_title
-        for i, content in enumerate(charts_or_tables):
-            if isinstance(content, go.Figure):  # Plotly chart
-                chart_image = BytesIO()
-                content.write_image(chart_image, format="png", width=800, height=300)
-                chart_image.seek(0)
-                slide.shapes.add_picture(chart_image, Inches(1), Inches(1 + i * 2.5), width=Inches(8))
-            elif isinstance(content, pd.DataFrame):  # Table
-                rows, cols = content.shape[0] + 1, content.shape[1]
-                table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
-                for col_idx, col_name in enumerate(content.columns):
-                    table.cell(0, col_idx).text = col_name
-                for row_idx, row in enumerate(content.itertuples(index=False)):
-                    for col_idx, value in enumerate(row):
-                        table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
-    
-    ppt_bytes = BytesIO()
-    ppt.save(ppt_bytes)
-    ppt_bytes.seek(0)
-    return ppt_bytes
+        for slide_title, charts_or_tables in slides_data:
+            slide = ppt.slides.add_slide(slide_layout)
+            slide.shapes.title.text = slide_title
+
+            for i, content in enumerate(charts_or_tables):
+                if isinstance(content, go.Figure):  # Plotly chart
+                    chart_image = BytesIO()
+                    content.write_image(chart_image, format="png", width=800, height=300)
+                    chart_image.seek(0)
+                    slide.shapes.add_picture(chart_image, Inches(1), Inches(1 + i * 2.5), width=Inches(8))
+                elif isinstance(content, pd.DataFrame):  # Table
+                    rows, cols = content.shape[0] + 1, content.shape[1]
+                    table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
+
+                    # Add table header
+                    for col_idx, col_name in enumerate(content.columns):
+                        table.cell(0, col_idx).text = col_name
+                    
+                    # Add table content
+                    for row_idx, row in enumerate(content.itertuples(index=False)):
+                        for col_idx, value in enumerate(row):
+                            table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
+
+        # Save PowerPoint to BytesIO
+        ppt_bytes = BytesIO()
+        ppt.save(ppt_bytes)
+        ppt_bytes.seek(0)
+        return ppt_bytes
+
+    except FileNotFoundError as fnf_error:
+        st.error(f"Template file not found: {template_path}")
+        raise fnf_error
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        raise e
 
 # Streamlit page configuration
 st.set_page_config(page_title="Pitch Book", layout="wide")
@@ -1244,7 +1257,10 @@ with st.expander("Benchmarking"):
 #         file_name=f"pitch_book{today}.pptx",
 #         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
 #     )
-# # Check and add valid charts to slides_data
+
+# Path to the PowerPoint template file
+template_path = "path/to/your/template.pptx"
+
 slides_data = []
 
 # Precedent Transactions Charts
@@ -1278,8 +1294,6 @@ if us_indicators_charts:
     slides_data.append(("US Indicators", us_indicators_charts))
 
 # Ensure there are slides to export
-template_path = f"streamlit_dashboard\data\pitch_template.pptx" 
-
 if slides_data:
     ppt_bytes = export_charts_to_ppt(slides_data, template_path)
     st.download_button(
