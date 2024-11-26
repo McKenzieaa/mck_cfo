@@ -31,7 +31,7 @@ except Exception as e:
 # Read data into a Dask DataFrame
 try:
     df = dd.read_sql_table(
-        table_name="precedent_transactions",  # Replace with your table name
+        table_name="precedent",  # Replace with your table name
         con=engine,
         index_col="id",  # Ensure this column exists and is unique
         columns=["Year", "Target", "EV/Revenue", "EV/EBITDA", "Business Description", "Industry", "Location"]
