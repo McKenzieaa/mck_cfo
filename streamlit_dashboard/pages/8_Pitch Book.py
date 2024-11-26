@@ -28,11 +28,13 @@ except KeyError:
     st.stop()
 
 # Function to export charts to PowerPoint
-def export_charts_to_ppt(slides_data):
-    ppt = Presentation()
-    slide_layout = ppt.slide_layouts[5]
+def export_charts_to_ppt(slides_data, template_path):
+    template_path= "C:\Users\sindh\Desktop\mck_cfo\streamlit_dashboard\data\pitch_template.pptx"
+    ppt = Presentation(template_path)  # Load the template PowerPoint file
+    slide_layout = ppt.slide_layouts[5]  # Default layout to use for new slides if needed
+    
     for slide_title, charts_or_tables in slides_data:
-        slide = ppt.slides.add_slide(slide_layout)
+        slide = ppt.slides.add_slide(slide_layout)  # Add a slide based on the template layout
         slide.shapes.title.text = slide_title
         for i, content in enumerate(charts_or_tables):
             if isinstance(content, go.Figure):  # Plotly chart
@@ -48,6 +50,7 @@ def export_charts_to_ppt(slides_data):
                 for row_idx, row in enumerate(content.itertuples(index=False)):
                     for col_idx, value in enumerate(row):
                         table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
+    
     ppt_bytes = BytesIO()
     ppt.save(ppt_bytes)
     ppt_bytes.seek(0)
