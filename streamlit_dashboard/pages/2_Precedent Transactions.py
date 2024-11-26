@@ -1,7 +1,6 @@
-import dask.dataframe as dd
+import pandas as pd
 import streamlit as st
 import plotly.express as px
-import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
@@ -28,25 +27,25 @@ except Exception as e:
     st.error(f"Failed to connect to the database: {e}")
     st.stop()
 
-# Read data into a Dask DataFrame
+# Read data into a Pandas DataFrame
 try:
-    df = dd.read_sql_table(
-        table_name="precedent",  # Replace with your table name
-        con=engine,
-        index_col="id",  # Ensure this column exists and is unique
-        columns=["Year", "Target", "EV/Revenue", "EV/EBITDA", "Business Description", "Industry", "Location"]
-    )
+    query = """
+    SELECT id, Year, Target, `EV/Revenue`, `EV/EBITDA`, `Business Description`, Industry, Location
+    FROM precedent
+    """
+    df = pd.read_sql_query(query, con=engine)
 except Exception as e:
     st.error(f"Error loading data from MySQL: {e}")
     st.stop()
 
 # Get unique values for Industry and Location filters
 try:
-    industries = df['Industry'].unique().compute()
-    locations = df['Location'].unique().compute()
+    industries = df['Industry'].dropna().unique().tolist()
+    locations = df['Location'].dropna().unique().tolist()
 except Exception as e:
     st.error(f"Error computing unique filter values: {e}")
     st.stop()
+
 # Display multi-select filters at the top without default selections
 col1, col2 = st.columns(2)
 selected_industries = col1.multiselect("Select Industry", industries)
@@ -54,21 +53,18 @@ selected_locations = col2.multiselect("Select Location", locations)
 
 # Filter data based on multi-selections using .isin()
 if selected_industries and selected_locations:
-    filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
-    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
-    filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
+    filtered_df = df[
+        (df['Industry'].isin(selected_industries)) &
+        (df['Location'].isin(selected_locations))
+    ][['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
+
     filtered_df['Year'] = filtered_df['Year'].astype(int)
 
     # Set up Ag-Grid for selection
     st.title("Precedent Transactions")
     gb = GridOptionsBuilder.from_dataframe(filtered_df)
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-    gb.configure_column(
-        field="Target",
-        tooltipField="Business Description",
-        maxWidth=400
-    )
-    gb.configure_columns(["Business Description"], hide=False)    
+    gb.configure_column("Target", tooltipField="Business Description", maxWidth=400)
     grid_options = gb.build()
 
     # Display Ag-Grid table
@@ -85,7 +81,6 @@ if selected_industries and selected_locations:
 
     if not selected_data.empty:
         avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
-        avg_data['Year'] = avg_data['Year'].astype(int)
 
         # Create the EV/Revenue chart
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
@@ -108,7 +103,7 @@ if selected_industries and selected_locations:
 
         if export_ppt:
             ppt = Presentation()
-            
+
             # Add EV/Revenue chart slide
             slide_layout = ppt.slide_layouts[5]
             slide1 = ppt.slides.add_slide(slide_layout)
@@ -136,6 +131,5 @@ if selected_industries and selected_locations:
                 file_name="charts_presentation.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
             )
-
 else:
     st.write("Please select at least one Industry and Location to view data.")
