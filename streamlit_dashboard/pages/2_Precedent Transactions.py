@@ -28,7 +28,7 @@ engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_n
 query = """
 SELECT 
     Year, Target, `EV/Revenue`, `EV/EBITDA`, `Business Description`, Industry, Location
-FROM precedent_transactions
+FROM precedent
 """
 
 # Read data into a Dask DataFrame
