@@ -30,13 +30,13 @@ except Exception as e:
 # Read data into a Pandas DataFrame
 try:
     query = """
-    SELECT id, ï»¿Announced Date, Target, `EV/Revenue`, `EV/EBITDA`, `Business Description`, Industry, Location
+    SELECT id, Announced Date, Target, `EV/Revenue`, `EV/EBITDA`, `Business Description`, Industry, Location
     FROM precedent
     """
     df = pd.read_sql_query(query, con=engine)
     df.columns = df.columns.str.strip()
-    df['ï»¿Announced Date'] = pd.to_datetime(df['ï»¿Announced Date'], errors='coerce')
-    df['Year'] = df['ï»¿Announced Date'].dt.year
+    df['Announced Date'] = pd.to_datetime(df['Announced Date'], errors='coerce')
+    df['Year'] = df['Announced Date'].dt.year
 
 except Exception as e:
     st.error(f"Error loading data from MySQL: {e}")
