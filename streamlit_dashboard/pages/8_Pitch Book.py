@@ -2,7 +2,6 @@ import requests
 import numpy as np
 import zipfile
 import io
-import boto3
 import dask.dataframe as dd
 import plotly.graph_objs as go
 import streamlit as st
@@ -28,77 +27,31 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-# Initialize S3 client
-try:
-    s3 = boto3.client(
-        's3',
-        aws_access_key_id=storage_options['key'],
-        aws_secret_access_key=storage_options['secret'],
-        region_name=storage_options['client_kwargs']
-    )
-except Exception as e:
-    st.error(f"Failed to initialize the S3 client: {str(e)}")
-    st.stop()
-
-# S3 file details
-template_s3_path = "industry_data/pitch_template.pptx"  # Ensure correct path
-bucket_name = "documentsapi"
-
-# Fetch the PowerPoint template from S3
-try:
-    ppt_data = BytesIO()  # Buffer to hold the file data
-    s3.download_fileobj(Bucket=bucket_name, Key=template_s3_path, Fileobj=ppt_data)
-    ppt_data.seek(0)  # Reset the stream position to the beginning
-
-    # Load the template into a Presentation object
-    ppt_template = Presentation(ppt_data)
-except s3.exceptions.NoSuchKey:
-    st.error(f"The specified file '{template_s3_path}' does not exist in the bucket '{bucket_name}'.")
-    st.stop()
-except s3.exceptions.ClientError as e:
-    st.error(f"Failed to fetch the file from S3: {str(e)}")
-    st.stop()
-except Exception as e:
-    st.error(f"An unexpected error occurred while processing the template: {str(e)}")
-    st.stop()
-
-def export_charts_to_ppt(slides_data, ppt_template):
-    try:
-        # Work with the existing PowerPoint template
-        ppt = ppt_template
-
-        for slide_title, charts_or_tables in slides_data:
-            slide_layout = ppt.slide_layouts[5]  # Choose a suitable slide layout
-            slide = ppt.slides.add_slide(slide_layout)
-            slide.shapes.title.text = slide_title
-
-            for i, content in enumerate(charts_or_tables):
-                if isinstance(content, go.Figure):  # Plotly chart
-                    chart_image = BytesIO()
-                    content.write_image(chart_image, format="png", width=800, height=300)
-                    chart_image.seek(0)
-                    slide.shapes.add_picture(chart_image, Inches(1), Inches(1 + i * 2.5), width=Inches(8))
-                elif isinstance(content, pd.DataFrame):  # Table
-                    rows, cols = content.shape[0] + 1, content.shape[1]
-                    table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
-
-                    # Add table headers
-                    for col_idx, col_name in enumerate(content.columns):
-                        table.cell(0, col_idx).text = col_name
-                    
-                    # Add table content
-                    for row_idx, row in enumerate(content.itertuples(index=False)):
-                        for col_idx, value in enumerate(row):
-                            table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
-
-        # Save PowerPoint to BytesIO for download
-        ppt_bytes = BytesIO()
-        ppt.save(ppt_bytes)
-        ppt_bytes.seek(0)
-        return ppt_bytes
-    except Exception as e:
-        st.error(f"An error occurred while exporting to PowerPoint: {e}")
-        raise
+# Function to export charts to PowerPoint
+def export_charts_to_ppt(slides_data):
+    ppt = Presentation()
+    slide_layout = ppt.slide_layouts[5]
+    for slide_title, charts_or_tables in slides_data:
+        slide = ppt.slides.add_slide(slide_layout)
+        slide.shapes.title.text = slide_title
+        for i, content in enumerate(charts_or_tables):
+            if isinstance(content, go.Figure):  # Plotly chart
+                chart_image = BytesIO()
+                content.write_image(chart_image, format="png", width=800, height=300)
+                chart_image.seek(0)
+                slide.shapes.add_picture(chart_image, Inches(1), Inches(1 + i * 2.5), width=Inches(8))
+            elif isinstance(content, pd.DataFrame):  # Table
+                rows, cols = content.shape[0] + 1, content.shape[1]
+                table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
+                for col_idx, col_name in enumerate(content.columns):
+                    table.cell(0, col_idx).text = col_name
+                for row_idx, row in enumerate(content.itertuples(index=False)):
+                    for col_idx, value in enumerate(row):
+                        table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
+    ppt_bytes = BytesIO()
+    ppt.save(ppt_bytes)
+    ppt_bytes.seek(0)
+    return ppt_bytes
 
 # Streamlit page configuration
 st.set_page_config(page_title="Pitch Book", layout="wide")
@@ -1288,23 +1241,26 @@ with st.expander("Benchmarking"):
 #         file_name=f"pitch_book{today}.pptx",
 #         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
 #     )
-
-# Prepare slide data
+# # Check and add valid charts to slides_data
 slides_data = []
 
-# Add slide data dynamically based on charts or tables
+# Precedent Transactions Charts
 if 'fig1_precedent' in locals() and fig1_precedent:
     slides_data.append(("Precedent Transactions", [fig1_precedent, fig2_precedent]))
 
+# Public Comps Charts
 if 'fig1_public' in locals() and fig1_public:
     slides_data.append(("Public Comps", [fig1_public, fig2_public]))
 
+# State Indicators Charts
 if 'labour_fig' in locals() and labour_fig:
     slides_data.append(("State Indicators", [labour_fig, gdp_fig]))
 
+# Benchmarking Charts
 if 'income_statement_df' in locals() and not income_statement_df.empty:
     slides_data.append(("Benchmarking", [income_statement_df, balance_sheet_df]))
 
+# US Indicators Charts
 us_indicators_charts = []
 if 'labour_fig' in locals() and labour_fig:
     us_indicators_charts.append(labour_fig)
@@ -1318,17 +1274,14 @@ if 'cpi_ppi_fig' in locals() and cpi_ppi_fig:
 if us_indicators_charts:
     slides_data.append(("US Indicators", us_indicators_charts))
 
-# Export slides to PowerPoint
+# Ensure there are slides to export
 if slides_data:
-    try:
-        ppt_bytes = export_charts_to_ppt(slides_data, ppt_template)
-        st.download_button(
-            label="Download Pitch Book",
-            data=ppt_bytes,
-            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        )
-    except Exception as e:
-        st.error(f"An error occurred while preparing the PowerPoint file: {str(e)}")
+    ppt_bytes = export_charts_to_ppt(slides_data)
+    st.download_button(
+        label="Download Pitch Book",
+        data=ppt_bytes,
+        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
+        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    )
 else:
     st.warning("No valid charts or tables to export.")
