@@ -2,6 +2,7 @@ import requests
 import numpy as np
 import zipfile
 import io
+import boto3
 import dask.dataframe as dd
 import plotly.graph_objs as go
 import streamlit as st
@@ -27,10 +28,35 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-def export_charts_to_ppt(slides_data, template_path):
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
+    aws_secret_access_key=st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
+    region_name=st.secrets["aws"]["AWS_DEFAULT_REGION"]
+)
+
+template_s3_path = "documentsapi/industry_data/pitch_template.pptx"
+bucket_name = "documentsapi"
+
+# Fetch the file from S3
+try:
+    ppt_data = BytesIO()
+    s3.download_fileobj(Bucket=bucket_name, Key="industry_data/pitch_template.pptx", Fileobj=ppt_data)
+    ppt_data.seek(0)  # Reset the stream position
+except Exception as e:
+    st.error(f"Failed to load the PowerPoint template from S3: {str(e)}")
+    st.stop()
+
+try:
+    ppt_template = Presentation(ppt_data)
+except Exception as e:
+    st.error(f"Failed to process the PowerPoint template: {str(e)}")
+    st.stop()
+
+def export_charts_to_ppt(slides_data, ppt_template):
     try:
         # Load the template PowerPoint file
-        ppt = Presentation(template_path)
+        ppt = Presentation(ppt_template)
         slide_layout = ppt.slide_layouts[5]  # Choose an appropriate slide layout
 
         for slide_title, charts_or_tables in slides_data:
@@ -63,7 +89,7 @@ def export_charts_to_ppt(slides_data, template_path):
         return ppt_bytes
 
     except FileNotFoundError as fnf_error:
-        st.error(f"Template file not found: {template_path}")
+        st.error(f"Template file not found: {ppt_template}")
         raise fnf_error
     except Exception as e:
         st.error(f"An error occurred: {e}")
@@ -1258,8 +1284,7 @@ with st.expander("Benchmarking"):
 #         mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
 #     )
 
-# Path to the PowerPoint template file
-template_path = "s3://documentsapi/industry_data/pitch_template.pptx"
+# Slides data preparation
 slides_data = []
 
 # Precedent Transactions Charts
@@ -1292,9 +1317,9 @@ if 'cpi_ppi_fig' in locals() and cpi_ppi_fig:
 if us_indicators_charts:
     slides_data.append(("US Indicators", us_indicators_charts))
 
-# Ensure there are slides to export
+# Export slides to PowerPoint
 if slides_data:
-    ppt_bytes = export_charts_to_ppt(slides_data, template_path)
+    ppt_bytes = export_charts_to_ppt(slides_data, ppt_template)
     st.download_button(
         label="Download Pitch Book",
         data=ppt_bytes,
