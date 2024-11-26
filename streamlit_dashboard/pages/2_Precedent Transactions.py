@@ -22,7 +22,8 @@ except KeyError:
 
 # Connect to the MySQL database
 try:
-    engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+    engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}", pool_size=10, max_overflow=20)
+
 except Exception as e:
     st.error(f"Failed to connect to the database: {e}")
     st.stop()
