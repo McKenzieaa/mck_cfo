@@ -1259,7 +1259,7 @@ with st.expander("Benchmarking"):
 #     )
 
 # Path to the PowerPoint template file
-template_path = "path/to/your/template.pptx"
+template_path = r"streamlit_dashboard\data\pitch_template.pptx"
 
 slides_data = []
 
