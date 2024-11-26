@@ -29,7 +29,7 @@ except KeyError:
 
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(slides_data, template_path):
-    template_path= "C:\Users\sindh\Desktop\mck_cfo\streamlit_dashboard\data\pitch_template.pptx"
+
     ppt = Presentation(template_path)  # Load the template PowerPoint file
     slide_layout = ppt.slide_layouts[5]  # Default layout to use for new slides if needed
     
@@ -1278,8 +1278,10 @@ if us_indicators_charts:
     slides_data.append(("US Indicators", us_indicators_charts))
 
 # Ensure there are slides to export
+template_path = f"streamlit_dashboard\data\pitch_template.pptx" 
+
 if slides_data:
-    ppt_bytes = export_charts_to_ppt(slides_data)
+    ppt_bytes = export_charts_to_ppt(slides_data, template_path)
     st.download_button(
         label="Download Pitch Book",
         data=ppt_bytes,
