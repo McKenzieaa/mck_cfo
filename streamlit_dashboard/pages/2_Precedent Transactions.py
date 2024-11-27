@@ -6,6 +6,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
+import os
 import s3fs  # For accessing S3 data
 
 # Define S3 file path
@@ -101,7 +102,7 @@ if selected_industries and selected_locations:
 
         if export_ppt:
             # Load the PowerPoint template
-            template_path = r"streamlit_dashboard\data\pitch_template.pptx"
+            template_path = template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "pitch_template.pptx")
             ppt = Presentation(template_path)
 
             # Define slide layout (using slide_layouts[5] as an example for a blank slide)
