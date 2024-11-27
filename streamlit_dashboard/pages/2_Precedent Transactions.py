@@ -88,7 +88,7 @@ if selected_industries and selected_locations:
         color_ev_ebitda = "#032649"   # Default Plotly red
 
         # Create the EV/Revenue chart with data labels
-        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue', bar_width = "40%")  # No title
+        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1)
 
