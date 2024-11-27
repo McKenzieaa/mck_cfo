@@ -6,6 +6,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
+import os
 import s3fs  # For accessing S3 data
 
 # Define S3 file path
@@ -104,7 +105,8 @@ if selected_industries and selected_locations:
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
-        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
+        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=45, tickmode='array', tickvals=avg_data['Company'], ticktext=[company if len(company) < 10 else '\n'.join(company[i:i+10] for i in range(0, len(company), 10)) for company in avg_data['Company']])
+)
 
         # Display the EV/Revenue chart
         st.plotly_chart(fig1)
@@ -112,7 +114,7 @@ if selected_industries and selected_locations:
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
         fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='inside')
-        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
+        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=45,tickmode='array', tickvals=avg_data['Company'], ticktext=[company if len(company) < 10 else '\n'.join(company[i:i+10] for i in range(0, len(company), 10)) for company in avg_data['Company']]))
 
         # Display the EV/EBITDA chart
         st.plotly_chart(fig2)
@@ -121,31 +123,37 @@ if selected_industries and selected_locations:
         export_ppt = st.button("Export Charts to PowerPoint")
 
         if export_ppt:
-            # Create a PowerPoint presentation
-            ppt = Presentation()
+            # Define the correct path to your PowerPoint template
+            template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "pitch_template.pptx")
             
-            # Add slide for EV/Revenue chart
-            slide_layout = ppt.slide_layouts[5]
-            slide1 = ppt.slides.add_slide(slide_layout)
+            # Check if the file exists before attempting to load
+            if not os.path.exists(template_path):
+                st.error(f"PowerPoint template not found at: {template_path}")
+                st.stop()
+
+            ppt = Presentation(template_path)
+            slide1 = ppt.slides[1]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
+            
+            # If slide does not exist, you can choose to add a new one
+            if slide1 is None:
+                slide_layout = ppt.slide_layouts[5]  # If no slide exists, create a blank slide
+                slide1 = ppt.slides.add_slide(slide_layout)
+
+            # Remove title
             title1 = slide1.shapes.title
-            title1.text = "Public Comps"
+            # title1.text = ""  # Remove chart title
             
             # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
-            fig1.write_image(fig1_image, format="png", width=800, height=300)
+            fig1.write_image(fig1_image, format="png", width=900, height=300)
             fig1_image.seek(0)
-            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(1.5), width=Inches(8))
+            slide1.shapes.add_picture(fig1_image, Inches(0.11), Inches(0.90), width=Inches(9), height=Inches(2.8))
 
-            # # Add slide for EV/EBITDA chart
-            # slide2 = ppt.slides.add_slide(slide_layout)
-            # title2 = slide2.shapes.title
-            # title2.text = "Public Comps - EV/EBITDA"
-            
-            # Save EV/EBITDA chart to an image
+            # Add EV/EBITDA chart to the same slide
             fig2_image = BytesIO()
-            fig2.write_image(fig2_image, format="png", width=800, height=300)
+            fig2.write_image(fig2_image, format="png", width=900, height=300)
             fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(3.5), width=Inches(8))
+            slide1.shapes.add_picture(fig2_image, Inches(0.11), Inches(3.70), width=Inches(9), height=Inches(2.8))
 
             # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
@@ -156,7 +164,7 @@ if selected_industries and selected_locations:
             st.download_button(
                 label="Download PowerPoint",
                 data=ppt_bytes,
-                file_name="charts_presentation.pptx",
+                file_name="precedent_transaction.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
             )
 
