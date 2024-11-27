@@ -88,12 +88,12 @@ if selected_industries and selected_locations:
         color_ev_ebitda = "#032649"   # Default Plotly red
 
         # Create the EV/Revenue chart with data labels
-        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
+        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue', bar_width = "40%")  # No title
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
 
         # Create the EV/EBITDA chart with data labels
-        fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')  # No title
+        fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA', bar_width = "40%")  # No title
         fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='inside')
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
 
@@ -101,14 +101,20 @@ if selected_industries and selected_locations:
         export_ppt = st.button("Export Charts to PowerPoint")
 
         if export_ppt:
-            # Load the PowerPoint template
-            template_path = template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "pitch_template.pptx")
+            # Define the correct path to your PowerPoint template
+            template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "pitch_template.pptx")
+            
+            # Check if the file exists before attempting to load
+            if not os.path.exists(template_path):
+                st.error(f"PowerPoint template not found at: {template_path}")
+                st.stop()
+
             ppt = Presentation(template_path)
 
             # Define slide layout (using slide_layouts[5] as an example for a blank slide)
             slide_layout = ppt.slide_layouts[5]
 
-            # Add slide for EV/Revenue chart
+            # Add slide for both charts (EV/Revenue and EV/EBITDA)
             slide1 = ppt.slides.add_slide(slide_layout)
             # Remove title
             title1 = slide1.shapes.title
@@ -120,17 +126,11 @@ if selected_industries and selected_locations:
             fig1_image.seek(0)
             slide1.shapes.add_picture(fig1_image, Inches(1), Inches(0.5), width=Inches(8), height=Inches(3))
 
-            # # Add slide for EV/EBITDA chart
-            # slide2 = ppt.slides.add_slide(slide_layout)
-            # # Remove title
-            # title2 = slide2.shapes.title
-            # title2.text = ""  # Remove chart title
-            
-            # Save EV/EBITDA chart to an image
+            # Add EV/EBITDA chart to the same slide
             fig2_image = BytesIO()
             fig2.write_image(fig2_image, format="png", width=800, height=300)
             fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(1), width=Inches(8), height=Inches(3))
+            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(4), width=Inches(8), height=Inches(3))
 
             # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
