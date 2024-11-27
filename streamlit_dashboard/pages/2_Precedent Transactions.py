@@ -110,12 +110,13 @@ if selected_industries and selected_locations:
                 st.stop()
 
             ppt = Presentation(template_path)
+            slide1 = ppt.slides[1]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
+            
+            # If slide does not exist, you can choose to add a new one
+            if slide1 is None:
+                slide_layout = ppt.slide_layouts[5]  # If no slide exists, create a blank slide
+                slide1 = ppt.slides.add_slide(slide_layout)
 
-            # Define slide layout (using slide_layouts[5] as an example for a blank slide)
-            slide_layout = ppt.slide_layouts[5]
-
-            # Add slide for both charts (EV/Revenue and EV/EBITDA)
-            slide1 = ppt.slides.add_slide(slide_layout)
             # Remove title
             title1 = slide1.shapes.title
             title1.text = ""  # Remove chart title
