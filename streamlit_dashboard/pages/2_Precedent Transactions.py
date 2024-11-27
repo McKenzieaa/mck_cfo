@@ -87,50 +87,49 @@ if selected_industries and selected_locations:
         color_ev_ebitda = "#032649"   # Default Plotly red
 
         # Create the EV/Revenue chart with data labels
-        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
+        fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
 
-        # Display the EV/Revenue chart
-        st.plotly_chart(fig1)
-
         # Create the EV/EBITDA chart with data labels
-        fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
+        fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')  # No title
         fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='inside')
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
-
-        # Display the EV/EBITDA chart
-        st.plotly_chart(fig2)
 
         # Button to export charts to PowerPoint
         export_ppt = st.button("Export Charts to PowerPoint")
 
         if export_ppt:
-            # Create a PowerPoint presentation
-            ppt = Presentation()
-            
-            # Add slide for EV/Revenue chart
+            # Load the PowerPoint template
+            template_path = r"streamlit_dashboard\data\pitch_template.pptx"
+            ppt = Presentation(template_path)
+
+            # Define slide layout (using slide_layouts[5] as an example for a blank slide)
             slide_layout = ppt.slide_layouts[5]
+
+            # Add slide for EV/Revenue chart
             slide1 = ppt.slides.add_slide(slide_layout)
+            # Remove title
             title1 = slide1.shapes.title
-            title1.text = "Precedent Transaction"
+            title1.text = ""  # Remove chart title
             
             # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
             fig1.write_image(fig1_image, format="png", width=800, height=300)
             fig1_image.seek(0)
-            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(0.5), width=Inches(8))
+            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(0.5), width=Inches(8), height=Inches(3))
 
             # # Add slide for EV/EBITDA chart
             # slide2 = ppt.slides.add_slide(slide_layout)
+            # # Remove title
             # title2 = slide2.shapes.title
-            # title2.text = "Precedent Transaction - EV/EBITDA"
+            # title2.text = ""  # Remove chart title
             
             # Save EV/EBITDA chart to an image
             fig2_image = BytesIO()
             fig2.write_image(fig2_image, format="png", width=800, height=300)
             fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(3.5), width=Inches(8))
+            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(1), width=Inches(8), height=Inches(3))
 
             # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
