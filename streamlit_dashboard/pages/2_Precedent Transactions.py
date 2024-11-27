@@ -129,13 +129,13 @@ if selected_industries and selected_locations:
             fig1_image = BytesIO()
             fig1.write_image(fig1_image, format="png", width=800, height=300)
             fig1_image.seek(0)
-            slide1.shapes.add_picture(fig1_image, Inches(1), Inches(0.5), width=Inches(8), height=Inches(3))
+            slide1.shapes.add_picture(fig1_image, Inches(0.11), Inches(0.90), width=Inches(9), height=Inches(2.8))
 
             # Add EV/EBITDA chart to the same slide
             fig2_image = BytesIO()
             fig2.write_image(fig2_image, format="png", width=800, height=300)
             fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(1), Inches(4), width=Inches(8), height=Inches(3))
+            slide1.shapes.add_picture(fig2_image, Inches(0.11), Inches(3.70), width=Inches(9), height=Inches(2.8))
 
             # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
