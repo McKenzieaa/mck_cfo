@@ -90,14 +90,14 @@ if selected_industries and selected_locations:
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
-        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1)
+        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False))
 
         st.plotly_chart(fig1)
 
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')  # No title
         fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='inside')
-        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.1,bargroupgap=0.1)
+        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False))
 
         st.plotly_chart(fig2)
 
@@ -146,7 +146,7 @@ if selected_industries and selected_locations:
             st.download_button(
                 label="Download PowerPoint",
                 data=ppt_bytes,
-                file_name="charts_presentation.pptx",
+                file_name="precedent_transaction.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
             )
 
