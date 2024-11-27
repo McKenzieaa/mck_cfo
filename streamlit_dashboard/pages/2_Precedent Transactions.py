@@ -119,7 +119,7 @@ if selected_industries and selected_locations:
 
             # Remove title
             title1 = slide1.shapes.title
-            title1.text = ""  # Remove chart title
+            # title1.text = ""  # Remove chart title
             
             # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
