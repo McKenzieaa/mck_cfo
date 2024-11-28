@@ -578,11 +578,27 @@ def plot_labour_unemployment():
     ))
 
     # Plot labour force participation rate on the secondary y-axis
-    fig.add_trace(go.Scatter(x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),y=merged['labour_force_rate'],name='Labour Force Participation Rate',mode='lines',line=dict(color='#595959'),yaxis='y2'))
-    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True),yaxis=dict(title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1],showgrid=False),hovermode='x unified', template='plotly_white', margin=dict(l=2, r=2, t=5, b=2))
-    
+    fig.add_trace(go.Scatter(
+        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
+        y=merged['labour_force_rate'],
+        name='Labour Force Participation Rate',
+        mode='lines',
+        line=dict(color='#595959'),
+        yaxis='y2'
+    ))
+
+    fig.update_layout(
+        title='',
+        xaxis=dict(showgrid=False, showticklabels=True),  # No title
+        yaxis=dict( title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
+        yaxis2=dict( title='Rate (%)', overlaying='y',side='right'),
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),
+        hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5,b=2),height=375, width=500)
     st.plotly_chart(fig, use_container_width=True)
     return fig
+
+
+
 
 def plot_external_driver(selected_indicators):
 
