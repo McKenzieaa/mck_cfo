@@ -9,7 +9,8 @@ import plotly.express as px
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
-from pptx.util import Inches
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
 from io import BytesIO
 from plotly.subplots import make_subplots
 import s3fs  # For accessing S3 data
@@ -33,14 +34,8 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
         print(f"Skipping slide '{title}' because the figure is None.")
         return  # Skip if fig is None
 
-    # Get the slide corresponding to the slide number (index starts at 0)
     slide = ppt.slides[slide_number]  # Adjust for 0-based index
 
-    # # Set slide title (optionally adjust placement based on the layout)
-    # title_shape = slide.shapes.title
-    # title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
-
-    # Save the figure image to a BytesIO object (no size, position parameters here)
     fig_image = BytesIO()
     fig.write_image(fig_image, format="png")  # Only pass the format here
     fig_image.seek(0)
@@ -49,22 +44,63 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
     slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))
     fig_image.close()
 
+def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(12), header_font_size=Pt(14)):
+    # Create a table shape on the slide
+    rows, cols = df.shape
+    table = slide.shapes.add_table(rows + 1, cols, Inches(left), Inches(top), Inches(width), Inches(height))
+
+    # Style the header row
+    for col_num, col_name in enumerate(df.columns):
+        cell = table.table.cell(0, col_num)
+        cell.text = str(col_name)
+        # Set header font style
+        cell.text_frame.paragraphs[0].font.size = header_font_size
+        cell.text_frame.paragraphs[0].font.bold = True
+        cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for header
+
+    # Style the data rows
+    for row_num, row in enumerate(df.values):
+        for col_num, value in enumerate(row):
+            cell = table.table.cell(row_num + 1, col_num)
+            cell.text = str(value)
+            # Set data cell font style
+            cell.text_frame.paragraphs[0].font.size = font_size
+            cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for data
+
+            # Optional: Adjust vertical alignment and wrapping
+            cell.text_frame.vertical_anchor = "middle"
+            cell.text_frame.word_wrap = True
+
+    # Optional: Adjust cell padding (top, bottom, left, right)
+    for row in table.table.rows:
+        for cell in row.cells:
+            cell.margin_top = Inches(0.05)
+            cell.margin_bottom = Inches(0.05)
+            cell.margin_left = Inches(0.05)
+            cell.margin_right = Inches(0.05)
+
+
 def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig):
     # Load the custom template
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
     ppt = Presentation(template_path)  # Load the template
 
     # Use the existing slides (slide_number corresponds to the slide index)
-    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=10, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=10, width=9, height=3, left=0.45, top=3.60)
-    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=11, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=11, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=10, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=10, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=4.55, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statitics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name} ", gdp_fig, slide_number=4, width=5.00, height=2.50, left=0.08, top=4.4)
+
+    # Add Benchmarking Tables to Slide
+    slide = ppt.slides[9] 
+    add_table_to_slide(slide, income_statement_df, left=0.08, top=1.3, width=9, height=3, header_font_size=Pt(14))
+    add_table_to_slide(slide, balance_sheet_df, left=0.08, top=4.6, width=9, height=3, header_font_size=Pt(14))
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
@@ -513,15 +549,38 @@ def fetch_cpi_data(series_id, df_cleaned):
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
 
 def plot_labour_unemployment():
-    merged = pd.merge(pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner'), df_pop, on=["year", "month"], how='inner')
+    # Merge unemployment and labour force data
+    merged = pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner')
+    merged = pd.merge(merged, df_pop, on=["year", "month"], how='inner')
+
     fig = go.Figure()
 
-    x_data = pd.to_datetime(merged[['year', 'month']].assign(day=1))
-    fig.add_trace(go.Scatter(x=x_data, y=merged['population'], fill='tozeroy', fillcolor='#032649', name='Population', mode='none', line=dict(color='#032649'), yaxis='y1'))
-    fig.add_trace(go.Scatter(x=x_data, y=merged['unemployment_rate'], name='Unemployment Rate', mode='lines', line=dict(color='#EB8928'), yaxis='y2'))
-    fig.add_trace(go.Scatter(x=x_data, y=merged['labour_force_rate'], name='Labour Force Participation Rate', mode='lines', line=dict(color='#595959'), yaxis='y2'))
+    # Plot population as an area chart on the primary y-axis
+    min_population = merged['population'].min()
+    fig.add_trace(go.Scatter(
+        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
+        y=merged['population'],
+        fill='tozeroy',  # Area chart
+        fillcolor='#032649', 
+        name='Population',
+        mode='none',
+        line=dict(color='#032649'),
+        yaxis='y1'
+    ))
 
-    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True), yaxis=dict(title='Population', side='left', range=[merged['population'].min(), merged['population'].max() * 1.1], showgrid=False), hovermode='x unified', template='plotly_white', margin=dict(l=0, r=0, t=5),height=250, width=500)
+    # Plot unemployment rate on the secondary y-axis
+    fig.add_trace(go.Scatter(
+        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
+        y=merged['unemployment_rate'],
+        name='Unemployment Rate',
+        mode='lines',
+        line=dict(color='#EB8928'),
+        yaxis='y2'
+    ))
+
+    # Plot labour force participation rate on the secondary y-axis
+    fig.add_trace(go.Scatter(x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),y=merged['labour_force_rate'],name='Labour Force Participation Rate',mode='lines',line=dict(color='#595959'),yaxis='y2'))
+    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True),yaxis=dict(title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1],showgrid=False),hovermode='x unified', template='plotly_white', margin=dict(l=2, r=2, t=5, b=2))
     
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -548,7 +607,7 @@ def plot_external_driver(selected_indicators):
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5),height=375, width=500)
+    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5,b=2),height=375, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -608,7 +667,7 @@ def plot_cpi_ppi(selected_series_id):
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value', showgrid=False),
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=0, r=0),height=250, width=500)
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
     
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -682,7 +741,7 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=0, r=0),height=250, width=500)
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -830,7 +889,7 @@ def plot_unemployment_labour_chart(state_name):
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
-            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=5),height=250,width=500)
+            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=2),height=250,width=500)
 
         st.plotly_chart(fig, use_container_width=True)
         return fig
@@ -860,7 +919,7 @@ def plot_gdp_chart(state_name):
                 xaxis_title=" ",
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=5),height=250,width=500)
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=2),height=250,width=500)
 
             st.plotly_chart(fig, use_container_width=True)
             return fig
