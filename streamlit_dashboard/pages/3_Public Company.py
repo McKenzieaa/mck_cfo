@@ -64,10 +64,10 @@ col1, col2 = st.columns(2)
 selected_industries = col1.multiselect("Select Industry", industries)
 selected_locations = col2.multiselect("Select Location", locations)
 
-# Filter data based on dropdown selections
+# Filter data based on multi-selections using .isin()
 if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
-    filtered_df = filtered_df[['Company', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
+    filtered_df = filtered_df[['Company',  'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_df['EV/Revenue'] = filtered_df['EV/Revenue'].round(1)
     filtered_df['EV/EBITDA'] = filtered_df['EV/EBITDA'].round(1)
 
@@ -94,16 +94,7 @@ if selected_industries and selected_locations:
     )
 
     selected_data = pd.DataFrame(grid_response['selected_rows'])
-
-    # Add "Submit" button after the table
-    if st.button("Submit"):
-        if not selected_data.empty:
-            st.write("Selected Companies:")
-            st.write(selected_data)
-        else:
-            st.warning("No rows selected. Please select at least one row from the table.")
-
-
+    
     if not selected_data.empty:
         avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
 
