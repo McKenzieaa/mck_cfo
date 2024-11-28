@@ -701,16 +701,16 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
             return  # Skip if fig is None
 
         # Add a new slide based on the template layout
-        slide_layout = ppt.slide_layouts[5]  # Use the desired slide layout from the template
+        slide_layout = ppt.slide_layouts[(slide_number)]  # Use the desired slide layout from the template
         slide = ppt.slides.add_slide(slide_layout)
 
-        # Set slide title (optionally adjust placement based on the layout)
-        title_shape = slide.shapes.title
-        title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
+        # # Set slide title (optionally adjust placement based on the layout)
+        # title_shape = slide.shapes.title
+        # # title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
 
         # Save the figure image to a BytesIO object
         fig_image = BytesIO()
-        fig.write_image(fig_image, format="png", width=width, height=height)
+        fig.write_image(fig_image, format="png", width=width, height=height, left=left, top=top)
         fig_image.seek(0)
 
         # Add the image to the slide with defined width, height, and position
