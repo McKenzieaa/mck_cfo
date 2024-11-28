@@ -28,10 +28,15 @@ except KeyError:
     st.stop()
 
 # Function to export charts to PowerPoint
+from pptx import Presentation
+from pptx.util import Inches
+from io import BytesIO
+import plotly.graph_objects as go
+import pandas as pd
+
 def export_charts_to_ppt(slides_data):
     ppt = Presentation()
-    slide = ppt.slides[slide_number]  # Use an empty slide layout (no title or content)
-
+    
     # Define slide properties for each chart
     slide_properties = {
         "Precedent Transactions": [
@@ -40,7 +45,7 @@ def export_charts_to_ppt(slides_data):
         ],
         "Public Comps": [
             {"chart": "fig1_public", "slide_number": 11, "width": 9, "height": 3, "left": 0.11, "top": 0.90},
-            {"chart": "fig2_public", "slide_number": 11,  "width": 8, "height": 3, "left": 0.11, "top": 3.7}
+            {"chart": "fig2_public", "slide_number": 11, "width": 8, "height": 3, "left": 0.11, "top": 3.7}
         ],
         "State Indicators": [
             {"chart": "labour_fig", "slide_number": 2, "width": 8, "height": 3, "left": 1, "top": 1},
@@ -58,9 +63,16 @@ def export_charts_to_ppt(slides_data):
         ]
     }
 
+    # Iterate over slides data and add charts or tables to the pre-existing slides
     for slide_title, charts in slides_data:
-        slide = ppt.slides.add_slide(slide)
-        slide.shapes.title.text = slide_title
+        # Access the pre-existing slide by title
+        slide_number = slide_properties.get(slide_title)
+        
+        if slide_number is None:
+            continue
+
+        slide = ppt.slides[slide_number]
+        slide.shapes.title.text = slide_title  # Set the title of the slide
 
         for chart_data in slide_properties.get(slide_title, []):
             chart = chart_data['chart']
@@ -1298,15 +1310,19 @@ if 'cpi_ppi_fig' in locals() and cpi_ppi_fig:
 
 if us_indicators_charts:
     slides_data.append(("US Indicators", us_indicators_charts))
-
-# Ensure there are slides to export
+    
 if slides_data:
-    ppt_bytes = export_charts_to_ppt(slides_data)
-    st.download_button(
-        label="Download Pitch Book",
-        data=ppt_bytes,
-        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
-        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-    )
+    ppt_bytes = export_charts_to_ppt(slides_data)  # This should be your updated export function
+
+    # Check if ppt_bytes is not empty before attempting download
+    if ppt_bytes:
+        st.download_button(
+            label="Download Pitch Book",
+            data=ppt_bytes,
+            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        )
+    else:
+        st.warning("Failed to generate the Pitch Book. Please try again.")
 else:
     st.warning("No valid charts or tables to export.")
