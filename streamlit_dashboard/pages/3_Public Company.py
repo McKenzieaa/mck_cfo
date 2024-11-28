@@ -106,7 +106,7 @@ if selected_industries and selected_locations:
             return '\n'.join(text[i:i+max_width] for i in range(0, len(text), max_width))
 
         num_companies = len(avg_data['Company'])
-        max_width = max(10, int(50 / num_companies))
+        max_width = max(25, int(50 / num_companies))
         wrapped_labels = [wrap_text_dynamically(company, max_width) for company in avg_data['Company']]
 
         # Create the EV/Revenue chart with data labels
