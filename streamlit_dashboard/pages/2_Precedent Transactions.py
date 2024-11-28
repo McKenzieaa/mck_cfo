@@ -111,7 +111,7 @@ if selected_industries and selected_locations:
                 )
             ]
         )
-        fig1.add_annotation(x=len(avg_data['Year']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left")
+        
         st.plotly_chart(fig1)
 
         # Create the EV/EBITDA chart with data labels
@@ -134,7 +134,7 @@ if selected_industries and selected_locations:
                 )
             ]
         )
-        fig2.add_annotation(x=len(avg_data['Year']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left")
+
         st.plotly_chart(fig2)
 
         # Button to export charts to PowerPoint
