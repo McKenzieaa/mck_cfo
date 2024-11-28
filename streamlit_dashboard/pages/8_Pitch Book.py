@@ -11,6 +11,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
+from pptx.enum.text import MSO_ANCHOR
 from io import BytesIO
 from plotly.subplots import make_subplots
 import s3fs  # For accessing S3 data
@@ -44,7 +45,7 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
     slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))
     fig_image.close()
 
-def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(12), header_font_size=Pt(14)):
+def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), header_font_size=Pt(12)):
     # Create a table shape on the slide
     rows, cols = df.shape
     table = slide.shapes.add_table(rows + 1, cols, Inches(left), Inches(top), Inches(width), Inches(height))
@@ -68,7 +69,7 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(12), he
             cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for data
 
             # Optional: Adjust vertical alignment and wrapping
-            cell.text_frame.vertical_anchor = "middle"
+            cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             cell.text_frame.word_wrap = True
 
     # Optional: Adjust cell padding (top, bottom, left, right)
@@ -596,8 +597,6 @@ def plot_labour_unemployment():
         hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5,b=2),height=375, width=500)
     st.plotly_chart(fig, use_container_width=True)
     return fig
-
-
 
 
 def plot_external_driver(selected_indicators):
