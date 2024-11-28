@@ -696,11 +696,11 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
         return  # Skip if fig is None
 
     # Get the slide corresponding to the slide number (index starts at 0)
-    slide = ppt.slides[slide_number - 1]  # Adjust for 0-based index
+    slide = ppt.slides[slide_number]  # Adjust for 0-based index
 
-    # Set slide title (optionally adjust placement based on the layout)
-    title_shape = slide.shapes.title
-    title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
+    # # Set slide title (optionally adjust placement based on the layout)
+    # title_shape = slide.shapes.title
+    # title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
 
     # Save the figure image to a BytesIO object (no size, position parameters here)
     fig_image = BytesIO()
@@ -768,12 +768,15 @@ def get_us_indicators_layout():
     cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
 
     if st.button("Export Charts to PowerPoint", key="export_button"):
+        # Export the charts to PowerPoint using the export_all_to_pptx function
         pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
+        
+        # Create a download button for the user to download the PowerPoint file
         st.download_button(
-            label="Download PowerPoint",
-            data=pptx_file,
-            file_name="state_indicators.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            label="Download PowerPoint",  # The label for the button
+            data=pptx_file,  # The PowerPoint file content
+            file_name="state_indicators.pptx",  # The default filename for the download
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"  # MIME type for PowerPoint
         )
 
 get_us_indicators_layout()
