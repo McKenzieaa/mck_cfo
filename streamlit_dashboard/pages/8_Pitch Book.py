@@ -1265,15 +1265,22 @@ with st.expander("Benchmarking"):
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-if st.button("Export Charts to PowerPoint", key="export_button"):
-        # Export the charts to PowerPoint using the export_all_to_pptx function
-    pptx_file = export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,fig1_precedent,fig2_precedent,fig1_public,fig2_public, labour_fig, gdp_fig)
-        
-        # Create a download button for the user to download the PowerPoint file
-    st.download_button(
-        label="Download PowerPoint",  # The label for the button
-        data=pptx_file,  # The PowerPoint file content
-        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",  # The default filename for the download
-        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"  # MIME type for PowerPoint
-        )
+    if st.button("Export Charts to PowerPoint", key="export_button"):
+        try:
+            # Export the charts to PowerPoint using the export_all_to_pptx function
+            pptx_file = export_all_to_pptx(
+                labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
+                fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
+                labour_fig, gdp_fig
+            )
 
+            # Create a download button for the user to download the PowerPoint file
+            st.download_button(
+                label="Download PowerPoint",  # The label for the button
+                data=pptx_file,  # The PowerPoint file content (must be in byte format)
+                file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",  # The default filename for the download
+                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"  # MIME type for PowerPoint
+            )
+
+        except Exception as e:
+            st.error(f"Error during PowerPoint export: {e}")
