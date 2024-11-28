@@ -68,13 +68,6 @@ if selected_industries and selected_locations:
     gb.configure_columns(["Business Description"], hide=False)    
     grid_options = gb.build()
 
-    def fetch_data(start, end):
-        return filtered_df.iloc[start:end]
-
-    start_row = st.session_state.get("start_row", 0)
-    end_row = start_row + 50 
-    paged_data = fetch_data(start_row, end_row)
-
     # Display Ag-Grid table
     grid_response = AgGrid(
         filtered_df,
