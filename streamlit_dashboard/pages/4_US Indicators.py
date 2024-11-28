@@ -718,10 +718,10 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
         fig_image.close()
 
     # Add slides for each figure with different properties
-    add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=500, height=250, left=0.08, top=1.3)
-    add_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=450, height=375, left=5.20, top=1.3)
-    add_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=5, width=500, height=250, left=0.08, top=4.4)
-    add_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=5, width=455, height=250, left=5.10, top=1.3)
+    add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=500, height=250, Inches=0.08, Inches=1.3)
+    add_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=450, height=375, Inches=5.20, Inches=1.3)
+    add_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=5, width=500, height=250, Inches=0.08, Inches=4.4)
+    add_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=5, width=455, height=250, Inches=5.10, Inches=1.3)
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
