@@ -63,35 +63,34 @@ def export_charts_to_ppt(slides_data):
         ]
     }
 
-    # Iterate over slides data and add charts or tables to the pre-existing slides
+    required_slide_numbers = {chart_data['slide_number'] for _, charts in slides_data for chart_data in charts}
+    while len(ppt.slides) < max(required_slide_numbers) + 1:
+        ppt.slides.add_slide(ppt.slide_layouts[5])  # Empty slide layout
+
     for slide_title, charts in slides_data:
-        # Access the pre-existing slide by title
-        slide_number = slide_properties.get(slide_title)
-        
-        if slide_number is None:
-            continue
-
-        slide = ppt.slides[slide_number]
-        slide.shapes.title.text = slide_title  # Set the title of the slide
-
-        for chart_data in slide_properties.get(slide_title, []):
-            chart = chart_data['chart']
+        for chart_data in charts:
             slide_number = chart_data['slide_number']
+            chart = chart_data['chart']
             width = chart_data['width']
             height = chart_data['height']
             left = chart_data['left']
             top = chart_data['top']
 
-            # Add the chart to the respective slide
-            if isinstance(globals().get(chart), go.Figure):  # If it's a Plotly chart
+            slide = ppt.slides[slide_number]
+            # Add title only if not already added
+            if not slide.shapes.title:
+                slide.shapes.title.text = slide_title
+
+            # Add chart or table
+            if isinstance(globals().get(chart), go.Figure):  # Plotly chart
                 chart_image = BytesIO()
                 globals().get(chart).write_image(chart_image, format="png", width=800, height=300)
                 chart_image.seek(0)
-                ppt.slides[slide_number].shapes.add_picture(chart_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height))
-            elif isinstance(globals().get(chart), pd.DataFrame):  # If it's a table
+                slide.shapes.add_picture(chart_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height))
+            elif isinstance(globals().get(chart), pd.DataFrame):  # Table
                 df = globals().get(chart)
                 rows, cols = df.shape[0] + 1, df.shape[1]
-                table = ppt.slides[slide_number].shapes.add_table(rows, cols, Inches(left), Inches(top), Inches(width), Inches(0.5 * rows)).table
+                table = slide.shapes.add_table(rows, cols, Inches(left), Inches(top), Inches(width), Inches(0.5 * rows)).table
                 for col_idx, col_name in enumerate(df.columns):
                     table.cell(0, col_idx).text = col_name
                 for row_idx, row in enumerate(df.itertuples(index=False)):
@@ -1310,7 +1309,7 @@ if 'cpi_ppi_fig' in locals() and cpi_ppi_fig:
 
 if us_indicators_charts:
     slides_data.append(("US Indicators", us_indicators_charts))
-    
+
 if slides_data:
     ppt_bytes = export_charts_to_ppt(slides_data)  # This should be your updated export function
 
