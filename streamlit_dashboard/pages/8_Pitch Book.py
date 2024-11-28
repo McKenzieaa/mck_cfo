@@ -48,25 +48,24 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
 def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), header_font_size=Pt(12)):
     # Create a table shape on the slide
     rows, cols = df.shape
-    table = slide.shapes.add_table(rows + 1, cols, Inches(left), Inches(top), Inches(width), Inches(height))
+    table = slide.shapes.add_table(rows + 1, cols, Inches(left), Inches(top), Inches(width), Inches(height)).table
 
     # Style the header row
     for col_num, col_name in enumerate(df.columns):
-        cell = table.table.cell(0, col_num)
+        cell = table.cell(0, col_num)
         cell.text = str(col_name)
         # Set header font style
         cell.text_frame.paragraphs[0].font.size = header_font_size
         cell.text_frame.paragraphs[0].font.bold = True
         cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for header
 
-        # Remove cell border for header row (No grid)
-        for border in cell._element.xpath('.//a:tcPr'):
-            border.getparent().remove(border)
+        # Remove borders for the header cell
+        remove_cell_borders(cell)
 
     # Style the data rows
     for row_num, row in enumerate(df.values):
         for col_num, value in enumerate(row):
-            cell = table.table.cell(row_num + 1, col_num)
+            cell = table.cell(row_num + 1, col_num)
             cell.text = str(value)
             # Set data cell font style
             cell.text_frame.paragraphs[0].font.size = font_size
@@ -76,17 +75,26 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             cell.text_frame.word_wrap = True
 
-            # Remove cell border for data rows (No grid)
-            for border in cell._element.xpath('.//a:tcPr'):
-                border.getparent().remove(border)
+            # Remove borders for the data cell
+            remove_cell_borders(cell)
 
     # Optional: Adjust cell padding (top, bottom, left, right)
-    for row in table.table.rows:
+    for row in table.rows:
         for cell in row.cells:
             cell.margin_top = Inches(0.05)
             cell.margin_bottom = Inches(0.05)
             cell.margin_left = Inches(0.05)
             cell.margin_right = Inches(0.05)
+
+def remove_cell_borders(cell):
+    """
+    Remove borders from a table cell by clearing its XML properties.
+    """
+    tc = cell._tc  # Access the underlying XML element
+    tcPr = tc.get_or_add_tcPr()
+    for border in ['a:lnL', 'a:lnR', 'a:lnT', 'a:lnB', 'a:lnTlToBr', 'a:lnBlToTr']:
+        for ln in tcPr.findall(border):
+            tcPr.remove(ln)
 
 def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig):
     # Load the custom template
