@@ -717,10 +717,10 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     ppt = Presentation(template_path)  # Load the template
 
     # Use the existing slides (slide_number corresponds to the slide index)
-    update_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=5, height=2.5, left=0.08, top=1.3)
-    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=6, width=6, height=4, left=1, top=1)
-    update_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=7, width=5, height=3.5, left=2, top=2)
-    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=8, width=5.50, height=3.75, left=1, top=1)
+    update_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
+    update_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=5, width=4.55, height=2.50, left=5.10, top=1.3)
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
@@ -775,7 +775,7 @@ def get_us_indicators_layout():
         st.download_button(
             label="Download PowerPoint",  # The label for the button
             data=pptx_file,  # The PowerPoint file content
-            file_name="state_indicators.pptx",  # The default filename for the download
+            file_name="US_indicators.pptx",  # The default filename for the download
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"  # MIME type for PowerPoint
         )
 
