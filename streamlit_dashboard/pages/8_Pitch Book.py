@@ -55,10 +55,10 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     ppt = Presentation(template_path)  # Load the template
 
     # Use the existing slides (slide_number corresponds to the slide index)
-    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=10, width=9, height=3, left=0.11, top=0.90)
-    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=10, width=9, height=3, left=0.11, top=3.70)
-    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.11, top=0.90)
-    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.11, top=3.70)
+    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=10, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=10, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
@@ -513,67 +513,16 @@ def fetch_cpi_data(series_id, df_cleaned):
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
 
 def plot_labour_unemployment():
-    # Merge unemployment and labour force data
-    merged = pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner')
-    merged = pd.merge(merged, df_pop, on=["year", "month"], how='inner')
-
+    merged = pd.merge(pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner'), df_pop, on=["year", "month"], how='inner')
     fig = go.Figure()
 
-    # Plot population as an area chart on the primary y-axis
-    min_population = merged['population'].min()
-    fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['population'],
-        fill='tozeroy',  # Area chart
-        fillcolor='#032649', 
-        name='Population',
-        mode='none',
-        line=dict(color='#032649'),
-        yaxis='y1'
-    ))
+    x_data = pd.to_datetime(merged[['year', 'month']].assign(day=1))
+    fig.add_trace(go.Scatter(x=x_data, y=merged['population'], fill='tozeroy', fillcolor='#032649', name='Population', mode='none', line=dict(color='#032649'), yaxis='y1'))
+    fig.add_trace(go.Scatter(x=x_data, y=merged['unemployment_rate'], name='Unemployment Rate', mode='lines', line=dict(color='#EB8928'), yaxis='y2'))
+    fig.add_trace(go.Scatter(x=x_data, y=merged['labour_force_rate'], name='Labour Force Participation Rate', mode='lines', line=dict(color='#595959'), yaxis='y2'))
 
-    # Plot unemployment rate on the secondary y-axis
-    fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['unemployment_rate'],
-        name='Unemployment Rate',
-        mode='lines',
-        line=dict(color='#EB8928'),
-        yaxis='y2'
-    ))
-
-    # Plot labour force participation rate on the secondary y-axis
-    fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['labour_force_rate'],
-        name='Labour Force Participation Rate',
-        mode='lines',
-        line=dict(color='#595959'),
-        yaxis='y2'
-    ))
-
-    fig.update_layout(
-        title='',
-        xaxis=dict(showgrid=False, showticklabels=True),  # No title
-        yaxis=dict(
-            title='Population',
-            side='left',
-            range=[merged['population'].min(), merged['population'].max() * 1.1],
-            showgrid=False
-        ),
-        yaxis2=dict(
-            title='Rate (%)',
-            overlaying='y',  # Overlay on the primary y-axis
-            side='right',
-            showgrid=False
-        ),
-        legend=dict(
-            orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
-        ),
-        hovermode='x unified',  # Unified hover mode
-        template='plotly_white',
-        margin=dict(l=0, r=0, t=0, b=0)
-    )
+    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True), yaxis=dict(title='Population', side='left', range=[merged['population'].min(), merged['population'].max() * 1.1], showgrid=False), hovermode='x unified', template='plotly_white', margin=dict(l=0, r=0, t=5),height=250, width=500)
+    
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
@@ -592,51 +541,14 @@ def plot_external_driver(selected_indicators):
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
-        # Cycle through colors if there are more than 5 indicators
-        color = colors[i % len(colors)]  # Use modulus to cycle through the colors
+        color = colors[i % len(colors)]
 
-        # Ensure the color is a valid string (in case of any unexpected value)
         if isinstance(color, str) and color.startswith('#') and len(color) == 7:
-            fig.add_trace(
-                go.Scatter(
-                    x=indicator_data['Year'],
-                    y=indicator_data['% Change'],
-                    mode='lines',
-                    name=indicator,
-                    line=dict(color=color),  # Apply the color dynamically
-                )
-            )
+            fig.add_trace(go.Scatter(x=indicator_data['Year'],y=indicator_data['% Change'],mode='lines',name=indicator,line=dict(color=color),))
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-    fig.update_layout(
-        title='',
-        xaxis=dict(
-            showgrid=False,    # Remove gridlines
-            showticklabels=True,
-            showline=False,    # Remove the x-axis line
-        ),
-        yaxis=dict(
-            title='Percent Change',
-            showgrid=False,    # Remove gridlines
-            showline=False,    # Remove the y-axis line
-        ),
-        hovermode='x',
-        legend=dict(
-            x=0, y=1, 
-            orientation='h',
-            xanchor='left', 
-            yanchor='top', 
-            traceorder='normal',
-            font=dict(size=10),
-            bgcolor='rgba(255, 255, 255, 0)', 
-            bordercolor='rgba(255, 255, 255, 0)', 
-            borderwidth=0 
-        ),
-        plot_bgcolor='rgba(0,0,0,0)',  # Transparent background for plot area
-        paper_bgcolor='rgba(0,0,0,0)', # Transparent background for the whole figure
-        margin=dict(l=0, r=0, t=0, b=0)  # Remove padding
-    )
+    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5),height=375, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -696,8 +608,9 @@ def plot_cpi_ppi(selected_series_id):
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value', showgrid=False),
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=0, b=0, l=0, r=0) )
-    st.plotly_chart(fig, use_container_width=True)#, key=key)
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=0, r=0),height=250, width=500)
+    
+    st.plotly_chart(fig, use_container_width=True)
     return fig
 
 def plot_gdp_and_industry(selected_industry=None):
@@ -713,7 +626,7 @@ def plot_gdp_and_industry(selected_industry=None):
             fill='tozeroy',  # Create area chart by filling to the x-axis
             fillcolor='#032649', #'rgba(235, 137, 40, 0.6)', 
             line=dict(color='#032649', width=2),
-            marker=dict(size=6)
+            marker=dict(size=10)
         ),
         secondary_y=False
     )
@@ -726,7 +639,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Percent Change',
             line=dict(color='#A5A5A5', width=2, dash='solid'),
-            marker=dict(size=6)
+            marker=dict(size=10)
         ),
         secondary_y=True
     )
@@ -745,7 +658,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 fill='tozeroy',  # Area chart
                 fillcolor='#EB8928', 
                 line=dict(color='#EB8928', width=2),
-                marker=dict(size=6)
+                marker=dict(size=10)
             ),
             secondary_y=False
         )
@@ -758,7 +671,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'GDP Industry - % Change',
                 line=dict(color='#1C798A', width=2, dash='solid'),
-                marker=dict(size=6)
+                marker=dict(size=10)
             ),
             secondary_y=True
         )
@@ -769,7 +682,7 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=8)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=0, b=0, l=0, r=0))
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=0, r=0),height=250, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -898,7 +811,6 @@ def plot_unemployment_labour_chart(state_name):
 
         merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
 
-
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Unemployment'], mode='lines',line=dict(color=line_colors["unemployment"]), name="Unemployment"))
         fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Labour Force'], mode='lines',line=dict(color=line_colors["labour_force"]), name="Labour Force"))
@@ -918,7 +830,7 @@ def plot_unemployment_labour_chart(state_name):
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
-            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=5),height=250,width=500)
 
         st.plotly_chart(fig, use_container_width=True)
         return fig
@@ -948,7 +860,7 @@ def plot_gdp_chart(state_name):
                 xaxis_title=" ",
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=5),height=250,width=500)
 
             st.plotly_chart(fig, use_container_width=True)
             return fig
@@ -1079,20 +991,19 @@ with st.expander("Precedent Transactions"):
             median_ev_ebitda = avg_data['EV/EBITDA'].median()
 
             # Create the EV/Revenue chart with data labels
-            fig1_precedent = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
-            fig1_precedent.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
+            fig1_precedent = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')  # No title
+            fig1_precedent.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
             fig1_precedent.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ", bargap=0.4, bargroupgap=0.4, yaxis=dict(showgrid=False), shapes=[dict(type='line', x0=avg_data['Year'].min(), x1=avg_data['Year'].max(), y0=median_ev_revenue, y1=median_ev_revenue, line=dict(color='#EB8928', dash='dot', width=2))], annotations=[dict(x=avg_data['Year'].max(), y=median_ev_revenue, xanchor='left', yanchor='bottom', text=f'Median: {median_ev_revenue:.1f}'+'x', showarrow=False, font=dict(size=12, color='gray'), bgcolor='white')],plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0),width=900,height=300)
 
             st.plotly_chart(fig1_precedent)
 
             # Create the EV/EBITDA chart with data labels
-            fig2_precedent = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')
-            fig2_precedent.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='auto',textfont=dict(size=10))
+            fig2_precedent = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
+            fig2_precedent.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='auto',textfont=dict(size=12))
             fig2_precedent.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ", bargap=0.4, bargroupgap=0.4, yaxis=dict(showgrid=False), shapes=[dict(type='line', x0=avg_data['Year'].min(), x1=avg_data['Year'].max(), y0=median_ev_ebitda, y1=median_ev_ebitda, line=dict(color='#EB8928', dash='dot', width=2))], annotations=[dict(x=avg_data['Year'].max(), y=median_ev_ebitda, xanchor='left', yanchor='bottom', text=f'Median: {median_ev_ebitda:.1f}'+'x', showarrow=False, font=dict(size=12, color='gray'), bgcolor='white')],plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0),width=900,height=300)
             
             st.plotly_chart(fig2_precedent)
 
-# Accordion for Public Comps
 with st.expander("Public Comps"):
     col1, col2 = st.columns(2)
     selected_industries = col1.multiselect("Select Industry", public_industries, key="public_industries")
@@ -1138,8 +1049,8 @@ with st.expander("Public Comps"):
 
             # Create the EV/Revenue chart with data labels
             fig1_public = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
-            fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
-            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin="height+width"),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',width=900,height=300)
+            fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
+            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin="height+width"),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0),width=900,height=300)
             fig1_public.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_revenue, y1=median_ev_revenue,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
             fig1_public.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
 
@@ -1147,8 +1058,8 @@ with st.expander("Public Comps"):
 
             # Create the EV/EBITDA chart with data labels
             fig2_public = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-            fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
-            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin="height+width"),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',width=900,height=300)
+            fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
+            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin="height+width"),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0),width=900,height=300)
             fig2_public.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_ebitda, y1=median_ev_ebitda,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
             fig2_public.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_ebitda + 0.2, text=f"Median: {median_ev_ebitda:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
             
