@@ -34,7 +34,7 @@ try:
 except Exception as e:
     st.error(f"Error loading data from S3: {e}")
     st.stop()
-    
+
 # Streamlit app title
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
@@ -50,14 +50,16 @@ selected_locations = col2.multiselect("Select Location", locations)
 # Filter data based on multi-selections using .isin()
 if selected_industries and selected_locations:
     filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
-    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
+    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
     filtered_df['Year'] = filtered_df['Year'].astype(int)
 
     # Set up Ag-Grid for selection
     st.title("Precedent Transactions")
     gb = GridOptionsBuilder.from_dataframe(filtered_df)
+    gb.configure_grid_options(rowModelType='infinite')
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+    gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=50)
     gb.configure_column(
         field="Target",
         tooltipField="Business Description",
@@ -66,9 +68,17 @@ if selected_industries and selected_locations:
     gb.configure_columns(["Business Description"], hide=False)    
     grid_options = gb.build()
 
+    def fetch_data(start, end):
+        return filtered_df.iloc[start:end]
+
+    # Paginate data using session_state for scrolling
+    start_row = st.session_state.get("start_row", 0)
+    end_row = start_row + 50
+    paged_data = fetch_data(start_row, end_row)
+
     # Display Ag-Grid table
     grid_response = AgGrid(
-        filtered_df,
+        paged_data,
         gridOptions=grid_options,
         update_mode=GridUpdateMode.SELECTION_CHANGED,
         height=400,
@@ -120,9 +130,6 @@ if selected_industries and selected_locations:
                     showarrow=False,
                     font=dict(size=12, color='gray'),
                     bgcolor='white',
-                    # borderpad=4,
-                    # bordercolor='red',
-                    # borderwidth=2
                 )
             ]
         )
@@ -158,9 +165,6 @@ if selected_industries and selected_locations:
                     showarrow=False,
                     font=dict(size=12, color='gray'),
                     bgcolor='white',
-                    # borderpad=4,
-                    # bordercolor='blue',
-                    # borderwidth=2
                 )
             ]
         )
@@ -188,7 +192,7 @@ if selected_industries and selected_locations:
 
             # Remove title
             title1 = slide1.shapes.title
-            # title1.text = ""  # Remove chart title
+            title1.text = ""  # Remove chart title
             
             # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
@@ -200,20 +204,18 @@ if selected_industries and selected_locations:
             fig2_image = BytesIO()
             fig2.write_image(fig2_image, format="png", width=900, height=300)
             fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(0.11), Inches(3.70), width=Inches(9), height=Inches(2.8))
+            slide1.shapes.add_picture(fig2_image, Inches(0.11), Inches(4.90), width=Inches(9), height=Inches(2.8))
 
-            # Save PowerPoint to BytesIO object for download
-            ppt_bytes = BytesIO()
-            ppt.save(ppt_bytes)
-            ppt_bytes.seek(0)
+            # Save the PowerPoint presentation as a BytesIO object for download
+            ppt_output = BytesIO()
+            ppt.save(ppt_output)
+            ppt_output.seek(0)
 
-            # Provide download link for PowerPoint
+            # Provide the download button
             st.download_button(
                 label="Download PowerPoint",
-                data=ppt_bytes,
+                data=ppt_output,
                 file_name="precedent_transaction.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
             )
 
-else:
-    st.write("Please select at least one Industry and Location to view data.")
