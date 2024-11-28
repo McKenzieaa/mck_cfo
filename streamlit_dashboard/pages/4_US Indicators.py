@@ -509,6 +509,8 @@ def plot_labour_unemployment():
 
 def plot_external_driver(selected_indicators):
 
+    color = ['#032649', '#EB8928', '#595959', '#A5A5A5', '#1C798A']
+
     if not selected_indicators:
         selected_indicators = ["World GDP"]
 
@@ -526,7 +528,7 @@ def plot_external_driver(selected_indicators):
                 y=indicator_data['% Change'],
                 mode='lines',
                 name=indicator,
-                line=dict(color='#032649'),
+                line=dict(color=color),
             )
         )
 
