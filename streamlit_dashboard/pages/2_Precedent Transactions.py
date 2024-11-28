@@ -109,6 +109,21 @@ if selected_industries and selected_locations:
                     y1=median_ev_revenue,
                     line=dict(color='#EB8928', dash='dot', width=2),
                 )
+            ],
+            annotations=[  # Add median label
+                dict(
+                    x=avg_data['Year'].max(),
+                    y=median_ev_revenue,
+                    xanchor='left',
+                    yanchor='bottom',
+                    text=f'Median: {median_ev_revenue:.1f}'+'x',
+                    showarrow=False,
+                    font=dict(size=12, color='gray'),
+                    bgcolor='white',
+                    # borderpad=4,
+                    # bordercolor='red',
+                    # borderwidth=2
+                )
             ]
         )
         
@@ -132,9 +147,23 @@ if selected_industries and selected_locations:
                     y1=median_ev_ebitda,
                     line=dict(color='#EB8928', dash='dot', width=2),
                 )
+            ],
+            annotations=[  # Add median label
+                dict(
+                    x=avg_data['Year'].max(),
+                    y=median_ev_ebitda,
+                    xanchor='left',
+                    yanchor='bottom',
+                    text=f'Median: {median_ev_ebitda:.1f}'+'x',
+                    showarrow=False,
+                    font=dict(size=12, color='gray'),
+                    # bgcolor='white',
+                    # borderpad=4,
+                    # bordercolor='blue',
+                    # borderwidth=2
+                )
             ]
         )
-
         st.plotly_chart(fig2)
 
         # Button to export charts to PowerPoint
