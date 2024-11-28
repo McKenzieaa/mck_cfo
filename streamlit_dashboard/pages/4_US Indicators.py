@@ -509,28 +509,39 @@ def plot_labour_unemployment():
 
 def plot_external_driver(selected_indicators):
 
-    color = ['#032649', '#EB8928', '#595959', '#A5A5A5', '#1C798A']
+    colors = ['#032649', '#EB8928', '#595959', '#A5A5A5', '#1C798A']
 
     if not selected_indicators:
         selected_indicators = ["World GDP"]
 
     fig = go.Figure()
 
-    for indicator in selected_indicators:
+    for i, indicator in enumerate(selected_indicators):
         indicator_data = external_driver_df[external_driver_df['Indicator'] == indicator]
 
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
-        fig.add_trace(
-            go.Scatter(
-                x=indicator_data['Year'],
-                y=indicator_data['% Change'],
-                mode='lines',
-                name=indicator,
-                line=dict(color=color),
+        # Cycle through colors if there are more than 5 indicators
+        color = colors[i % len(colors)]  # Use modulus to cycle through the colors
+
+        # Debugging: Print the color to ensure it's a valid value
+        print(f"Applying color: {color} for indicator: {indicator}")
+
+        # Ensure the color is a valid string (in case of any unexpected value)
+        if isinstance(color, str) and color.startswith('#') and len(color) == 7:
+            fig.add_trace(
+                go.Scatter(
+                    x=indicator_data['Year'],
+                    y=indicator_data['% Change'],
+                    mode='lines',
+                    name=indicator,
+                    line=dict(color=color),  # Apply the color dynamically
+                )
             )
-        )
+        else:
+            raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
+
 
     fig.update_layout(
         title='',
