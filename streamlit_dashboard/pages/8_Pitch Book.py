@@ -91,11 +91,11 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.45, top=0.90)
     update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
-    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
-    update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=4.55, height=2.50, left=5.10, top=1.3)
+    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=5, height=4, left=5.20, top=1.3)
+    update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statitics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
-    update_figure_slide(ppt, f"GDP - {state_name} ", gdp_fig, slide_number=4, width=5.00, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, f"GDP - {state_name} ", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
 
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9] 
