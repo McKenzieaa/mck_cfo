@@ -86,23 +86,27 @@ if selected_industries and selected_locations:
         # Define colors
         color_ev_revenue = "#032649"  # Default Plotly blue
         color_ev_ebitda = "#032649"   # Default Plotly red
-        x_labels = []
-        for label in avg_data['Company']:
-            x_labels.append(label.replace(' ','<br>'))
+
+        median_ev_revenue = avg_data['EV/Revenue'].median()
+        median_ev_ebitda = avg_data['EV/EBITDA'].median()
             
 
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),automargin="height+width")
-
+        fig1.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_revenue, y1=median_ev_revenue,line=dict(color="#EB8928", width=2, dash="dash"),  xref="x", yref="y")
+        fig1.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left")
+        
         st.plotly_chart(fig1)
 
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')  # No title
         fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='auto',textfont=dict(size=10))
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),automargin="height+width")
-
+        fig2.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_ebitda, y1=median_ev_ebitda,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
+        fig2.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_ebitda + 0.2, text=f"Median: {median_ev_ebitda:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left")
+       
         st.plotly_chart(fig2)
 
         # Button to export charts to PowerPoint
