@@ -112,8 +112,7 @@ if selected_industries and selected_locations:
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
-        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0, tickmode='array', tickvals=avg_data['Company'], ticktext=wrapped_labels)
-)
+        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
 
         # Display the EV/Revenue chart
         st.plotly_chart(fig1)
