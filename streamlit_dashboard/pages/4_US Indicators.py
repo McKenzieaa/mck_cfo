@@ -486,7 +486,7 @@ def plot_labour_unemployment():
     ))
 
     fig.update_layout(
-        title='Population, Unemployment Rate, and Labour Force Participation Rate (USA)',
+        title='',
         xaxis=dict(showgrid=False, showticklabels=True),  # No title
         yaxis=dict(
             title='Population',
@@ -531,7 +531,7 @@ def plot_external_driver(selected_indicators):
         )
 
     fig.update_layout(
-        title='External Driver Indicators',
+        title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Percent Change'),
         hovermode='x'
@@ -592,7 +592,7 @@ def plot_cpi_ppi(selected_series_id):
 
     # Configure the layout of the chart
     fig.update_layout(
-        title=f'CPI-US, CPI by Industry & PPI-US',
+        title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
@@ -672,7 +672,7 @@ def plot_gdp_and_industry(selected_industry=None):
 
     # Update layout
     fig.update_layout(
-        title=f'GDP-US & {selected_industry}-Value & Percent',
+        title='',
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
