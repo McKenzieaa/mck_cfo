@@ -576,33 +576,50 @@ def plot_labour_unemployment():
 
 def plot_external_driver(selected_indicators):
 
+    colors = ['#032649', '#EB8928', '#595959', '#A5A5A5', '#1C798A']
+
     if not selected_indicators:
         selected_indicators = ["World GDP"]
 
     fig = go.Figure()
 
-    for indicator in selected_indicators:
+    for i, indicator in enumerate(selected_indicators):
         indicator_data = external_driver_df[external_driver_df['Indicator'] == indicator]
 
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
-        fig.add_trace(
-            go.Scatter(
-                x=indicator_data['Year'],
-                y=indicator_data['% Change'],
-                mode='lines',
-                name=indicator,
-                line=dict(color='#032649'),
+        # Cycle through colors if there are more than 5 indicators
+        color = colors[i % len(colors)]  # Use modulus to cycle through the colors
+
+        # Ensure the color is a valid string (in case of any unexpected value)
+        if isinstance(color, str) and color.startswith('#') and len(color) == 7:
+            fig.add_trace(
+                go.Scatter(
+                    x=indicator_data['Year'],
+                    y=indicator_data['% Change'],
+                    mode='lines',
+                    name=indicator,
+                    line=dict(color=color),  # Apply the color dynamically
+                )
             )
-        )
+        else:
+            raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
+
 
     fig.update_layout(
-        title='External Driver Indicators',
+        title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Percent Change'),
-        hovermode='x'
+        hovermode='x',
+        legend=dict(
+            x=0, y=1, orientation='h',xanchor='left', yanchor='top', traceorder='normal',font=dict(size=10),
+            bgcolor='rgba(255, 255, 255, 0)', 
+            bordercolor='rgba(255, 255, 255, 0)', 
+            borderwidth=0 
+        )
     )
+    
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
