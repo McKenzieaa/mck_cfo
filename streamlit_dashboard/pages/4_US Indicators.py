@@ -690,38 +690,37 @@ def plot_gdp_and_industry(selected_industry=None):
 
     # Function to export charts to PowerPoint
 
+def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top):
+    if fig is None:
+        print(f"Skipping slide '{title}' because the figure is None.")
+        return  # Skip if fig is None
+
+    # Get the slide corresponding to the slide number (index starts at 0)
+    slide = ppt.slides[slide_number - 1]  # Adjust for 0-based index
+
+    # Set slide title (optionally adjust placement based on the layout)
+    title_shape = slide.shapes.title
+    title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
+
+    # Save the figure image to a BytesIO object (no size, position parameters here)
+    fig_image = BytesIO()
+    fig.write_image(fig_image, format="png")  # Only pass the format here
+    fig_image.seek(0)
+
+    # Use Inches for size and position only in the add_picture() function
+    slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))
+    fig_image.close()
+
 def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
     # Load the custom template
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
     ppt = Presentation(template_path)  # Load the template
 
-    def add_figure_slide(ppt, title, fig, slide_number, width, height, left, top):
-        if fig is None:
-            print(f"Skipping slide '{title}' because the figure is None.")
-            return  # Skip if fig is None
-
-        # Add a new slide based on the template layout
-        slide_layout = ppt.slide_layouts[slide_number]  # Use the desired slide layout from the template
-        slide = ppt.slides.add_slide(slide_layout)
-
-        # # Set slide title (optionally adjust placement based on the layout)
-        # title_shape = slide.shapes.title
-        # # title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
-
-        # Save the figure image to a BytesIO object
-        fig_image = BytesIO()
-        fig.write_image(fig_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height), )
-        fig_image.seek(0)
-
-        # Add the image to the slide with defined width, height, and position
-        slide.shapes.add_picture(fig_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height))
-        fig_image.close()
-
-    # Add slides for each figure with different properties
-    add_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=500, height=250, left=0.08, top=1.3)
-    add_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=450, height=375, left=5.20, top=1.3)
-    add_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=5, width=500, height=250, left=0.08, top=4.4)
-    add_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=5, width=455, height=250, left=5.10, top=1.3)
+    # Use the existing slides (slide_number corresponds to the slide index)
+    update_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=500, height=250, left=0.08, top=1.3)
+    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=6, width=600, height=400, left=1, top=1)
+    update_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=7, width=500, height=350, left=2, top=2)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=8, width=550, height=375, left=1, top=1)
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
