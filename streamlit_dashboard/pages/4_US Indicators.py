@@ -710,7 +710,7 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
 
         # Save the figure image to a BytesIO object
         fig_image = BytesIO()
-        fig.write_image(fig_image, format="png", width=width, height=height, left=left, top=top)
+        fig.write_image(fig_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height), )
         fig_image.seek(0)
 
         # Add the image to the slide with defined width, height, and position
