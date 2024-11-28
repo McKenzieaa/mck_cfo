@@ -88,9 +88,8 @@ if selected_industries and selected_locations:
         color_ev_ebitda = "#032649"   # Default Plotly red
         x_labels = []
         for label in avg_data['Company']:
-            words = label.split()
-            formatted_label = '<br>'.join([' '.join(words[i:i+2]) for i in range(0, len(words), 2)])
-            x_labels.append(formatted_label)
+            x_labels.append(label.replace(' ','<br>'))
+            
 
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
