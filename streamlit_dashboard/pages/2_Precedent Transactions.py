@@ -157,7 +157,7 @@ if selected_industries and selected_locations:
                     text=f'Median: {median_ev_ebitda:.1f}'+'x',
                     showarrow=False,
                     font=dict(size=12, color='gray'),
-                    # bgcolor='white',
+                    bgcolor='white',
                     # borderpad=4,
                     # bordercolor='blue',
                     # borderwidth=2
