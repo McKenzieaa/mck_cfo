@@ -553,7 +553,7 @@ def plot_labour_unemployment():
     ))
 
     fig.update_layout(
-        title='Population, Unemployment Rate, and Labour Force Participation Rate (USA)',
+        title='',
         xaxis=dict(showgrid=False, showticklabels=True),  # No title
         yaxis=dict(
             title='Population',
