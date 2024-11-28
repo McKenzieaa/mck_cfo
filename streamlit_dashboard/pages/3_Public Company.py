@@ -114,7 +114,7 @@ if selected_industries and selected_locations:
         fig2 = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
         fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='inside')
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
-        
+
         # Display the EV/EBITDA chart
         st.plotly_chart(fig2)
 
@@ -123,7 +123,7 @@ if selected_industries and selected_locations:
 
         if export_ppt:
             # Define the correct path to your PowerPoint template
-            template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "pitch_template.pptx")
+            template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
             
             # Check if the file exists before attempting to load
             if not os.path.exists(template_path):
@@ -131,7 +131,7 @@ if selected_industries and selected_locations:
                 st.stop()
 
             ppt = Presentation(template_path)
-            slide1 = ppt.slides[1]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
+            slide1 = ppt.slides[12]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
             
             # If slide does not exist, you can choose to add a new one
             if slide1 is None:

@@ -106,7 +106,7 @@ if selected_industries and selected_locations:
 
         if export_ppt:
             # Define the correct path to your PowerPoint template
-            template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "pitch_template.pptx")
+            template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
             
             # Check if the file exists before attempting to load
             if not os.path.exists(template_path):
@@ -114,7 +114,7 @@ if selected_industries and selected_locations:
                 st.stop()
 
             ppt = Presentation(template_path)
-            slide1 = ppt.slides[1]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
+            slide1 = ppt.slides[11]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
             
             # If slide does not exist, you can choose to add a new one
             if slide1 is None:
