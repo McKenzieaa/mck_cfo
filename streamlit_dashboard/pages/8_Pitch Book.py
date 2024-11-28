@@ -59,6 +59,10 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
         cell.text_frame.paragraphs[0].font.bold = True
         cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for header
 
+        # Remove cell border for header row (No grid)
+        for border in cell._element.xpath('.//a:tcPr'):
+            border.getparent().remove(border)
+
     # Style the data rows
     for row_num, row in enumerate(df.values):
         for col_num, value in enumerate(row):
@@ -68,9 +72,13 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.text_frame.paragraphs[0].font.size = font_size
             cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for data
 
-            # Optional: Adjust vertical alignment and wrapping
+            # Adjust vertical alignment and wrapping
             cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             cell.text_frame.word_wrap = True
+
+            # Remove cell border for data rows (No grid)
+            for border in cell._element.xpath('.//a:tcPr'):
+                border.getparent().remove(border)
 
     # Optional: Adjust cell padding (top, bottom, left, right)
     for row in table.table.rows:
@@ -86,10 +94,10 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     ppt = Presentation(template_path)  # Load the template
 
     # Use the existing slides (slide_number corresponds to the slide index)
-    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=11, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=11, width=9, height=3, left=0.45, top=3.60)
-    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=10, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=10, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=12, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=12, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
@@ -99,8 +107,8 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
 
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9] 
-    add_table_to_slide(slide, income_statement_df, left=0.08, top=1.3, width=9, height=3, header_font_size=Pt(14))
-    add_table_to_slide(slide, balance_sheet_df, left=0.08, top=4.6, width=9, height=3, header_font_size=Pt(14))
+    add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
+    add_table_to_slide(slide, balance_sheet_df, left=0.90, top=4.6, width=4.3, height=5.65, header_font_size=Pt(12))
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
@@ -593,11 +601,11 @@ def plot_labour_unemployment():
         xaxis=dict(showgrid=False, showticklabels=True),  # No title
         yaxis=dict( title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
         yaxis2=dict( title='Rate (%)', overlaying='y',side='right'),
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),
-        hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5,b=2),height=375, width=500)
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=10)),
+        hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
+    
     st.plotly_chart(fig, use_container_width=True)
     return fig
-
 
 def plot_external_driver(selected_indicators):
 
@@ -621,7 +629,7 @@ def plot_external_driver(selected_indicators):
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=5,b=2),height=375, width=500)
+    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=5, l=2, r=2,b=2),height=375, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
