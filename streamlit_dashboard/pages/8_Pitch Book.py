@@ -13,6 +13,7 @@ from pptx.util import Inches
 from io import BytesIO
 from plotly.subplots import make_subplots
 import s3fs  # For accessing S3 data
+import os
 from datetime import date
 
 today = date.today().strftime("%Y-%m-%d")
@@ -27,76 +28,45 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-# Function to export charts to PowerPoint
-from pptx import Presentation
-from pptx.util import Inches
-from io import BytesIO
-import plotly.graph_objects as go
-import pandas as pd
+def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top):
+    if fig is None:
+        print(f"Skipping slide '{title}' because the figure is None.")
+        return  # Skip if fig is None
 
-def export_charts_to_ppt(slides_data):
-    ppt = Presentation()
-    
-    # Define slide properties for each chart
-    slide_properties = {
-        "Precedent Transactions": [
-            {"chart": "fig1_precedent", "slide_number": 10, "width": 9, "height": 3, "left": 0.11, "top": 0.90},
-            {"chart": "fig2_precedent", "slide_number": 10, "width": 8, "height": 3, "left": 0.11, "top": 3.7}
-        ],
-        "Public Comps": [
-            {"chart": "fig1_public", "slide_number": 11, "width": 9, "height": 3, "left": 0.11, "top": 0.90},
-            {"chart": "fig2_public", "slide_number": 11, "width": 8, "height": 3, "left": 0.11, "top": 3.7}
-        ],
-        "State Indicators": [
-            {"chart": "labour_fig", "slide_number": 2, "width": 8, "height": 3, "left": 1, "top": 1},
-            {"chart": "gdp_fig", "slide_number": 2, "width": 8, "height": 3, "left": 1, "top": 4.5}
-        ],
-        "Benchmarking": [
-            {"chart": "income_statement_df", "slide_number": 3, "width": 8, "height": 3, "left": 1, "top": 1},
-            {"chart": "balance_sheet_df", "slide_number": 3, "width": 8, "height": 3, "left": 1, "top": 4.5}
-        ],
-        "US Indicators": [
-            {"chart": "labour_fig", "slide_number": 5, "width": 5, "height": 3, "left": 0.08, "top": 1.3},
-            {"chart": "external_fig", "slide_number": 7, "width": 4.5, "height": 3.75, "left": 5.2, "top": 1.3},
-            {"chart": "gdp_fig", "slide_number": 5, "width": 5, "height": 3, "left": 0.08, "top": 4.4},
-            {"chart": "cpi_ppi_fig", "slide_number": 5, "width": 4.55, "height": 3, "left": 5.1, "top": 1.3}
-        ]
-    }
+    # Get the slide corresponding to the slide number (index starts at 0)
+    slide = ppt.slides[slide_number]  # Adjust for 0-based index
 
-    required_slide_numbers = {chart_data['slide_number'] for _, charts in slides_data for chart_data in charts}
-    while len(ppt.slides) < max(required_slide_numbers) + 1:
-        ppt.slides.add_slide(ppt.slide_layouts[5])  # Empty slide layout
+    # # Set slide title (optionally adjust placement based on the layout)
+    # title_shape = slide.shapes.title
+    # title_shape.text = f"Slide {slide_number}: {title}"  # Add slide number to title
 
-    for slide_title, charts in slides_data:
-        for chart_data in charts:
-            slide_number = chart_data['slide_number']
-            chart = chart_data['chart']
-            width = chart_data['width']
-            height = chart_data['height']
-            left = chart_data['left']
-            top = chart_data['top']
+    # Save the figure image to a BytesIO object (no size, position parameters here)
+    fig_image = BytesIO()
+    fig.write_image(fig_image, format="png")  # Only pass the format here
+    fig_image.seek(0)
 
-            slide = ppt.slides[slide_number]
-            # Add title only if not already added
-            if not slide.shapes.title:
-                slide.shapes.title.text = slide_title
+    # Use Inches for size and position only in the add_picture() function
+    slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))
+    fig_image.close()
 
-            # Add chart or table
-            if isinstance(globals().get(chart), go.Figure):  # Plotly chart
-                chart_image = BytesIO()
-                globals().get(chart).write_image(chart_image, format="png", width=800, height=300)
-                chart_image.seek(0)
-                slide.shapes.add_picture(chart_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height))
-            elif isinstance(globals().get(chart), pd.DataFrame):  # Table
-                df = globals().get(chart)
-                rows, cols = df.shape[0] + 1, df.shape[1]
-                table = slide.shapes.add_table(rows, cols, Inches(left), Inches(top), Inches(width), Inches(0.5 * rows)).table
-                for col_idx, col_name in enumerate(df.columns):
-                    table.cell(0, col_idx).text = col_name
-                for row_idx, row in enumerate(df.itertuples(index=False)):
-                    for col_idx, value in enumerate(row):
-                        table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
+def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
+    # Load the custom template
+    template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
+    ppt = Presentation(template_path)  # Load the template
 
+    # Use the existing slides (slide_number corresponds to the slide index)
+    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=10, width=9, height=3, left=0.11, top=0.90)
+    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=10, width=9, height=3, left=0.11, top=3.70)
+    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.11, top=0.90)
+    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.11, top=3.70)
+    update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
+    update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=4.55, height=2.50, left=5.10, top=1.3)
+    update_figure_slide(ppt, f"Labour force Statitics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, f"GDP - {state_name} ", gdp_fig, slide_number=4, width=5.00, height=2.50, left=0.08, top=4.4)
+
+    # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
     ppt.save(ppt_bytes)
     ppt_bytes.seek(0)
@@ -1171,7 +1141,7 @@ with st.expander("US Indicators"):
 
     # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment")
-    labour_fig = plot_labour_unemployment()
+    labour_fig_us = plot_labour_unemployment()
 
     # External Driver Indicators
     st.subheader("External Driver Indicators")
@@ -1191,7 +1161,7 @@ with st.expander("US Indicators"):
         index=0,
         key="gdp_industry_selectbox"
     )
-    gdp_fig = plot_gdp_and_industry(selected_gdp_industry)
+    gdp_fig_us = plot_gdp_and_industry(selected_gdp_industry)
 
     # CPI and PPI Comparison
     st.subheader("CPI & PPI")
@@ -1202,7 +1172,7 @@ with st.expander("US Indicators"):
         key="cpi_series_selectbox"
     )
     selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
+    cpi_ppi_fig_us = plot_cpi_ppi(selected_series_id)
 
 with st.expander("State Indicators"):
     st.subheader("State Indicators - US")
@@ -1278,50 +1248,15 @@ with st.expander("Benchmarking"):
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-slides_data = []
-
-# Precedent Transactions Charts
-if 'fig1_precedent' in locals() and fig1_precedent:
-    slides_data.append(("Precedent Transactions", [fig1_precedent, fig2_precedent]))
-
-# Public Comps Charts
-if 'fig1_public' in locals() and fig1_public:
-    slides_data.append(("Public Comps", [fig1_public, fig2_public]))
-
-# State Indicators Charts
-if 'labour_fig' in locals() and labour_fig:
-    slides_data.append(("State Indicators", [labour_fig, gdp_fig]))
-
-# Benchmarking Charts
-if 'income_statement_df' in locals() and not income_statement_df.empty:
-    slides_data.append(("Benchmarking", [income_statement_df, balance_sheet_df]))
-
-# US Indicators Charts
-us_indicators_charts = []
-if 'labour_fig' in locals() and labour_fig:
-    us_indicators_charts.append(labour_fig)
-if 'external_fig' in locals() and external_fig:
-    us_indicators_charts.append(external_fig)
-if 'gdp_fig' in locals() and gdp_fig:
-    us_indicators_charts.append(gdp_fig)
-if 'cpi_ppi_fig' in locals() and cpi_ppi_fig:
-    us_indicators_charts.append(cpi_ppi_fig)
-
-if us_indicators_charts:
-    slides_data.append(("US Indicators", us_indicators_charts))
-
-if slides_data:
-    ppt_bytes = export_charts_to_ppt(slides_data)  # This should be your updated export function
-
-    # Check if ppt_bytes is not empty before attempting download
-    if ppt_bytes:
-        st.download_button(
-            label="Download Pitch Book",
-            data=ppt_bytes,
-            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+if st.button("Export Charts to PowerPoint", key="export_button"):
+        # Export the charts to PowerPoint using the export_all_to_pptx function
+    pptx_file = export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,fig1_precedent,fig2_precedent,fig1_public,fig2_public, labour_fig, gdp_fig)
+        
+        # Create a download button for the user to download the PowerPoint file
+    st.download_button(
+        label="Download PowerPoint",  # The label for the button
+        data=pptx_file,  # The PowerPoint file content
+        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",  # The default filename for the download
+        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"  # MIME type for PowerPoint
         )
-    else:
-        st.warning("Failed to generate the Pitch Book. Please try again.")
-else:
-    st.warning("No valid charts or tables to export.")
+
