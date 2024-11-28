@@ -525,9 +525,6 @@ def plot_external_driver(selected_indicators):
         # Cycle through colors if there are more than 5 indicators
         color = colors[i % len(colors)]  # Use modulus to cycle through the colors
 
-        # Debugging: Print the color to ensure it's a valid value
-        print(f"Applying color: {color} for indicator: {indicator}")
-
         # Ensure the color is a valid string (in case of any unexpected value)
         if isinstance(color, str) and color.startswith('#') and len(color) == 7:
             fig.add_trace(
@@ -547,8 +544,22 @@ def plot_external_driver(selected_indicators):
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Percent Change'),
-        hovermode='x'
+        hovermode='x',
+        legend=dict(
+            x=0,  # Set x to 0 to position it on the left
+            y=1,  # Set y to 1 to position it at the top
+            xanchor='left',  # Anchor the legend to the left
+            yanchor='top',   # Anchor the legend to the top
+            traceorder='normal',
+            font=dict(
+                size=10
+            ),
+            bgcolor='rgba(255, 255, 255, 0)',  # Optional: make the background transparent
+            bordercolor='rgba(255, 255, 255, 0)',  # Optional: remove border
+            borderwidth=0  # Optional: remove border width
+        )
     )
+    
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
