@@ -546,17 +546,10 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title='Percent Change'),
         hovermode='x',
         legend=dict(
-            x=0,  # Set x to 0 to position it on the left
-            y=1,  # Set y to 1 to position it at the top
-            xanchor='left',  # Anchor the legend to the left
-            yanchor='top',   # Anchor the legend to the top
-            traceorder='normal',
-            font=dict(
-                size=10
-            ),
-            bgcolor='rgba(255, 255, 255, 0)',  # Optional: make the background transparent
-            bordercolor='rgba(255, 255, 255, 0)',  # Optional: remove border
-            borderwidth=0  # Optional: remove border width
+            x=0, y=1, orientation='h',xanchor='left', yanchor='top', traceorder='normal',font=dict(size=10),
+            bgcolor='rgba(255, 255, 255, 0)', 
+            bordercolor='rgba(255, 255, 255, 0)', 
+            borderwidth=0 
         )
     )
     
