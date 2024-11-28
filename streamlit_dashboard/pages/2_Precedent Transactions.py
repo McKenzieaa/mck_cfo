@@ -86,18 +86,23 @@ if selected_industries and selected_locations:
         # Define colors
         color_ev_revenue = "#032649"  # Default Plotly blue
         color_ev_ebitda = "#032649"   # Default Plotly red
+        x_labels = []
+        for label in avg_data['Company']:
+            words = label.split()
+            formatted_label = '<br>'.join([' '.join(words[i:i+2]) for i in range(0, len(words), 2)])
+            x_labels.append(formatted_label)
 
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
-        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False))
+        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),ticktext=x_labels)
 
         st.plotly_chart(fig1)
 
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')  # No title
         fig2.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='auto',textfont=dict(size=10))
-        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False))
+        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),ticktext=x_labels)
 
         st.plotly_chart(fig2)
 
