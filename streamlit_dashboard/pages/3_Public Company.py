@@ -112,7 +112,7 @@ if selected_industries and selected_locations:
 
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-        fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='outside',textfont=dict(size=10))
+        fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
 
         # Display the EV/EBITDA chart
