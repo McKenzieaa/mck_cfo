@@ -90,11 +90,15 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
 def remove_cell_borders(cell):
     """
     Remove borders from a table cell by clearing its XML properties.
+    Handles XML namespaces explicitly to avoid prefix errors.
     """
+    nsmap = {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'}
     tc = cell._tc  # Access the underlying XML element
     tcPr = tc.get_or_add_tcPr()
+
+    # Remove specific border elements by namespace
     for border_tag in ['a:lnL', 'a:lnR', 'a:lnT', 'a:lnB', 'a:lnTlToBr', 'a:lnBlToTr']:
-        for border in tcPr.findall(border_tag):
+        for border in tcPr.findall(border_tag, namespaces=nsmap):
             tcPr.remove(border)
 
 def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig):
