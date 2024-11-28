@@ -30,24 +30,62 @@ except KeyError:
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(slides_data):
     ppt = Presentation()
-    slide_layout = ppt.slide_layouts[5]
-    for slide_title, charts_or_tables in slides_data:
-        slide = ppt.slides.add_slide(slide_layout)
+    slide = ppt.slides[slide_number]  # Use an empty slide layout (no title or content)
+
+    # Define slide properties for each chart
+    slide_properties = {
+        "Precedent Transactions": [
+            {"chart": "fig1_precedent", "slide_number": 10, "width": 9, "height": 3, "left": 0.11, "top": 0.90},
+            {"chart": "fig2_precedent", "slide_number": 10, "width": 8, "height": 3, "left": 0.11, "top": 3.7}
+        ],
+        "Public Comps": [
+            {"chart": "fig1_public", "slide_number": 11, "width": 9, "height": 3, "left": 0.11, "top": 0.90},
+            {"chart": "fig2_public", "slide_number": 11,  "width": 8, "height": 3, "left": 0.11, "top": 3.7}
+        ],
+        "State Indicators": [
+            {"chart": "labour_fig", "slide_number": 2, "width": 8, "height": 3, "left": 1, "top": 1},
+            {"chart": "gdp_fig", "slide_number": 2, "width": 8, "height": 3, "left": 1, "top": 4.5}
+        ],
+        "Benchmarking": [
+            {"chart": "income_statement_df", "slide_number": 3, "width": 8, "height": 3, "left": 1, "top": 1},
+            {"chart": "balance_sheet_df", "slide_number": 3, "width": 8, "height": 3, "left": 1, "top": 4.5}
+        ],
+        "US Indicators": [
+            {"chart": "labour_fig", "slide_number": 5, "width": 5, "height": 3, "left": 0.08, "top": 1.3},
+            {"chart": "external_fig", "slide_number": 7, "width": 4.5, "height": 3.75, "left": 5.2, "top": 1.3},
+            {"chart": "gdp_fig", "slide_number": 5, "width": 5, "height": 3, "left": 0.08, "top": 4.4},
+            {"chart": "cpi_ppi_fig", "slide_number": 5, "width": 4.55, "height": 3, "left": 5.1, "top": 1.3}
+        ]
+    }
+
+    for slide_title, charts in slides_data:
+        slide = ppt.slides.add_slide(slide)
         slide.shapes.title.text = slide_title
-        for i, content in enumerate(charts_or_tables):
-            if isinstance(content, go.Figure):  # Plotly chart
+
+        for chart_data in slide_properties.get(slide_title, []):
+            chart = chart_data['chart']
+            slide_number = chart_data['slide_number']
+            width = chart_data['width']
+            height = chart_data['height']
+            left = chart_data['left']
+            top = chart_data['top']
+
+            # Add the chart to the respective slide
+            if isinstance(globals().get(chart), go.Figure):  # If it's a Plotly chart
                 chart_image = BytesIO()
-                content.write_image(chart_image, format="png", width=800, height=300)
+                globals().get(chart).write_image(chart_image, format="png", width=800, height=300)
                 chart_image.seek(0)
-                slide.shapes.add_picture(chart_image, Inches(1), Inches(1 + i * 2.5), width=Inches(8))
-            elif isinstance(content, pd.DataFrame):  # Table
-                rows, cols = content.shape[0] + 1, content.shape[1]
-                table = slide.shapes.add_table(rows, cols, Inches(0.5), Inches(1), Inches(9), Inches(0.5 * rows)).table
-                for col_idx, col_name in enumerate(content.columns):
+                ppt.slides[slide_number].shapes.add_picture(chart_image, Inches(left), Inches(top), width=Inches(width), height=Inches(height))
+            elif isinstance(globals().get(chart), pd.DataFrame):  # If it's a table
+                df = globals().get(chart)
+                rows, cols = df.shape[0] + 1, df.shape[1]
+                table = ppt.slides[slide_number].shapes.add_table(rows, cols, Inches(left), Inches(top), Inches(width), Inches(0.5 * rows)).table
+                for col_idx, col_name in enumerate(df.columns):
                     table.cell(0, col_idx).text = col_name
-                for row_idx, row in enumerate(content.itertuples(index=False)):
+                for row_idx, row in enumerate(df.itertuples(index=False)):
                     for col_idx, value in enumerate(row):
                         table.cell(row_idx + 1, col_idx).text = str(value) if pd.notnull(value) else "N/A"
+
     ppt_bytes = BytesIO()
     ppt.save(ppt_bytes)
     ppt_bytes.seek(0)
@@ -640,7 +678,7 @@ def plot_cpi_ppi(selected_series_id):
 
     # Configure the layout of the chart
     fig.update_layout(
-        title=f'CPI-US, CPI by Industry & PPI-US',
+        title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
@@ -720,7 +758,7 @@ def plot_gdp_and_industry(selected_industry=None):
 
     # Update layout
     fig.update_layout(
-        title=f'GDP-US & {selected_industry}-Value & Percent',
+        title='',
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
