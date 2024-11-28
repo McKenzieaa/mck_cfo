@@ -59,10 +59,6 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
         cell.text_frame.paragraphs[0].font.bold = True
         cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for header
 
-        # Remove cell border for header row (No grid)
-        for border in cell._element.xpath('.//a:tcPr'):
-            border.getparent().remove(border)
-
     # Style the data rows
     for row_num, row in enumerate(df.values):
         for col_num, value in enumerate(row):
@@ -72,13 +68,9 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.text_frame.paragraphs[0].font.size = font_size
             cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for data
 
-            # Adjust vertical alignment and wrapping
+            # Optional: Adjust vertical alignment and wrapping
             cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             cell.text_frame.word_wrap = True
-
-            # Remove cell border for data rows (No grid)
-            for border in cell._element.xpath('.//a:tcPr'):
-                border.getparent().remove(border)
 
     # Optional: Adjust cell padding (top, bottom, left, right)
     for row in table.table.rows:
