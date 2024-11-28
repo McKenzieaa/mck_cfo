@@ -701,7 +701,7 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
             return  # Skip if fig is None
 
         # Add a new slide based on the template layout
-        slide_layout = ppt.slide_layouts[(slide_number)]  # Use the desired slide layout from the template
+        slide_layout = ppt.slide_layouts[slide_number]  # Use the desired slide layout from the template
         slide = ppt.slides.add_slide(slide_layout)
 
         # # Set slide title (optionally adjust placement based on the layout)
