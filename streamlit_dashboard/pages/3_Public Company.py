@@ -131,7 +131,7 @@ if selected_industries and selected_locations:
                 st.stop()
 
             ppt = Presentation(template_path)
-            slide1 = ppt.slides[12]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
+            slide1 = ppt.slides[11]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
             
             # If slide does not exist, you can choose to add a new one
             if slide1 is None:
@@ -163,7 +163,7 @@ if selected_industries and selected_locations:
             st.download_button(
                 label="Download PowerPoint",
                 data=ppt_bytes,
-                file_name="precedent_transaction.pptx",
+                file_name="public_comps.pptx",
                 mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
             )
 
