@@ -105,7 +105,7 @@ if selected_industries and selected_locations:
         # Create the EV/Revenue chart with data labels
         fig1 = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
-        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=90, tickmode='array', tickvals=avg_data['Company'], ticktext=[company if len(company) < 10 else '\n'.join(company[i:i+10] for i in range(0, len(company), 10)) for company in avg_data['Company']])
+        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0, tickmode='array', tickvals=avg_data['Company'], ticktext=[company if len(company) < 10 else '\n'.join(company[i:i+10] for i in range(0, len(company), 10)) for company in avg_data['Company']])
 )
 
         # Display the EV/Revenue chart
@@ -114,7 +114,7 @@ if selected_industries and selected_locations:
         # Create the EV/EBITDA chart with data labels
         fig2 = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
         fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='inside')
-        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=90,tickmode='array', tickvals=avg_data['Company'], ticktext=[company if len(company) < 10 else '\n'.join(company[i:i+10] for i in range(0, len(company), 10)) for company in avg_data['Company']]))
+        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.1,bargroupgap=0.1,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,tickmode='array', tickvals=avg_data['Company'], ticktext=[company if len(company) < 10 else '\n'.join(company[i:i+10] for i in range(0, len(company), 10)) for company in avg_data['Company']]))
 
         # Display the EV/EBITDA chart
         st.plotly_chart(fig2)
