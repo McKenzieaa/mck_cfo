@@ -12,7 +12,6 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR
-from pptx.enum.dml import MSO_THEME_COLOR
 from io import BytesIO
 from plotly.subplots import make_subplots
 import s3fs  # For accessing S3 data
@@ -47,59 +46,47 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
     fig_image.close()
 
 def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), header_font_size=Pt(12)):
-
+    # Create a table shape on the slide
     rows, cols = df.shape
-    table = slide.shapes.add_table(rows + 1, cols, Inches(left), Inches(top), Inches(width), Inches(height)).table
+    table = slide.shapes.add_table(rows + 1, cols, Inches(left), Inches(top), Inches(width), Inches(height))
 
+    # Style the header row
     for col_num, col_name in enumerate(df.columns):
-        cell = table.cell(0, col_num)
+        cell = table.table.cell(0, col_num)
         cell.text = str(col_name)
-
+        # Set header font style
         cell.text_frame.paragraphs[0].font.size = header_font_size
         cell.text_frame.paragraphs[0].font.bold = True
-        cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0) 
+        cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for header
 
-        cell.fill.solid()
-        cell.fill.fore_color.theme_color = MSO_THEME_COLOR.ACCENT_1
+        # Remove cell border for header row (No grid)
+        for border in cell._element.xpath('.//a:tcPr'):
+            border.getparent().remove(border)
 
-        remove_cell_borders(cell)
-
+    # Style the data rows
     for row_num, row in enumerate(df.values):
         for col_num, value in enumerate(row):
-            cell = table.cell(row_num + 1, col_num)
+            cell = table.table.cell(row_num + 1, col_num)
             cell.text = str(value)
-
+            # Set data cell font style
             cell.text_frame.paragraphs[0].font.size = font_size
-            cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)
+            cell.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 0, 0)  # Black font for data
 
+            # Adjust vertical alignment and wrapping
             cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
             cell.text_frame.word_wrap = True
 
-            cell.fill.solid()
-            cell.fill.fore_color.theme_color = MSO_THEME_COLOR.ACCENT_2
+            # Remove cell border for data rows (No grid)
+            for border in cell._element.xpath('.//a:tcPr'):
+                border.getparent().remove(border)
 
-            remove_cell_borders(cell)
-
-    for row in table.rows:
+    # Optional: Adjust cell padding (top, bottom, left, right)
+    for row in table.table.rows:
         for cell in row.cells:
             cell.margin_top = Inches(0.05)
             cell.margin_bottom = Inches(0.05)
             cell.margin_left = Inches(0.05)
             cell.margin_right = Inches(0.05)
-
-def remove_cell_borders(cell):
-    """
-    Remove borders from a table cell by clearing its XML properties.
-    Handles XML namespaces explicitly to avoid prefix errors.
-    """
-    nsmap = {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'}
-    tc = cell._tc  # Access the underlying XML element
-    tcPr = tc.get_or_add_tcPr()
-
-    # Remove specific border elements by namespace
-    for border_tag in ['a:lnL', 'a:lnR', 'a:lnT', 'a:lnB', 'a:lnTlToBr', 'a:lnBlToTr']:
-        for border in tcPr.findall(border_tag, namespaces=nsmap):
-            tcPr.remove(border)
 
 def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig):
     # Load the custom template
@@ -612,7 +599,7 @@ def plot_labour_unemployment():
     fig.update_layout(
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),  # No title
-        yaxis=dict( title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
+        yaxis=dict( showgrid=False,title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
         yaxis2=dict( title='Rate (%)', overlaying='y',side='right'),
         legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=10)),
         hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
@@ -642,7 +629,7 @@ def plot_external_driver(selected_indicators):
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=5, l=2, r=2,b=2),height=375, width=500)
+    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',height=375, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -702,7 +689,7 @@ def plot_cpi_ppi(selected_series_id):
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value', showgrid=False),
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',height=250, width=500)
     
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -776,7 +763,7 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
+        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',xaxis=dict(showgrid=False),  yaxis=dict(showgrid=False), yaxis2=dict(showgrid=False),margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -924,7 +911,7 @@ def plot_unemployment_labour_chart(state_name):
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
-            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=5),height=250,width=500)
+            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=5),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
         st.plotly_chart(fig, use_container_width=True)
         return fig
@@ -954,7 +941,7 @@ def plot_gdp_chart(state_name):
                 xaxis_title=" ",
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=2,b=5),height=250,width=500)
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=5),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
             st.plotly_chart(fig, use_container_width=True)
             return fig
