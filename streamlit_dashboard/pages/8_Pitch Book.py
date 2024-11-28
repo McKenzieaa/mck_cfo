@@ -1042,19 +1042,17 @@ with st.expander("Precedent Transactions"):
             color_ev_ebitda = "#032649"   # Default Plotly red
 
             # Create the EV/Revenue chart with data labels
-            fig1_precedent = px.bar(avg_data, x='Year', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
-            fig1_precedent.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
-            fig1_precedent.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
+            fig1_precedent = px.bar(avg_data, x='Year', y='EV/Revenue', title="", text='EV/Revenue')  # No title
+            fig1_precedent.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
+            fig1_precedent.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False))
 
-            # Display the EV/Revenue chart
             st.plotly_chart(fig1_precedent)
 
             # Create the EV/EBITDA chart with data labels
-            fig2_precedent = px.bar(avg_data, x='Year', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-            fig2_precedent.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='inside')
-            fig2_precedent.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
+            fig2_precedent = px.bar(avg_data, x='Year', y='EV/EBITDA', title="", text='EV/EBITDA')
+            fig2_precedent.update_traces(marker_color=color_ev_ebitda, texttemplate='%{text:.1f}'+ 'x', textposition='auto',textfont=dict(size=10))
+            fig2_precedent.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False))
 
-            # Display the EV/EBITDA chart
             st.plotly_chart(fig2_precedent)
 
 # Accordion for Public Comps
@@ -1100,18 +1098,16 @@ with st.expander("Public Comps"):
 
             # Create the EV/Revenue chart with data labels
             fig1_public = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
-            fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='inside')
-            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ")
+            fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
+            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
 
-            # Display the EV/Revenue chart
             st.plotly_chart(fig1_public)
 
             # Create the EV/EBITDA chart with data labels
             fig2_public = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-            fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='inside')
-            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ")
+            fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
+            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
 
-            # Display the EV/EBITDA chart
             st.plotly_chart(fig2_public)
 
 with st.expander("US Indicators"):

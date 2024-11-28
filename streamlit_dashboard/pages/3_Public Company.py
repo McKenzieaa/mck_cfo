@@ -107,7 +107,6 @@ if selected_industries and selected_locations:
         fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
         fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
 
-        # Display the EV/Revenue chart
         st.plotly_chart(fig1)
 
         # Create the EV/EBITDA chart with data labels
@@ -115,7 +114,6 @@ if selected_industries and selected_locations:
         fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
         fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True))
 
-        # Display the EV/EBITDA chart
         st.plotly_chart(fig2)
 
         # Button to export charts to PowerPoint
