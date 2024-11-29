@@ -594,7 +594,13 @@ def plot_labour_unemployment():
         yaxis=dict( showgrid=False,title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
         yaxis2=dict( title='Rate (%)', overlaying='y',side='right'),
         legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=10)),
-        hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=2, r=2,b=80, t=50),height=250, width=500)
+        hovermode='x unified', template='plotly_white',
+        plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        height=400,  # Increased height for better spacing
+        width=600,  # Adjusted width for better visualization
+        margin=dict(b=80, t=50),  # Add space for x-axis labels and top legend
+    )
     
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -702,16 +708,21 @@ def plot_cpi_ppi(selected_series_id):
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Value'),
         legend=dict(
-            orientation="h",  # Set legend to horizontal
-            x=0.01,  # Adjust x position (left margin)
-            y=0.01,  # Adjust y position (top margin)
-            bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
+            orientation="h", 
+            x=0.01,
+            y=0.01,
+            bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=8)
     ),
         hovermode='x unified',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        height=400,
+        width=600,
         margin=dict(b=80, t=50),
     )
-    st.plotly_chart(fig, use_container_width=True)#, key=key)
+    
+    st.plotly_chart(fig, use_container_width=True)
     return fig
 
 def plot_gdp_and_industry(selected_industry=None):
@@ -783,8 +794,13 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',xaxis=dict(showgrid=False),  yaxis=dict(showgrid=False), yaxis2=dict(showgrid=False),margin=dict(t=50, l=2, r=2,b=80),height=250, width=500)
-
+        legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        height=400,
+        width=600,
+        margin=dict(b=80, t=50),
+    )
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
