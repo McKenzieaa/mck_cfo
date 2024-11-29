@@ -730,7 +730,7 @@ def plot_cpi_ppi(selected_series_id):
         legend=dict(
             orientation="h", 
             x=0.01,
-            y=0.01,
+            y=0.2,
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=8)
     ),
@@ -739,7 +739,7 @@ def plot_cpi_ppi(selected_series_id):
         paper_bgcolor='rgba(0,0,0,0)',
         height=400,
         width=600,
-        margin=dict(b=80, t=50),
+        margin=dict(b=100, t=50),
     )
     
     st.plotly_chart(fig, use_container_width=True)
