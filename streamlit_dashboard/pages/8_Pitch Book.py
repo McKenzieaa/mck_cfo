@@ -620,7 +620,7 @@ def plot_labour_unemployment():
     paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
     height=450,  # Increased height for better spacing
     width=700,  # Adjusted width for better visualization
-    margin=dict(b=100, t=50)  # Add more bottom margin for x-axis labels
+    margin=dict(b=100, t=50,l=10, r=10)  # Add more bottom margin for x-axis labels
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -666,7 +666,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         height=375,
         width=500,
-        margin=dict(b=80, t=50),
+        margin=dict(b=100, t=50, l=10, r=10),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -833,7 +833,7 @@ def plot_gdp_and_industry(selected_industry=None):
         paper_bgcolor='rgba(0,0,0,0)',
         height=450,
         width=700,
-        margin=dict(b=120, t=80),  # Increased bottom margin for space
+        margin=dict(b=120, t=80,l=10, r=10),  # Increased bottom margin for space
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -1223,7 +1223,7 @@ with st.expander("Public Comps"):
             # Create the EV/Revenue chart with data labels
             fig1_public = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
             fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
-            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=150),width=900,height=300)
+            fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=80),width=900,height=300)
             fig1_public.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_revenue, y1=median_ev_revenue,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
             fig1_public.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
 
@@ -1232,7 +1232,7 @@ with st.expander("Public Comps"):
             # Create the EV/EBITDA chart with data labels
             fig2_public = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
             fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
-            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=150),width=900,height=300)
+            fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=80),width=900,height=300)
             fig2_public.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_ebitda, y1=median_ev_ebitda,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
             fig2_public.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_ebitda + 0.2, text=f"Median: {median_ev_ebitda:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
             
