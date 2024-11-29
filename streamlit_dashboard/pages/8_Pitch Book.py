@@ -627,7 +627,7 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title='Percent Change'),
         hovermode='x',
         legend=dict(
-            x=0, y=1, orientation='h',xanchor='left', yanchor='top', traceorder='normal',font=dict(size=10),
+            x=0.01, y=0.01, orientation='h',xanchor='left', yanchor='bottom', traceorder='normal',font=dict(size=10),
             bgcolor='rgba(255, 255, 255, 0)', 
             bordercolor='rgba(255, 255, 255, 0)', 
             borderwidth=0 ,
