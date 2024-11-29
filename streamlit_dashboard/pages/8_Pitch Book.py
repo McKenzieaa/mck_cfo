@@ -593,7 +593,7 @@ def plot_labour_unemployment():
         xaxis=dict(showgrid=False, showticklabels=True),  # No title
         yaxis=dict( showgrid=False,title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
         yaxis2=dict( title='Rate (%)', overlaying='y',side='right'),
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=10)),
+        legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=10)),
         hovermode='x unified', template='plotly_white', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(t=5, l=2, r=2,b=2),height=250, width=500)
     
     st.plotly_chart(fig, use_container_width=True)
@@ -621,7 +621,19 @@ def plot_external_driver(selected_indicators):
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-    fig.update_layout(title='', xaxis=dict(showgrid=False, showticklabels=True, showline=False), yaxis=dict(title='Percent Change', showgrid=False, showline=False), hovermode='x', legend=dict(x=0, y=1, orientation='h', xanchor='left', yanchor='top', traceorder='normal', font=dict(size=10), bgcolor='rgba(255, 255, 255, 0)', bordercolor='rgba(255, 255, 255, 0)', borderwidth=0), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',height=375, width=500,margin=dict(t=5, l=2, r=2,b=10))
+        fig.update_layout(
+        title='',
+        xaxis=dict(showgrid=False, showticklabels=True),
+        yaxis=dict(title='Percent Change'),
+        hovermode='x',
+        legend=dict(
+            x=0, y=1, orientation='h',xanchor='left', yanchor='top', traceorder='normal',font=dict(size=10),
+            bgcolor='rgba(255, 255, 255, 0)', 
+            bordercolor='rgba(255, 255, 255, 0)', 
+            borderwidth=0 ,
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',height=375, width=500
+        )
+    )
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -684,7 +696,7 @@ def plot_cpi_ppi(selected_series_id):
         legend=dict(
             orientation="h",  # Set legend to horizontal
             x=0.01,  # Adjust x position (left margin)
-            y=0.99,  # Adjust y position (top margin)
+            y=0.01,  # Adjust y position (top margin)
             bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
             font=dict(size=8)
     ),
@@ -762,7 +774,7 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',xaxis=dict(showgrid=False),  yaxis=dict(showgrid=False), yaxis2=dict(showgrid=False),margin=dict(t=5, l=2, r=2,b=25),height=250, width=500)
+        legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',xaxis=dict(showgrid=False),  yaxis=dict(showgrid=False), yaxis2=dict(showgrid=False),margin=dict(t=5, l=2, r=2,b=25),height=250, width=500)
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -910,7 +922,7 @@ def plot_unemployment_labour_chart(state_name):
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
-            legend=dict( x=0, y=1, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=5),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+            legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='top',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=5),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
         st.plotly_chart(fig, use_container_width=True)
         return fig
@@ -940,6 +952,7 @@ def plot_gdp_chart(state_name):
                 xaxis_title=" ",
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
+                legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='top',title_text=None ),
                 plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=5,b=5),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
             st.plotly_chart(fig, use_container_width=True)
