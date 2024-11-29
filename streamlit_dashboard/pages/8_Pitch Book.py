@@ -739,7 +739,7 @@ def plot_cpi_ppi(selected_series_id):
         paper_bgcolor='rgba(0,0,0,0)',
         height=250,
         width=500,
-        margin=dict(b=100, t=50),
+        margin=dict(b=120, t=50),
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -817,9 +817,9 @@ def plot_gdp_and_industry(selected_industry=None):
         legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=25,
+        height=250,
         width=500,
-        margin=dict(b=100, t=50),
+        margin=dict(b=120, t=50),
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
