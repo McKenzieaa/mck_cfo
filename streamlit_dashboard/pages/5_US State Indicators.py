@@ -83,7 +83,7 @@ def download_csv(state_name, data_type):
         return None
 
     data_id = data_ids["ur_id"] if data_type == "unemployment" else data_ids["labour_id"]
-    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={data_id}&cosd=1976-01-01&coed={today_date}"
+    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={data_id}&cosd=1976-01-01"
 
     response = requests.get(url)
     if response.status_code == 200:
