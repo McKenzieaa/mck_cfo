@@ -729,19 +729,21 @@ def plot_cpi_ppi(selected_series_id):
         yaxis=dict(title='Value',showgrid=False),
         legend=dict(
             orientation="h", 
-            x=0.01,
-            y=0.2,
+            x=0.5,  # Center the legend horizontally
+            y=-0.2,  # Place it below the chart
+            xanchor='center',  # Center alignment
+            yanchor='top',  # Align the top of the legend to the y position
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10)
-    ),
+        ),
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         height=450,
         width=700,
-        margin=dict(b=150, t=80),
+        margin=dict(b=150, t=80),  # Increased bottom margin for space
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
@@ -814,12 +816,22 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.2, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',
+        legend=dict(
+            orientation="h",
+            x=0.5,  # Center the legend horizontally
+            y=-0.15,  # Place it below the chart
+            xanchor='center',  # Center alignment
+            yanchor='top',  # Align to top of the legend box
+            bgcolor='rgba(255, 255, 255, 0.6)',
+            font=dict(size=10),
+            traceorder='normal'
+        ),
+        template='plotly_white',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         height=450,
         width=700,
-        margin=dict(b=100, t=80),
+        margin=dict(b=120, t=80),  # Increased bottom margin for space
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
