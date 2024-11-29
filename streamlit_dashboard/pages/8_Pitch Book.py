@@ -726,7 +726,7 @@ def plot_cpi_ppi(selected_series_id):
     fig.update_layout(
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title='Value'),
+        yaxis=dict(title='Value',showgrid=False),
         legend=dict(
             orientation="h", 
             x=0.01,
