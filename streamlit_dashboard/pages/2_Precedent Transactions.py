@@ -24,26 +24,36 @@ except KeyError:
     st.error("AWS credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
-async def load_data():
+async def async_load_data():
+    """Asynchronous function to load data from S3."""
     try:
+        # Load data using Dask
         df = dd.read_parquet(
             s3_path,
             storage_options=storage_options,
             usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
-            dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
+            dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'},
         )
+        # Extract unique values for filtering
+        industries = df['Industry'].dropna().unique().compute().tolist()
+        locations = df['Location'].dropna().unique().compute().tolist()
+        return df, industries, locations
     except Exception as e:
         st.error(f"Error loading data from S3: {e}")
-        st.stop()
-        return asyncio.run(async_load_data())
+        return None, [], []
     
+def load_data_sync():
+    """Wrapper to run the asynchronous data loading function synchronously."""
+    return asyncio.run(async_load_data())
+
 def main():
-    df = load_data()
     st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
-    # Get unique values for Industry and Location filters
-    industries = df['Industry'].dropna().unique()
-    locations = df['Location'].dropna().unique()
+    # Load data and filter options
+    df, industries, locations = load_data_sync()
+
+    if df is None:
+        st.stop()
 
     # Display multi-select filters at the top without default selections
     col1, col2 = st.columns(2)
