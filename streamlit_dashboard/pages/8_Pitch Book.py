@@ -737,9 +737,9 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,
-        width=600,
-        margin=dict(b=50, t=20),
+        height=250,
+        width=500,
+        margin=dict(b=100, t=50),
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -817,9 +817,9 @@ def plot_gdp_and_industry(selected_industry=None):
         legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,
-        width=600,
-        margin=dict(b=80, t=50),
+        height=25,
+        width=500,
+        margin=dict(b=100, t=50),
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -967,7 +967,7 @@ def plot_unemployment_labour_chart(state_name):
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
-            legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=50,b=80),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+            legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=50,b=100),height=400,width=600,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
         st.plotly_chart(fig, use_container_width=True)
         return fig
@@ -987,9 +987,12 @@ def plot_gdp_chart(state_name):
             fig.add_trace(go.Scatter(x=gdp_data['Year'], y=gdp_data['Value'], mode='lines',line=dict(color=line_colors["gdp"]), name=f"{state_name} GDP"))
 
             last_row = gdp_data.iloc[-1]
+            value_in_millions = last_row['Value'] / 1_000_000
+            formatted_value = f"{value_in_millions:.1f}M"
+
             fig.add_annotation(
                 x=last_row['Year'], y=last_row['Value'],
-                text=f" {last_row['Value']:.0f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
+                text=f" {formatted_value}", showarrow=True, arrowhead=1, ax=-40, ay=-40
             )
 
             fig.update_layout(
@@ -998,7 +1001,7 @@ def plot_gdp_chart(state_name):
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
                 legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=50,b=80),height=250,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=400,width=600,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
             st.plotly_chart(fig, use_container_width=True)
             return fig
