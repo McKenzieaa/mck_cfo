@@ -42,8 +42,8 @@ def main():
     st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
     # Get unique values for Industry and Location filters
-    industries = sorted(df['Industry'].dropna().unique())
-    locations = sorted(df['Location'].dropna().unique())
+    industries = df['Industry'].dropna().unique()
+    locations = df['Location'].dropna().unique()
 
     # Display multi-select filters at the top without default selections
     col1, col2 = st.columns(2)
