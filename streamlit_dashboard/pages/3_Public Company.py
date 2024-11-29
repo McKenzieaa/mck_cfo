@@ -97,33 +97,31 @@ if selected_industries and selected_locations:
     
     if not selected_data.empty:
         avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
-        avg_data['Company'] = avg_data['Company'].apply(lambda x: '<br>'.join([x[i:i+20] for i in range(0, len(x), 10)]))
+        avg_data['Company'] = avg_data['Company'].apply(lambda x: '<br>'.join([x[i:i+20] for i in range(0, len(x), 20)]) if len(x) > 20 else x)
 
         color_ev_revenue = "#032649"  # Default Plotly blue
         color_ev_ebitda = "#032649"   # Default Plotly red
-        
+
         median_ev_revenue = avg_data['EV/Revenue'].median()
         median_ev_ebitda = avg_data['EV/EBITDA'].median()
 
         # Create the EV/Revenue chart with data labels
-        fig1 = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
-        fig1.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
-        fig1.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin="height+width"))
-        fig1.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_revenue, y1=median_ev_revenue,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
-        fig1.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
-        
-        st.plotly_chart(fig1)
+        fig1_public = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
+        fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
+        fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=80),width=900,height=300)
+        fig1_public.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_revenue, y1=median_ev_revenue,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
+        fig1_public.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_revenue + 0.2, text=f"Median: {median_ev_revenue:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
 
-        # Create the EV/EBITDA chart with data labels
-        fig2 = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
-        fig2.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
-        fig2.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin="height+width"))
-        fig2.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_ebitda, y1=median_ev_ebitda,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
-        fig2.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_ebitda + 0.2, text=f"Median: {median_ev_ebitda:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
-       
-        st.plotly_chart(fig2)
+        st.plotly_chart(fig1_public)
 
-        # Button to export charts to PowerPoint
+            # Create the EV/EBITDA chart with data labels
+        fig2_public = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
+        fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
+        fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=80),width=900,height=300)
+        fig2_public.add_shape(type="line",x0=-0.5, x1=len(avg_data['Company']) - 0.5,  y0=median_ev_ebitda, y1=median_ev_ebitda,line=dict(color="#EB8928", width=2, dash="dot"),  xref="x", yref="y")
+        fig2_public.add_annotation(x=len(avg_data['Company']) - 1, y=median_ev_ebitda + 0.2, text=f"Median: {median_ev_ebitda:.1f}x",showarrow=False, font=dict(size=10, color="gray"), xanchor="left",bgcolor='white')
+            
+        st.plotly_chart(fig2_public)
         export_ppt = st.button("Export Charts to PowerPoint")
 
         if export_ppt:
@@ -136,26 +134,23 @@ if selected_industries and selected_locations:
                 st.stop()
 
             ppt = Presentation(template_path)
-            slide1 = ppt.slides[11]  # You can change the index to 0 for the first slide, 1 for the second slide, etc.
-            
-            # If slide does not exist, you can choose to add a new one
+            slide1 = ppt.slides[11] 
+
             if slide1 is None:
                 slide_layout = ppt.slide_layouts[5]  # If no slide exists, create a blank slide
                 slide1 = ppt.slides.add_slide(slide_layout)
 
-            # Remove title
             title1 = slide1.shapes.title
             # title1.text = ""  # Remove chart title
             
-            # Save EV/Revenue chart to an image
             fig1_image = BytesIO()
-            fig1.write_image(fig1_image, format="png", width=900, height=300)
+            fig1_public.write_image(fig1_image, format="png", width=900, height=300)
             fig1_image.seek(0)
             slide1.shapes.add_picture(fig1_image, Inches(0.11), Inches(0.90), width=Inches(9), height=Inches(2.8))
 
             # Add EV/EBITDA chart to the same slide
             fig2_image = BytesIO()
-            fig2.write_image(fig2_image, format="png", width=900, height=300)
+            fig2_public.write_image(fig2_image, format="png", width=900, height=300)
             fig2_image.seek(0)
             slide1.shapes.add_picture(fig2_image, Inches(0.11), Inches(3.70), width=Inches(9), height=Inches(2.8))
 
