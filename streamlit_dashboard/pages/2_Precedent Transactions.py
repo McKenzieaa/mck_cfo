@@ -35,9 +35,10 @@ async def load_data():
     except Exception as e:
         st.error(f"Error loading data from S3: {e}")
         st.stop()
+        return asyncio.run(async_load_data())
     
-async def main():
-    df = await load_data()
+def main():
+    df = load_data()
     st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
     # Get unique values for Industry and Location filters
@@ -222,5 +223,4 @@ async def main():
     else:
         st.write("Please select at least one Industry and Location to view data.")
 
-# Run async main
-asyncio.run(main())
+main()
