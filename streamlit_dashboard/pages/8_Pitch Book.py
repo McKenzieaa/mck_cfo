@@ -680,10 +680,17 @@ def plot_cpi_ppi(selected_series_id):
     fig.update_layout(
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title='Value', showgrid=False),
-        legend=dict(orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)),hovermode='x unified',plot_bgcolor='rgba(0,0,0,0)',paper_bgcolor='rgba(0,0,0,0)',height=250, width=500,margin=dict(t=5, l=2, r=2,b=30))
-    
-    st.plotly_chart(fig, use_container_width=True)
+        yaxis=dict(title='Value'),
+        legend=dict(
+            orientation="h",  # Set legend to horizontal
+            x=0.01,  # Adjust x position (left margin)
+            y=0.99,  # Adjust y position (top margin)
+            bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
+            font=dict(size=8)
+    ),
+        hovermode='x unified'
+    )
+    st.plotly_chart(fig, use_container_width=True)#, key=key)
     return fig
 
 def plot_gdp_and_industry(selected_industry=None):
