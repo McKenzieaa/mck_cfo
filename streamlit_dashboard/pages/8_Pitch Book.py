@@ -729,9 +729,9 @@ def plot_cpi_ppi(selected_series_id):
         yaxis=dict(title='Value',showgrid=False),
         legend=dict(
             orientation="h", 
-            x=0.5,  # Center the legend horizontally
+            x=0.01,  # Center the legend horizontally
             y=-0.2,  # Place it below the chart
-            xanchor='center',  # Center alignment
+            xanchor='left',  # Center alignment
             yanchor='top',  # Align the top of the legend to the y position
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10)
@@ -818,9 +818,9 @@ def plot_gdp_and_industry(selected_industry=None):
         yaxis2_title='Percent Change',
         legend=dict(
             orientation="h",
-            x=0.5,  # Center the legend horizontally
+            x=0.01,  # Center the legend horizontally
             y=-0.15,  # Place it below the chart
-            xanchor='center',  # Center alignment
+            xanchor='left',  # Center alignment
             yanchor='top',  # Align to top of the legend box
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10),
@@ -979,7 +979,23 @@ def plot_unemployment_labour_chart(state_name):
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
-            legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=50,b=100),height=400,width=600,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+            legend=dict(
+                x=0.01,  # Center the legend horizontally
+                y=-0.2,  # Move the legend below the chart
+                xanchor='left',
+                yanchor='top',
+                title_text=None,
+                orientation='h',  # Horizontal legend
+                font=dict(size=10)
+            ),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=2, r=2, t=50, b=120),  # Increased bottom margin for legend space
+            height=400,
+            width=600,
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False)
+        )
 
         st.plotly_chart(fig, use_container_width=True)
         return fig
@@ -1023,6 +1039,7 @@ def plot_gdp_chart(state_name):
     else:
         st.warning("State GDP data not loaded.")
         return None
+
 # Define S3 file paths
 precedent_path = "s3://documentsapi/industry_data/precedent.parquet"
 public_comp_path = "s3://documentsapi/industry_data/public_comp_data.parquet"
