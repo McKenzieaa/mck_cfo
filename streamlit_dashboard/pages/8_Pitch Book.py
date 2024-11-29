@@ -814,12 +814,12 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',
+        legend=dict(orientation="h",x=0.01, y=0.2, bgcolor='rgba(255, 255, 255, 0.6)',font=dict(size=10)),template='plotly_white',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         height=450,
         width=700,
-        margin=dict(b=150, t=80),
+        margin=dict(b=100, t=80),
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
