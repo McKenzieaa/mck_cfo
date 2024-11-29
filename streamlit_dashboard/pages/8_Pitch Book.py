@@ -640,6 +640,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
         height=375,
         width=500,
+        margin=dict(b=80, t=50),
     )
 
     st.plotly_chart(fig, use_container_width=True)
