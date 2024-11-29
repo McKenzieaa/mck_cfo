@@ -732,7 +732,7 @@ def plot_cpi_ppi(selected_series_id):
             x=0.01,
             y=0.2,
             bgcolor='rgba(255, 255, 255, 0.6)',
-            font=dict(size=8)
+            font=dict(size=10)
     ),
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
