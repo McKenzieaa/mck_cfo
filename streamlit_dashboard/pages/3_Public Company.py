@@ -97,7 +97,7 @@ if selected_industries and selected_locations:
     
     if not selected_data.empty:
         avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
-        avg_data['Company'] = avg_data['Company'].apply(lambda x: '<br>'.join([x[i:i+10] for i in range(0, len(x), 10)]))
+        avg_data['Company'] = avg_data['Company'].apply(lambda x: '<br>'.join([x[i:i+20] for i in range(0, len(x), 10)]))
 
         color_ev_revenue = "#032649"  # Default Plotly blue
         color_ev_ebitda = "#032649"   # Default Plotly red
