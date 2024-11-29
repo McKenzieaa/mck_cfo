@@ -816,6 +816,8 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False),
         legend=dict(
             orientation="h",
             x=0.01,  # Center the legend horizontally
