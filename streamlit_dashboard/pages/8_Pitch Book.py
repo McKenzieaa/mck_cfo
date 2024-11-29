@@ -621,18 +621,25 @@ def plot_external_driver(selected_indicators):
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-        fig.update_layout(
-        title='',
+    fig.update_layout(
+        title='',  # No title specified
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title='Percent Change'),
         hovermode='x',
         legend=dict(
-            x=0.01, y=0.01, orientation='h',xanchor='left', yanchor='bottom', traceorder='normal',font=dict(size=10),
-            bgcolor='rgba(255, 255, 255, 0)', 
-            bordercolor='rgba(255, 255, 255, 0)', 
-            borderwidth=0 ,
-            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',height=375, width=500
-        )
+            x=0.01,
+            y=0.01,
+            orientation='h',  # Horizontal legend
+            xanchor='left',
+            yanchor='bottom',
+            traceorder='normal',
+            font=dict(size=10),
+            bgcolor='rgba(255, 255, 255, 0)',  # Transparent background
+        ),
+        plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        height=375,
+        width=500,
     )
 
     st.plotly_chart(fig, use_container_width=True)
