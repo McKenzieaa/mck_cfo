@@ -589,19 +589,39 @@ def plot_labour_unemployment():
     ))
 
     fig.update_layout(
-        title='',
-        xaxis=dict(showgrid=False, showticklabels=True),  # No title
-        yaxis=dict( showgrid=False,title='Population',side='left',range=[merged['population'].min(), merged['population'].max() * 1.1]),
-        yaxis2=dict( title='Rate (%)', overlaying='y',side='right'),
-        legend=dict(orientation="h",x=0.01, y=0.01, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=10)),
-        hovermode='x unified', template='plotly_white',
-        plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
-        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-        height=400,  # Increased height for better spacing
-        width=600,  # Adjusted width for better visualization
-        margin=dict(b=80, t=50),  # Add space for x-axis labels and top legend
-    )
-    
+    title='',  # No title
+    xaxis=dict(
+        showgrid=False,
+        showticklabels=True,
+        tickangle=0,  # Rotate x-axis labels to avoid overlap
+        automargin=True  # Automatically adjust margins for better spacing
+    ),
+    yaxis=dict(
+        showgrid=False,
+        title='Population',
+        side='left',
+        range=[merged['population'].min(), merged['population'].max() * 1.1]
+    ),
+    yaxis2=dict(
+        title='Rate (%)',
+        overlaying='y',
+        side='right'
+    ),
+    legend=dict(
+        orientation="h",
+        x=0.01,
+        y=-0.15,  # Move legend below the plot to avoid overlap
+        bgcolor='rgba(255, 255, 255, 0.6)',
+        font=dict(size=10)
+    ),
+    hovermode='x unified',
+    template='plotly_white',
+    plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
+    paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+    height=450,  # Increased height for better spacing
+    width=700,  # Adjusted width for better visualization
+    margin=dict(b=100, t=50)  # Add more bottom margin for x-axis labels
+)
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
