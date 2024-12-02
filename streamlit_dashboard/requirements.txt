@@ -13,4 +13,3 @@ dask
 boto3
 sqlalchemy
 pymysql
-pyspark
