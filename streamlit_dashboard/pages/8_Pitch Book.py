@@ -698,15 +698,15 @@ def plot_external_driver(selected_indicators):
         legend=dict(
             x=0.01,
             y=0.01,
-            orientation='h',  # Horizontal legend
+            orientation='h', 
             xanchor='left',
             yanchor='bottom',
             traceorder='normal',
             font=dict(size=10),
-            bgcolor='rgba(255, 255, 255, 0)',  # Transparent background
+            bgcolor='rgba(255, 255, 255, 0)',
         ),
-        plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
-        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        plot_bgcolor='rgba(0,0,0,0)', 
+        paper_bgcolor='rgba(0,0,0,0)',
         height=375,
         width=500,
         margin=dict(b=80, t=30, l=10, r=10),
