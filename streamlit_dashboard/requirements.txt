@@ -13,3 +13,4 @@ dask
 boto3
 sqlalchemy
 pymysql
+mysql-connector-python
