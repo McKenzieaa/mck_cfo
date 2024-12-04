@@ -1,16 +1,16 @@
-import dask.dataframe as dd 
+import pandas as pd
+import pymysql  # For accessing MySQL
 import streamlit as st
 import plotly.express as px
-import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import os
-import pymysql  # For accessing MySQL
 
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
+# MySQL connection config from Streamlit secrets
 try:
     db_config = {
         'host': st.secrets["mysql"]["host"],
@@ -58,11 +58,9 @@ if selected_industries:
 if selected_locations:
     df = df[df['Location'].isin(selected_locations)]
 
-# Filter data based on multi-selections using .isin()
+# Filter data based on multi-selections
 if selected_industries and selected_locations:
-    filtered_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
-    filtered_df = filtered_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
-    filtered_df = filtered_df.compute()  # Convert to Pandas for easier manipulation in Streamlit
+    filtered_df = df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_df['Year'] = filtered_df['Year'].astype(int)
 
     # Set up Ag-Grid for selection
