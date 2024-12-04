@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine
+import mysql.connector
 import streamlit as st
 import plotly.express as px
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
@@ -10,29 +10,39 @@ import os
 
 # Streamlit app title
 st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
+# MySQL database connection details
+host = st.secrets["mysql"]["host"]
+user = st.secrets["mysql"]["user"]
+password = st.secrets["mysql"]["password"]
+database = st.secrets["mysql"]["database"]
 
-# MySQL connection setup
-mysql_user = st.secrets["mysql"]["user"]
-mysql_password = st.secrets["mysql"]["password"]
-mysql_host = st.secrets["mysql"]["host"]
-mysql_db = st.secrets["mysql"]["db"]
+# Connect to the MySQL database
+try:
+    conn = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+    )
+except mysql.connector.Error as e:
+    st.error(f"Error connecting to MySQL: {e}")
+    st.stop()
 
-# Create SQLAlchemy engine
-connection_string = f"mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"
-engine = create_engine(connection_string)
 
 # SQL query to fetch the public_comp_table
 query = """
     SELECT `Name`, `Country`, `Enterprise Value (in $)`, `Revenue (in $)`, `EBITDA (in $)`, `Business Description`, `Industry`
     FROM public_comp_table
 """
-
-# Load data from MySQL
 try:
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL: {e}")
+    st.stop()
 
-    # Rename columns to match expected column names
-    df = df.rename(columns={
+conn.close()
+
+df = df.rename(columns={
         'Name': 'Company',
         'Country': 'Location',
         'Enterprise Value (in $)': 'Enterprise Value',
@@ -40,18 +50,14 @@ try:
         'EBITDA (in $)': 'EBITDA',
     })
 
-    # Convert columns to numeric
-    df['Enterprise Value'] = pd.to_numeric(df['Enterprise Value'], errors='coerce')
-    df['Revenue'] = pd.to_numeric(df['Revenue'], errors='coerce')
-    df['EBITDA'] = pd.to_numeric(df['EBITDA'], errors='coerce')
+# Convert columns to numeric
+df['Enterprise Value'] = pd.to_numeric(df['Enterprise Value'], errors='coerce')
+df['Revenue'] = pd.to_numeric(df['Revenue'], errors='coerce')
+df['EBITDA'] = pd.to_numeric(df['EBITDA'], errors='coerce')
 
-    # Calculate EV/Revenue and EV/EBITDA
-    df['EV/Revenue'] = df['Enterprise Value'] / df['Revenue']
-    df['EV/EBITDA'] = df['Enterprise Value'] / df['EBITDA']
-
-except Exception as e:
-    st.error(f"Error loading data from MySQL: {e}")
-    st.stop()
+# Calculate EV/Revenue and EV/EBITDA
+df['EV/Revenue'] = df['Enterprise Value'] / df['Revenue']
+df['EV/EBITDA'] = df['Enterprise Value'] / df['EBITDA']
 
 # Get unique values for Industry and Location filters
 industries = df['Industry'].dropna().unique()
