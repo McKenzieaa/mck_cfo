@@ -1316,7 +1316,7 @@ with st.expander("Benchmarking"):
     selected_industry = st.selectbox("Select Industry", industries)
     if selected_industry:
 
-        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
+        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry]
 
         if 'Report_ID' in filtered_df_rma.columns:
             filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
