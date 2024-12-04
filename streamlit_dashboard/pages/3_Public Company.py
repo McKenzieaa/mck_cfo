@@ -10,7 +10,7 @@ import os
 
 # Streamlit app title
 st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
-# MySQL database connection details
+
 host = st.secrets["mysql"]["host"]
 user = st.secrets["mysql"]["user"]
 password = st.secrets["mysql"]["password"]

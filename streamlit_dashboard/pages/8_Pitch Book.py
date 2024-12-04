@@ -38,20 +38,30 @@ except mysql.connector.Error as e:
     st.error(f"Error connecting to MySQL: {e}")
     st.stop()
 
-query = """
+query1 = """
 SELECT 
     `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
 FROM 
     precedent_table
 """
-
 try:
-    precedent_df = pd.read_sql(query, conn)
+    df_precedent = pd.read_sql(query1, conn)
 except Exception as e:
-    st.error(f"Error loading data from MySQL: {e}")
+    st.error(f"Error loading data from MySQL (Precedent Transactions): {e}")
     st.stop()
 
-# Close the MySQL connection
+# Fetch Public Listed Companies data
+query2 = """
+SELECT `Name`, `Country`, `Enterprise Value (in $)`, `Revenue (in $)`, `EBITDA (in $)`, `Business Description`, `Industry`
+FROM public_comp_table
+"""
+try:
+    df_public = pd.read_sql(query2, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL (Public Companies): {e}")
+    st.stop()
+
+# Close MySQL connection
 conn.close()
 
 try:
@@ -1101,52 +1111,21 @@ usecols = [
 df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options,usecols=usecols, engine='openpyxl')
 df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
 
-# Load data for both Public Comps and Precedent Transactions
-try:
-    # # Load Precedent Transactions Data
-    # precedent_df = dd.read_parquet(
-    #     precedent_path,
-    #     storage_options=storage_options,
-    #     usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
-    #     dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
-    # )
+df_public = df_public.rename(columns={
+    'Name': 'Company',
+    'Country': 'Location',
+    'Enterprise Value (in $)': 'Enterprise Value',
+    'Revenue (in $)': 'Revenue',
+    'EBITDA (in $)': 'EBITDA',
+})
+df_public['Enterprise Value'] = pd.to_numeric(df_public['Enterprise Value'], errors='coerce')
+df_public['Revenue'] = pd.to_numeric(df_public['Revenue'], errors='coerce')
+df_public['EBITDA'] = pd.to_numeric(df_public['EBITDA'], errors='coerce')
+df_public['EV/Revenue'] = df_public['Enterprise Value'] / df_public['Revenue']
+df_public['EV/EBITDA'] = df_public['Enterprise Value'] / df_public['EBITDA']
 
-    # Load Public Comps Data
-    public_comp_df = dd.read_parquet(
-        public_comp_path,
-        storage_options=storage_options,
-        usecols=['Name', 'Country', 'Enterprise Value (in $)', 'Revenue (in $)', 'EBITDA (in $)', 'Business Description', 'Industry']
-    ).rename(columns={
-        'Name': 'Company',
-        'Country': 'Location',
-        'Enterprise Value (in $)': 'Enterprise Value',
-        'Revenue (in $)': 'Revenue',
-        'EBITDA (in $)': 'EBITDA'
-    })
-
-    # Ensure numeric conversion
-    public_comp_df['Enterprise Value'] = dd.to_numeric(public_comp_df['Enterprise Value'], errors='coerce')
-    public_comp_df['Revenue'] = dd.to_numeric(public_comp_df['Revenue'], errors='coerce')
-    public_comp_df['EBITDA'] = dd.to_numeric(public_comp_df['EBITDA'], errors='coerce')
-
-    # Drop rows with invalid data for division
-    public_comp_df = public_comp_df.dropna(subset=['Enterprise Value', 'Revenue', 'EBITDA'])
-
-    # Calculate EV/Revenue and EV/EBITDA
-    public_comp_df['EV/Revenue'] = public_comp_df['Enterprise Value'] / public_comp_df['Revenue']
-    public_comp_df['EV/EBITDA'] = public_comp_df['Enterprise Value'] / public_comp_df['EBITDA']
-
-    # Get unique industries and locations from Public Comps
-    public_industries = public_comp_df['Industry'].dropna().compute().unique().tolist()
-    public_locations = public_comp_df['Location'].dropna().compute().unique().tolist()
-
-    # Compute the DataFrame for use in Streamlit
-
-    public_comp_df = public_comp_df.compute()
-
-except Exception as e:
-    st.error(f"Error loading data from S3: {e}")
-    st.stop()
+precedent_df = df_precedent.copy()
+public_comp_df = df_public.copy()
 
 # Accordion for Precedent Transactions
 with st.expander("Precedent Transactions"):
@@ -1209,8 +1188,10 @@ with st.expander("Precedent Transactions"):
 
 with st.expander("Public Comps"):
     col1, col2 = st.columns(2)
-    selected_industries = col1.multiselect("Select Industry", public_industries, key="public_industries")
-    selected_locations = col2.multiselect("Select Location", public_locations, key="public_locations")
+    industries_public = df_public['Industry'].unique()
+    locations_public = df_public['Location'].unique()
+    selected_industries = col1.multiselect("Select Industry", industries_public, key="public_industries")
+    selected_locations = col2.multiselect("Select Location", locations_public, key="public_locations")
     if selected_industries and selected_locations:
         filtered_df = public_comp_df[public_comp_df['Industry'].isin(selected_industries) & public_comp_df['Location'].isin(selected_locations)]
         filtered_df = filtered_df[['Company',  'EV/Revenue', 'EV/EBITDA', 'Business Description']]
