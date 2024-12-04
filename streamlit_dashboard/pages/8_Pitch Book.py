@@ -1375,14 +1375,13 @@ with st.expander("Benchmarking"):
 
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
-        # Export the charts to PowerPoint using the export_all_to_pptx function
+
         pptx_file = export_all_to_pptx(
             labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
             fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
             labour_fig, gdp_fig
         )
 
-        # Create a download button for the user to download the PowerPoint file
         st.download_button(
             label="Download PowerPoint", 
             data=pptx_file,
