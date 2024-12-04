@@ -46,7 +46,7 @@ FROM
 """
 
 try:
-    df = pd.read_sql(query, conn)
+    precedent_df = pd.read_sql(query, conn)
 except Exception as e:
     st.error(f"Error loading data from MySQL: {e}")
     st.stop()
@@ -1141,7 +1141,7 @@ try:
     public_locations = public_comp_df['Location'].dropna().compute().unique().tolist()
 
     # Compute the DataFrame for use in Streamlit
-    precedent_df = df.compute()
+
     public_comp_df = public_comp_df.compute()
 
 except Exception as e:
