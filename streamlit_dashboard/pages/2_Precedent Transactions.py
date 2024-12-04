@@ -7,42 +7,56 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import os
-import s3fs  # For accessing S3 data
+import pymysql  # For accessing MySQL
 
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
-# Define S3 file path
-s3_path = "s3://documentsapi/industry_data/precedent.parquet"
 try:
-    storage_options = {
-        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
-        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
-        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
+    db_config = {
+        'host': st.secrets["mysql"]["host"],
+        'user': st.secrets["mysql"]["user"],
+        'password': st.secrets["mysql"]["password"],
+        'database': st.secrets["mysql"]["database"],
+        'port': st.secrets["mysql"]["port"]
     }
 except KeyError:
-    st.error("AWS credentials are not configured correctly in Streamlit secrets.")
+    st.error("MySQL credentials are not configured correctly in Streamlit secrets.")
     st.stop()
 
+# Query data from MySQL
+query = """
+SELECT 
+    Year, 
+    Target, 
+    `EV/Revenue`, 
+    `EV/EBITDA`, 
+    `Business Description`, 
+    Industry, 
+    Location 
+FROM precedent_table
+"""
 try:
-    df = dd.read_parquet(
-        s3_path,
-        storage_options=storage_options,
-        usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
-        dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
-    )
+    connection = pymysql.connect(**db_config)
+    df = pd.read_sql(query, connection)
+    connection.close()
 except Exception as e:
-    st.error(f"Error loading data from S3: {e}")
+    st.error(f"Error loading data from MySQL: {e}")
     st.stop()
-    
 
 # Get unique values for Industry and Location filters
-industries = df['Industry'].unique().compute()
-locations = df['Location'].unique().compute()
+industries = df['Industry'].unique()
+locations = df['Location'].unique()
 
 # Display multi-select filters at the top without default selections
 col1, col2 = st.columns(2)
 selected_industries = col1.multiselect("Select Industry", industries)
 selected_locations = col2.multiselect("Select Location", locations)
+
+# Filter the DataFrame based on user selections
+if selected_industries:
+    df = df[df['Industry'].isin(selected_industries)]
+if selected_locations:
+    df = df[df['Location'].isin(selected_locations)]
 
 # Filter data based on multi-selections using .isin()
 if selected_industries and selected_locations:
