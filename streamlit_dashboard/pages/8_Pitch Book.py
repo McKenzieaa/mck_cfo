@@ -489,7 +489,6 @@ df_unpivoted["Month & Year"] = pd.to_datetime(df_unpivoted["Month & Year"], form
 df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
 all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
 all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
-# Function to fetch CPI data for the selected industry
 
 # Load and clean PPI data
 df_ppi = pd.read_csv(ppi_file_path, delimiter=',').dropna().reset_index(drop=True)
@@ -1123,9 +1122,7 @@ with st.expander("Precedent Transactions"):
     selected_industries = col1.multiselect("Select Industry", industries, key="precedent_industries")
     selected_locations = col2.multiselect("Select Location", locations, key="precedent_locations")
     if selected_industries and selected_locations:
-        filtered_precedent_df = precedent_df[
-            precedent_df['Industry'].isin(selected_industries) & precedent_df['Location'].isin(selected_locations)
-        ]
+        filtered_precedent_df = precedent_df[precedent_df['Industry'].isin(selected_industries) & precedent_df['Location'].isin(selected_locations)]
         filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
         filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
 
