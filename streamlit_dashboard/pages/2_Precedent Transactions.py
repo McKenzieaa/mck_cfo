@@ -33,7 +33,7 @@ query = """
 SELECT 
     `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
 FROM 
-    cpi_data
+    precedent_table
 """
 
 try:
