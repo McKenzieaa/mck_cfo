@@ -61,7 +61,16 @@ except Exception as e:
     st.error(f"Error loading data from MySQL (Public Companies): {e}")
     st.stop()
 
-# Close MySQL connection
+query3 = """
+SELECT `NAICS`, `LineItems`, `Percent`, `ReportID`, `Industry`
+FROM rma_table
+"""
+try:
+    df_rma = pd.read_sql(query3, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL (Public Companies): {e}")
+    st.stop()
+
 conn.close()
 
 try:
@@ -579,10 +588,8 @@ df_combined = pd.merge(
     how="inner"
    )
 
-    # Filter GDP data
 df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 
-# Create a list of industries excluding GDP for the dropdown
 industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
@@ -697,7 +704,7 @@ def plot_external_driver(selected_indicators):
         hovermode='x',
         legend=dict(
             x=0.01,
-            y=0.01,
+            y=-0.15,
             orientation='h', 
             xanchor='left',
             yanchor='bottom',
@@ -1086,12 +1093,12 @@ def plot_gdp_chart(state_name):
         return None
 
 # Define S3 file paths
-precedent_path = "s3://documentsapi/industry_data/precedent.parquet"
+# precedent_path = "s3://documentsapi/industry_data/precedent.parquet"
 public_comp_path = "s3://documentsapi/industry_data/public_comp_data.parquet"
 s3_path_rma = "s3://documentsapi/industry_data/rma_data.parquet"
 s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
 
-df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)  # Set to True if the bucket is public
+# RMA data pre-processing
 df_rma = df_rma.rename(columns={
     'ReportID': 'Report_ID',      
     'Line Items': 'LineItems',    
@@ -1373,10 +1380,10 @@ if st.button("Export Charts to PowerPoint", key="export_button"):
 
         # Create a download button for the user to download the PowerPoint file
         st.download_button(
-            label="Download PowerPoint",  # The label for the button
-            data=pptx_file,  # The PowerPoint file content (must be in byte format)
-            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",  # The default filename for the download
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"  # MIME type for PowerPoint
+            label="Download PowerPoint", 
+            data=pptx_file,
+            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation" 
         )
 
     except Exception as e:
