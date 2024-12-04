@@ -17,9 +17,43 @@ from plotly.subplots import make_subplots
 import s3fs  # For accessing S3 data
 import os
 from datetime import date
+import mysql.connector
 
 today = date.today().strftime("%Y-%m-%d")
 state_gdp_data = None
+
+host = st.secrets["mysql"]["host"]
+user = st.secrets["mysql"]["user"]
+password = st.secrets["mysql"]["password"]
+database = st.secrets["mysql"]["database"]
+
+try:
+    conn = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+    )
+except mysql.connector.Error as e:
+    st.error(f"Error connecting to MySQL: {e}")
+    st.stop()
+
+query = """
+SELECT 
+    `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
+FROM 
+    precedent_table
+"""
+
+try:
+    df = pd.read_sql(query, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL: {e}")
+    st.stop()
+
+# Close the MySQL connection
+conn.close()
+
 try:
     storage_options = {
         'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
@@ -1069,13 +1103,13 @@ df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""
 
 # Load data for both Public Comps and Precedent Transactions
 try:
-    # Load Precedent Transactions Data
-    precedent_df = dd.read_parquet(
-        precedent_path,
-        storage_options=storage_options,
-        usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
-        dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
-    )
+    # # Load Precedent Transactions Data
+    # precedent_df = dd.read_parquet(
+    #     precedent_path,
+    #     storage_options=storage_options,
+    #     usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
+    #     dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
+    # )
 
     # Load Public Comps Data
     public_comp_df = dd.read_parquet(
@@ -1107,7 +1141,7 @@ try:
     public_locations = public_comp_df['Location'].dropna().compute().unique().tolist()
 
     # Compute the DataFrame for use in Streamlit
-    precedent_df = precedent_df.compute()
+    precedent_df = df.compute()
     public_comp_df = public_comp_df.compute()
 
 except Exception as e:
