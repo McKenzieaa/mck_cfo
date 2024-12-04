@@ -1,44 +1,44 @@
-import dask.dataframe as dd
+import pandas as pd
+from sqlalchemy import create_engine
 import streamlit as st
 import plotly.express as px
-import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import os
-import s3fs  # For accessing S3 data
 
-# Define S3 file path
-s3_path = "s3://documentsapi/industry_data/public_comp_data.parquet"
+# Streamlit app title
+st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
 
-# Streamlit secrets can be accessed if credentials are provided there
+# MySQL connection setup
+mysql_user = st.secrets["mysql"]["user"]
+mysql_password = st.secrets["mysql"]["password"]
+mysql_host = st.secrets["mysql"]["host"]
+mysql_db = st.secrets["mysql"]["db"]
+
+# Create SQLAlchemy engine
+connection_string = f"mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"
+engine = create_engine(connection_string)
+
+# SQL query to fetch the public_comp_table
+query = """
+    SELECT `Name`, `Country`, `Enterprise Value (in $)`, `Revenue (in $)`, `EBITDA (in $)`, `Business Description`, `Industry`
+    FROM public_comp_table
+"""
+
+# Load data from MySQL
 try:
-    storage_options = {
-        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
-        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
-        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
-    }
-except KeyError:
-    st.error("AWS credentials are not configured correctly in Streamlit secrets.")
-    st.stop()
+    df = pd.read_sql(query, engine)
 
-# Read Parquet file from S3 with Dask
-try:
-    df = dd.read_parquet(
-        s3_path,
-        storage_options=storage_options,
-        usecols=['Name', 'Country', 'Enterprise Value (in $)', 'Revenue (in $)', 'EBITDA (in $)', 'Business Description', 'Industry']
-    ).rename(columns={
+    # Rename columns to match expected column names
+    df = df.rename(columns={
         'Name': 'Company',
         'Country': 'Location',
         'Enterprise Value (in $)': 'Enterprise Value',
         'Revenue (in $)': 'Revenue',
         'EBITDA (in $)': 'EBITDA',
     })
-    
-    # Convert Dask DataFrame to Pandas DataFrame
-    df = df.compute()
 
     # Convert columns to numeric
     df['Enterprise Value'] = pd.to_numeric(df['Enterprise Value'], errors='coerce')
@@ -50,11 +50,8 @@ try:
     df['EV/EBITDA'] = df['Enterprise Value'] / df['EBITDA']
 
 except Exception as e:
-    st.error(f"Error loading data from S3: {e}")
+    st.error(f"Error loading data from MySQL: {e}")
     st.stop()
-    
-# Streamlit app title
-st.set_page_config(page_title="Public Listed Companies Analysis", layout="wide")
 
 # Get unique values for Industry and Location filters
 industries = df['Industry'].dropna().unique()
@@ -94,7 +91,6 @@ if selected_industries and selected_locations:
     )
 
     selected_data = pd.DataFrame(grid_response['selected_rows'])
-    
     if not selected_data.empty:
         avg_data = selected_data.groupby('Company')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
         avg_data['Company'] = avg_data['Company'].apply(lambda x: '<br>'.join([x[i:i+20] for i in range(0, len(x), 20)]) if len(x) > 20 else x)
@@ -105,7 +101,6 @@ if selected_industries and selected_locations:
         median_ev_revenue = avg_data['EV/Revenue'].median()
         median_ev_ebitda = avg_data['EV/EBITDA'].median()
 
-        # Create the EV/Revenue chart with data labels
         fig1_public = px.bar(avg_data, x='Company', y='EV/Revenue', title="EV/Revenue", text='EV/Revenue')
         fig1_public.update_traces(marker_color=color_ev_revenue, texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
         fig1_public.update_layout(yaxis_title="EV/Revenue", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=80),width=900,height=300)
@@ -114,7 +109,6 @@ if selected_industries and selected_locations:
 
         st.plotly_chart(fig1_public)
 
-            # Create the EV/EBITDA chart with data labels
         fig2_public = px.bar(avg_data, x='Company', y='EV/EBITDA', title="EV/EBITDA", text='EV/EBITDA')
         fig2_public.update_traces(marker_color=color_ev_ebitda,texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=12))
         fig2_public.update_layout(yaxis_title="EV/EBITDA", xaxis_title=" ",bargap=0.4,bargroupgap=0.4,yaxis=dict(showgrid=False),xaxis=dict(tickangle=0,automargin=True,tickmode='array',tickvals=avg_data['Company'],ticktext=avg_data['Company']),plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=50,b=80),width=900,height=300)
@@ -125,10 +119,9 @@ if selected_industries and selected_locations:
         export_ppt = st.button("Export Charts to PowerPoint")
 
         if export_ppt:
-            # Define the correct path to your PowerPoint template
+
             template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
-            
-            # Check if the file exists before attempting to load
+
             if not os.path.exists(template_path):
                 st.error(f"PowerPoint template not found at: {template_path}")
                 st.stop()
@@ -137,7 +130,7 @@ if selected_industries and selected_locations:
             slide1 = ppt.slides[11] 
 
             if slide1 is None:
-                slide_layout = ppt.slide_layouts[5]  # If no slide exists, create a blank slide
+                slide_layout = ppt.slide_layouts[5]
                 slide1 = ppt.slides.add_slide(slide_layout)
 
             title1 = slide1.shapes.title
