@@ -1316,7 +1316,7 @@ with st.expander("Benchmarking"):
     selected_industry = st.selectbox("Select Industry", industries)
     if selected_industry:
 
-        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry] + '%'
+        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry]
 
         if 'Report_ID' in filtered_df_rma.columns:
             filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
@@ -1362,6 +1362,10 @@ with st.expander("Benchmarking"):
             on='LineItems',
             how='left'
         )
+
+        income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{x}%" if pd.notnull(x) else x)
+        balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{x}%" if pd.notnull(x) else x)
+
 
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
