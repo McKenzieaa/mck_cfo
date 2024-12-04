@@ -1305,7 +1305,7 @@ with st.expander("State Indicators"):
 
 with st.expander("Benchmarking"):
     st.subheader("Benchmarking")
-    # Create dropdown and process data for RMA and public comps
+
     industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries = sorted(set(industries_rma).union(set(industries_public)))
