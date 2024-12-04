@@ -1,54 +1,66 @@
-import dask.dataframe as dd 
+import pandas as pd
+import mysql.connector
 import streamlit as st
 import plotly.express as px
-import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import os
-import s3fs  # For accessing S3 data
 
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
-# Define S3 file path
-s3_path = "s3://documentsapi/industry_data/precedent.parquet"
-try:
-    storage_options = {
-        'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
-        'secret': st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
-        'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
-    }
-except KeyError:
-    st.error("AWS credentials are not configured correctly in Streamlit secrets.")
-    st.stop()
+# MySQL database connection details
+host = st.secrets["mysql"]["host"]
+user = st.secrets["mysql"]["user"]
+password = st.secrets["mysql"]["password"]
+database = st.secrets["mysql"]["database"]
 
+# Connect to the MySQL database
 try:
-    df = dd.read_parquet(
-        s3_path,
-        storage_options=storage_options,
-        usecols=['Year', 'Target', 'EV/Revenue', 'EV/EBITDA', 'Business Description', 'Industry', 'Location'],
-        dtype={'EV/Revenue': 'float64', 'EV/EBITDA': 'float64'}
+    conn = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
-except Exception as e:
-    st.error(f"Error loading data from S3: {e}")
+except mysql.connector.Error as e:
+    st.error(f"Error connecting to MySQL: {e}")
     st.stop()
-    
-precedent_df = df.compute()
-public_comp_df = df.compute()
 
-industries = df['Industry'].unique().compute()
-locations = df['Location'].unique().compute()
+# Query to fetch the data from the MySQL table
+query = """
+SELECT 
+    `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
+FROM 
+    cpi_data
+"""
 
+try:
+    df = pd.read_sql(query, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL: {e}")
+    st.stop()
+
+# Close the MySQL connection
+conn.close()
+
+# List of unique industries and locations
+industries = df['Industry'].unique()
+locations = df['Location'].unique()
+
+# Sidebar for selecting industries and locations
 col1, col2 = st.columns(2)
 selected_industries = col1.multiselect("Select Industry", industries)
 selected_locations = col2.multiselect("Select Location", locations)
 
 if selected_industries and selected_locations:
-    filtered_precedent_df = precedent_df[precedent_df['Industry'].isin(selected_industries) & precedent_df['Location'].isin(selected_locations)]
-    filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA','Business Description']]
+    # Filter data based on selections
+    filtered_precedent_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
+    filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
 
+    # Display filtered data in Ag-Grid table
     st.subheader("Precedent Transactions")
     gb = GridOptionsBuilder.from_dataframe(filtered_precedent_df)
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
@@ -56,8 +68,8 @@ if selected_industries and selected_locations:
         field="Target",
         tooltipField="Business Description",
         maxWidth=400
-        )
-    gb.configure_columns(["Business Description"], hide=False)    
+    )
+    gb.configure_columns(["Business Description"], hide=False)
     grid_options = gb.build()
 
     # Display Ag-Grid table
@@ -69,12 +81,13 @@ if selected_industries and selected_locations:
         width='100%',
         theme='streamlit'
     )
+
+    # Get selected rows from the grid
     selected_data = pd.DataFrame(grid_response['selected_rows'])
     if not selected_data.empty:
-
+        # Calculate average EV/Revenue and EV/EBITDA for the selected data
         avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
         avg_data['Year'] = avg_data['Year'].astype(int)
-
         color_ev_revenue = "#032649" 
         color_ev_ebitda = "#032649"  
 
