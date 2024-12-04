@@ -1363,8 +1363,8 @@ with st.expander("Benchmarking"):
             how='left'
         )
 
-        income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{x}%" if pd.notnull(x) else x)
-        balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{x}%" if pd.notnull(x) else x)
+        income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
+        balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
 
 
         st.write("Income Statement")
