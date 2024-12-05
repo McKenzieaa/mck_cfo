@@ -704,7 +704,7 @@ def plot_external_driver(selected_indicators):
         hovermode='x',
         legend=dict(
             x=0.01,
-            y=-0.25,
+            y=-0.30,
             orientation='h', 
             xanchor='left',
             yanchor='bottom',
@@ -716,7 +716,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',
         height=375,
         width=500,
-        margin=dict(b=50, t=20, l=20, r=20),
+        margin=dict(b=50, t=20, l=30, r=25),
     )
 
     st.plotly_chart(fig, use_container_width=True)
