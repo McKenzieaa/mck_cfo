@@ -706,7 +706,7 @@ def plot_external_driver(selected_indicators):
             x=0.1,
             y=-0.25,
             orientation='h', 
-            xanchor='center',
+            xanchor='left',
             yanchor='bottom',
             traceorder='normal',
             font=dict(size=10),
