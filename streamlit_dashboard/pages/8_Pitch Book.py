@@ -703,7 +703,7 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title='Percent Change'),
         hovermode='x',
         legend=dict(
-            x=0.5,
+            x=0.01,
             y=-0.25,
             orientation='h', 
             xanchor='center',
