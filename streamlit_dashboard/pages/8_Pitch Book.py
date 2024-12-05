@@ -716,7 +716,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',
         height=375,
         width=500,
-        margin=dict(b=100, t=30, l=10, r=10),
+        margin=dict(b=80, t=30, l=20, r=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
