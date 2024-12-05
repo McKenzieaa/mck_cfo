@@ -144,7 +144,7 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.45, top=0.90)
     update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
-    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=5, height=4, left=5.20, top=1.3)
+    update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.70, height=3.90, left=5, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=4.4)
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statitics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
@@ -716,7 +716,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',
         height=375,
         width=500,
-        margin=dict(b=80, t=30, l=20, r=20),
+        margin=dict(b=50, t=20, l=20, r=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
