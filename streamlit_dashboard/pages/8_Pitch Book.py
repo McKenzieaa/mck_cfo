@@ -703,7 +703,7 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title='Percent Change'),
         hovermode='x',
         legend=dict(
-            x=0.01,
+            x=0.5,
             y=-0.15,
             orientation='h', 
             xanchor='center',
@@ -716,7 +716,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',
         height=375,
         width=500,
-        margin=dict(b=100, t=50, l=10, r=10),
+        margin=dict(b=120, t=30, l=10, r=10),
     )
 
     st.plotly_chart(fig, use_container_width=True)
