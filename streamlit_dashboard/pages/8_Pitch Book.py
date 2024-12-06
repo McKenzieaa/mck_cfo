@@ -698,7 +698,7 @@ def plot_external_driver(selected_indicators):
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
     fig.update_layout(
-        title='',  # No title specified
+        title='Percent Change',  # No title specified
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title=''),
         hovermode='x',
