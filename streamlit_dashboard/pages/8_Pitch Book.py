@@ -700,7 +700,7 @@ def plot_external_driver(selected_indicators):
     fig.update_layout(
         title='',  # No title specified
         xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title='Percent Change'),
+        yaxis=dict(title=''),
         hovermode='x',
         legend=dict(
             x=0.01,
