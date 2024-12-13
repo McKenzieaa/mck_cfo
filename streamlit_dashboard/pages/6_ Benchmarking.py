@@ -117,8 +117,6 @@ if selected_industry:
     st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
 
-
-# Bar Chart for Income Statement
 # Bar Chart for Income Statement
 if not income_statement_df.empty:
     st.write("Income Statement Chart")
@@ -127,7 +125,7 @@ if not income_statement_df.empty:
 
     income_chart = px.bar(
         income_statement_df,
-        x="LineItems",  # Use LineItems for x-axis
+        x=income_statement_df['LineItems'],  # Use LineItems for x-axis
         y=["RMA Percent", "Public Comp Percent"],  # Y-axis: Percentages for RMA and Public Comps
         title="Income Statement Comparison",
         labels={"value": "Percentage", "LineItems": "Items"},  # Axis labels
