@@ -6,6 +6,7 @@ import s3fs  # For accessing S3 data
 from io import BytesIO
 from pptx import Presentation
 from pptx.util import Inches
+import plotly.express as px
 
 storage_options = {
         'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
@@ -114,6 +115,44 @@ if selected_industry:
 
     st.write("Balance Sheet")
     st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
+
+
+
+# Bar Chart for Income Statement
+if not income_statement_df.empty:
+    st.write("Income Statement Chart")
+    income_chart = px.bar(
+        income_statement_df,
+        x="LineItems",
+        y=["RMA Percent", "Public Comp Percent"],
+        title="Income Statement Comparison",
+        labels={"value": "Percentage", "LineItems": "Items"},
+        barmode="group"
+    )
+    income_chart.update_layout(xaxis_tickangle=45)
+    st.plotly_chart(income_chart, use_container_width=True)
+
+# Bar Chart for Balance Sheet
+if not balance_sheet_df.empty:
+    st.write("Balance Sheet Chart")
+    # Grouping Balance Sheet items by Assets and Liabilities & Equity
+    balance_sheet_df['Category'] = balance_sheet_df['LineItems'].apply(
+        lambda x: "Assets" if x in ["Cash", "Accounts Receivables", "Inventories", "Fixed Assets", "PPE", "Total Assets"]
+        else "Liabilities & Equity"
+    )
+
+    balance_chart = px.bar(
+        balance_sheet_df,
+        x="LineItems",
+        y=["RMA Percent", "Public Comp Percent"],
+        color="Category",
+        title="Balance Sheet Comparison",
+        labels={"value": "Percentage", "LineItems": "Items"},
+        barmode="group"
+    )
+    balance_chart.update_layout(xaxis_tickangle=45)
+    st.plotly_chart(balance_chart, use_container_width=True)
+
 
         # Function to create and download PowerPoint presentation
 def create_ppt(income_df, balance_df):
