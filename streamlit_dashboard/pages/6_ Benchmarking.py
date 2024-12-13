@@ -123,15 +123,15 @@ if not income_statement_df.empty:
     st.write("Income Statement Chart")
     income_chart = px.bar(
         income_statement_df,
-        x="LineItems",
-        y=["RMA Percent", "Public Comp Percent"],
+        x="LineItems",  # X-axis: Line Items from Income Statement
+        y=["RMA Percent", "Public Comp Percent"],  # Y-axis: Percentages for RMA and Public Comps
         title="Income Statement Comparison",
-        labels={"value": "Percentage", "LineItems": "Items"},
-        barmode="group"
+        labels={"value": "Percentage", "LineItems": "Items"},  # Axis labels
+        barmode="group"  # Group bars side by side
     )
-    income_chart.update_layout(xaxis_tickangle=45)
+    income_chart.update_layout(xaxis_tickangle=45)  # Tilt x-axis labels for readability
     st.plotly_chart(income_chart, use_container_width=True)
-
+    
 # Bar Chart for Balance Sheet
 if not balance_sheet_df.empty:
     st.write("Balance Sheet Chart")
