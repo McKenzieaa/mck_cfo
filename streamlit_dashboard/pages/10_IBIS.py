@@ -45,7 +45,7 @@ def main():
 
     # Multi-select dropdown for industries
     industries = data['Industry'].unique()
-    selected_industries = st.multiselect("Select Industries", industries, default=industries)
+    selected_industries = st.multiselect("Select Industries", industries, default="Shoe Repair")
 
     if not selected_industries:
         st.warning("Please select at least one industry.")
@@ -54,36 +54,20 @@ def main():
     # Filter data based on selected industries
     filtered_data = data[data['Industry'].isin(selected_industries)]
 
-    # Debugging: Show filtered data structure
-    st.write("Filtered Data Preview:", filtered_data.head())
+    # Generate bar chart with x-axis = "Year", y-axis = "Value", and Legend = "Business"
+    if "Year" in filtered_data.columns and "Value" in filtered_data.columns and "Category" in filtered_data.columns:
+        st.subheader("Bar Chart for Yearly Values by Business")
+        fig = px.bar(
+            filtered_data,
+            x="Year",
+            y="Value",
+            color="Business",
+            barmode="group",
+            title="Yearly Values by Business"
+        )
+        st.plotly_chart(fig)
+    else:
+        st.error("The required columns ('Year', 'Value', 'Business') are not present in the data.")
 
-    # Check if required columns exist and have correct types
-    required_columns = ["Year", "Value", "Business"]
-    if not all(col in filtered_data.columns for col in required_columns):
-        st.error(f"Required columns {required_columns} are missing in the data.")
-        return
-
-    # Ensure 'Year' and 'Value' are of correct types
-    try:
-        filtered_data["Year"] = pd.to_datetime(filtered_data["Year"], errors="coerce").dt.year
-        filtered_data["Value"] = pd.to_numeric(filtered_data["Value"], errors="coerce")
-    except Exception as e:
-        st.error(f"Error processing data types: {e}")
-        return
-
-    # Check for null values after conversion
-    if filtered_data["Year"].isnull().any() or filtered_data["Value"].isnull().any():
-        st.error("Null values found in 'Year' or 'Value' after type conversion. Please check your data.")
-        return
-
-    # Generate bar chart
-    st.subheader("Bar Chart for Yearly Values by Business")
-    fig = px.bar(
-        filtered_data.dropna(subset=["Year", "Value"]),
-        x="Year",
-        y="Value",
-        color="Business",
-        barmode="group",
-        title="Yearly Values by Business"
-    )
-    st.plotly_chart(fig)
+if __name__ == "__main__":
+    main()
