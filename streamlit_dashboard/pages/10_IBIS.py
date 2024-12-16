@@ -54,20 +54,15 @@ def main():
     # Filter data based on selected industries
     filtered_data = data[data['Industry'].isin(selected_industries)]
 
-    # Generate bar chart with x-axis = "Year", y-axis = "Value", and Legend = "Business"
-    if "Year" in filtered_data.columns and "Value" in filtered_data.columns and "Category" in filtered_data.columns:
-        st.subheader("Bar Chart for Yearly Values by Business")
-        fig = px.bar(
-            filtered_data,
-            x="Year",
-            y="Value",
-            color="Business",
-            barmode="group",
-            title="Yearly Values by Business"
-        )
-        st.plotly_chart(fig)
-    else:
-        st.error("The required columns ('Year', 'Value', 'Business') are not present in the data.")
-
+    fig = px.bar(
+        filtered_data.dropna(subset=["Year", "Value"]),
+        x="Year",
+        y="Value",
+        color="Business",
+        barmode="group",
+        title="Yearly Values by Business"
+    )
+    st.plotly_chart(fig)
+    
 if __name__ == "__main__":
     main()
