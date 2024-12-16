@@ -84,7 +84,7 @@ def main():
             filtered_data,
             x="Year",
             y="Value",
-            color="Category",
+            color=None,  # Remove legend
             barmode="group",
             title="Yearly Values by Category"
         )
