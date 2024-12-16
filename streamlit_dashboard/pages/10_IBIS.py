@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import mysql.connector
 import plotly.express as px
-import plotly.graph_objects as go
 
 # Load MySQL credentials from Streamlit secrets
 host = st.secrets["mysql"]["host"]
@@ -44,11 +43,9 @@ def main():
         st.warning("No data found in the 'ibis_report' table.")
         return
 
-    # Multi-select dropdown for industries with default value "Soyabean Farming"
+    # Multi-select dropdown for industries
     industries = data['Industry'].unique()
-    # Set "Soyabean Farming" as the default if it exists in the list
-    default_industry = ["Soyabean Farming"] if "Soyabean Farming" in industries else []
-    selected_industries = st.multiselect("Select Industries", industries, default=default_industry)
+    selected_industries = st.multiselect("Select Industries", industries)
 
     if not selected_industries:
         st.warning("Please select at least one industry.")
@@ -84,62 +81,29 @@ def main():
     # Fill missing values with zeros (or another strategy)
     filtered_data.fillna({"Value": 0}, inplace=True)
 
-    # Group data by Year and Category, then calculate the average of 'Value'
+    # Group data by Year and Category, then sum 'Value'
     grouped_data = filtered_data.groupby(["Year", "Category"], as_index=False).agg({"Value": "mean"})
-
-    # Calculate the "Change" in value from the previous year for each category
-    grouped_data["Change"] = grouped_data.groupby("Category")["Value"].diff().fillna(0)
 
     # Unique categories
     categories = grouped_data['Category'].unique()
 
-    # Dropdown for category selection
-    selected_category = st.selectbox("Select a Category", categories)
-
-    if selected_category:
-        # Filter data based on selected category
-        category_data = grouped_data[grouped_data['Category'] == selected_category]
-
-        # Generate bar chart for average value
-        st.subheader(f"Bar Chart for Category: {selected_category}")
+    # Loop through categories to create different charts
+    for category in categories:
+        st.subheader(f"Bar Chart for Category: {category}")
+        category_data = grouped_data[grouped_data['Category'] == category]
+        
         try:
             fig = px.bar(
                 category_data,
                 x="Year",
                 y="Value",
-                title=f"Yearly Values for Category: {selected_category}",
-                labels={"Value": "Average Value", "Year": "Year"},
-                template="plotly_dark"  # Optional styling for charts
+                title=f"Yearly Values for Category: {category}",
+                labels={"Value": "Total Value", "Year": "Year"},
+                template="plotly_white"  # Optional styling for charts
             )
             st.plotly_chart(fig)
-
-            # Generate line chart for change in value
-            st.subheader(f"Line Chart for Change in Value: {selected_category}")
-            try:
-                line_fig = go.Figure()
-
-                line_fig.add_trace(go.Scatter(
-                    x=category_data['Year'],
-                    y=category_data['Change'],
-                    mode='lines+markers',
-                    name='Change in Value',
-                    line=dict(color='red', width=2)
-                ))
-
-                line_fig.update_layout(
-                    title=f"Change in Value for Category: {selected_category}",
-                    xaxis_title="Year",
-                    yaxis_title="Change in Value",
-                    template="plotly_dark"
-                )
-
-                st.plotly_chart(line_fig)
-            except Exception as e:
-                st.error(f"Error creating the line chart for {selected_category}: {e}")
-                st.write("Debugging Data:", category_data)
-
         except ValueError as e:
-            st.error(f"Error creating the bar chart for {selected_category}: {e}")
+            st.error(f"Error creating the bar chart for {category}: {e}")
             st.write("Debugging Data:", category_data)
 
 if __name__ == "__main__":
