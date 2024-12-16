@@ -1503,19 +1503,14 @@ with st.expander("IBIS"):
     industry = st.selectbox("Select Industry", industry_options)  # Dropdown for industries
 
     if industry:
-        # Fetch data for the selected industry
         df_selected = get_data(industry)
-
         if not df_selected.empty:
-            # Create category charts for the selected industry
             ibischarts = create_category_charts(df_selected)
-
-            # Display the charts
             for chart in ibischarts:
                 st.plotly_chart(chart, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
-            
+
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
 
