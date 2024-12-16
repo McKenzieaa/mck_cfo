@@ -43,9 +43,11 @@ def main():
         st.warning("No data found in the 'ibis_report' table.")
         return
 
-    # Multi-select dropdown for industries
+    # Multi-select dropdown for industries with default value "Soyabean Farming"
     industries = data['Industry'].unique()
-    selected_industries = st.multiselect("Select Industries", industries, default=list(industries))
+    # Set "Soyabean Farming" as the default if it exists in the list
+    default_industry = ["Soyabean Farming"] if "Soyabean Farming" in industries else []
+    selected_industries = st.multiselect("Select Industries", industries, default=default_industry)
 
     if not selected_industries:
         st.warning("Please select at least one industry.")
