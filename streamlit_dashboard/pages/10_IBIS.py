@@ -48,6 +48,9 @@ def get_data(industry):
 # Function to create separate charts for each category
 def create_category_charts(df):
     category_charts = []
+
+    bar_color = '#032649'
+    line_color = '#EB8928' 
     
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
@@ -57,10 +60,10 @@ def create_category_charts(df):
         
         # Create a bar chart with a line showing the change for this category
         fig = px.bar(category_data, x='Year', y='Value', color='Category', title=f"{category} - Value vs Change",
-                     labels={'Value': 'Value', 'Year': 'Year'})
+                     labels={'Value': 'Value', 'Year': 'Year'},color_discrete_sequence=[bar_color])
         
         # Add a line for the change percentage for this category
-        fig.add_scatter(x=category_data['Year'], y=df['Change'], mode='lines', name=f'{category} Change')
+        fig.add_scatter(x=category_data['Year'], y=df['Change'], mode='lines', name=f'{category} Change',line=dict(color=line_color))
 
         category_charts.append(fig)
     
