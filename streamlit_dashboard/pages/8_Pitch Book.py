@@ -599,6 +599,122 @@ df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
+def get_industries():
+        host = st.secrets["mysql"]["host"]
+        user = st.secrets["mysql"]["user"]
+        password = st.secrets["mysql"]["password"]
+        database = st.secrets["mysql"]["database"]
+
+        # Connect to the database
+        connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database
+        )
+
+        # Query to get distinct industries
+        query = "SELECT DISTINCT Industry FROM ibis_report"
+        df = pd.read_sql(query, connection)
+        connection.close()
+        return df
+
+    # Function to get data for the selected industry
+def get_data(industry):
+        host = st.secrets["mysql"]["host"]
+        user = st.secrets["mysql"]["user"]
+        password = st.secrets["mysql"]["password"]
+        database = st.secrets["mysql"]["database"]
+
+        # Connect to the database
+        connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database
+        )
+
+        # Query to get data for the selected industry
+        query = f"SELECT * FROM ibis_report WHERE Industry = '{industry}'"
+        df = pd.read_sql(query, connection)
+        connection.close()
+        return df
+
+def create_category_charts(df):
+        category_charts = []
+
+        bar_color = '#032649'
+        line_color = '#EB8928'
+
+        for category in df['Category'].unique():
+            category_data = df[df['Category'] == category]
+            
+            # Calculate the change for the category
+            category_data['Change'] = category_data['Value'].pct_change() * 100
+            
+            # Get the last value for each category
+            last_value = category_data['Value'].iloc[-1]
+            last_change = category_data['Change'].iloc[-1]
+
+            # Create a subplot with secondary y-axis
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+            # Add bar chart for 'Value' on the primary y-axis
+            fig.add_trace(
+                go.Bar(
+                    x=category_data['Year'],
+                    y=category_data['Value'],
+                    name='Value',
+                    marker_color=bar_color,
+                    text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
+                    textposition="outside"  # Place text outside the bars
+                ),
+                secondary_y=False
+            )
+
+            # Add line chart for 'Change' on the secondary y-axis
+            fig.add_trace(
+                go.Scatter(
+                    x=category_data['Year'],
+                    y=category_data['Change'],
+                    name='Change (%)',
+                    mode='lines+markers',
+                    line=dict(color=line_color),
+                    text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
+                    textposition="top center"  # Place text above the last marker
+                ),
+                secondary_y=True
+            )
+
+            # Update axis titles
+            fig.update_layout(
+                # title_text=f"{category} - Value vs Change",
+                xaxis_title="Year",
+                yaxis_title="Value",
+            )
+
+            # Set secondary y-axis title
+            fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
+            fig.update_yaxes(title_text="Change (%)", secondary_y=True)
+
+            # Update the legend position (upper-left)
+            fig.update_layout(
+                legend=dict(
+                    x=0, 
+                    y=1, 
+                    xanchor='left', 
+                    yanchor='top'
+                ),
+                yaxis=dict(showgrid=False),
+                margin=dict(l=50, r=50, t=50,b=50),height=400,width=600
+            )
+
+            category_charts.append(fig)
+
+        return category_charts
+
+
+
 def fetch_cpi_data(series_id, df_cleaned):
     selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
     selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-01']
@@ -1382,120 +1498,11 @@ with st.expander("Benchmarking"):
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
-def get_industries():
-        host = st.secrets["mysql"]["host"]
-        user = st.secrets["mysql"]["user"]
-        password = st.secrets["mysql"]["password"]
-        database = st.secrets["mysql"]["database"]
-
-        # Connect to the database
-        connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
-
-        # Query to get distinct industries
-        query = "SELECT DISTINCT Industry FROM ibis_report"
-        df = pd.read_sql(query, connection)
-        connection.close()
-        return df
-
-    # Function to get data for the selected industry
-def get_data(industry):
-        host = st.secrets["mysql"]["host"]
-        user = st.secrets["mysql"]["user"]
-        password = st.secrets["mysql"]["password"]
-        database = st.secrets["mysql"]["database"]
-
-        # Connect to the database
-        connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
-
-        # Query to get data for the selected industry
-        query = f"SELECT * FROM ibis_report WHERE Industry = '{industry}'"
-        df = pd.read_sql(query, connection)
-        connection.close()
-        return df
-
-def create_category_charts(df):
-        category_charts = []
-
-        bar_color = '#032649'
-        line_color = '#EB8928'
-
-        for category in df['Category'].unique():
-            category_data = df[df['Category'] == category]
-            
-            # Calculate the change for the category
-            category_data['Change'] = category_data['Value'].pct_change() * 100
-            
-            # Get the last value for each category
-            last_value = category_data['Value'].iloc[-1]
-            last_change = category_data['Change'].iloc[-1]
-
-            # Create a subplot with secondary y-axis
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-            # Add bar chart for 'Value' on the primary y-axis
-            fig.add_trace(
-                go.Bar(
-                    x=category_data['Year'],
-                    y=category_data['Value'],
-                    name='Value',
-                    marker_color=bar_color,
-                    text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
-                    textposition="outside"  # Place text outside the bars
-                ),
-                secondary_y=False
-            )
-
-            # Add line chart for 'Change' on the secondary y-axis
-            fig.add_trace(
-                go.Scatter(
-                    x=category_data['Year'],
-                    y=category_data['Change'],
-                    name='Change (%)',
-                    mode='lines+markers',
-                    line=dict(color=line_color),
-                    text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
-                    textposition="top center"  # Place text above the last marker
-                ),
-                secondary_y=True
-            )
-
-            # Update axis titles
-            fig.update_layout(
-                # title_text=f"{category} - Value vs Change",
-                xaxis_title="Year",
-                yaxis_title="Value",
-            )
-
-            # Set secondary y-axis title
-            fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
-            fig.update_yaxes(title_text="Change (%)", secondary_y=True)
-
-            # Update the legend position (upper-left)
-            fig.update_layout(
-                legend=dict(
-                    x=0, 
-                    y=1, 
-                    xanchor='left', 
-                    yanchor='top'
-                ),
-                yaxis=dict(showgrid=False),
-                margin=dict(l=50, r=50, t=50,b=50),height=400,width=600
-            )
-
-            category_charts.append(fig)
-
-        return category_charts
-
+    
+    df_industries = get_industries()
+    industry_options = df_industries["Industry"].tolist()
+    industry = st.selectbox("Select Industry", industry_options)
+    create_category_charts
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
 
