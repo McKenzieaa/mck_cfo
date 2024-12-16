@@ -105,6 +105,7 @@ def create_category_charts(df):
 
     return category_charts
 
+# Function to export charts to PowerPoint
 def export_charts_to_ppt(charts, filename="charts.pptx"):
     prs = Presentation()
 
@@ -127,8 +128,6 @@ def export_charts_to_ppt(charts, filename="charts.pptx"):
     ppt_buffer.seek(0)
     return ppt_buffer
 
-
-
 # Streamlit interface
 st.title("IBIS - Industry Analysis")
 
@@ -149,5 +148,17 @@ if not df.empty:
     # Display all charts
     for chart in charts:
         st.plotly_chart(chart)
+
+    # Add "Export to PowerPoint" button
+    if st.button("Export Charts to PowerPoint"):
+        ppt_buffer = export_charts_to_ppt(charts)
+
+        # Provide download link for PowerPoint
+        st.download_button(
+            label="Download PowerPoint",
+            data=ppt_buffer,
+            file_name="industry_charts.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        )
 else:
     st.write("No data available for the selected industry.")
