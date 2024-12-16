@@ -109,7 +109,7 @@ def main():
         st.plotly_chart(fig)
 
         # Calculate and display the Change in Value for each year
-        grouped_data["Change"] = grouped_data["Value"].diff()
+        grouped_data["Change"] = grouped_data["Value"]
 
         # Line chart for the change in values
         st.subheader(f"Change in Value for Category: {category}")
