@@ -92,7 +92,7 @@ def create_category_charts(df):
                 mode='lines+markers',
                 line=dict(color=line_color),
                 text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
-                textposition="inside"  # Place text above the last marker
+                textposition="top center"  # Place text above the last marker
             ),
             secondary_y=True
         )
