@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import mysql.connector
-import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 from pptx import Presentation
 from pptx.util import Inches
 import io
@@ -55,23 +56,53 @@ def create_category_charts(df):
     category_charts = []
 
     bar_color = '#032649'
-    line_color = '#EB8928' 
-    
+    line_color = '#EB8928'
+
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
         
-        # # Calculate the change for the category
-        # category_data['Change'] = category_data['Value'].pct_change() * 100
+        # Calculate the change for the category
+        category_data['Change'] = category_data['Value'].pct_change() * 100
         
-        # Create a bar chart with a line showing the change for this category
-        fig = px.bar(category_data, x='Year', y='Value', color='Category', title=f"{category} - Value vs Change",
-                     labels={'Value': 'Value', 'Year': 'Year'},color_discrete_sequence=[bar_color])
-        
-        # Add a line for the change percentage for this category
-        fig.add_scatter(x=category_data['Year'], y=df['Change'], mode='lines', name=f'{category} Change',line=dict(color=line_color))
+        # Create a subplot with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        # Add bar chart for 'Value' on the primary y-axis
+        fig.add_trace(
+            go.Bar(
+                x=category_data['Year'],
+                y=category_data['Value'],
+                name='Value',
+                marker_color=bar_color
+            ),
+            secondary_y=False
+        )
+
+        # Add line chart for 'Change' on the secondary y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=category_data['Year'],
+                y=category_data['Change'],
+                name='Change (%)',
+                mode='lines+markers',
+                line=dict(color=line_color)
+            ),
+            secondary_y=True
+        )
+
+        # Update axis titles
+        fig.update_layout(
+            title_text=f"{category} - Value vs Change",
+            xaxis_title="Year",
+            yaxis_title="Value",
+        )
+
+        # Set secondary y-axis title
+        fig.update_yaxes(title_text="Value", secondary_y=False)
+        fig.update_yaxes(title_text="Change (%)", secondary_y=True)
 
         category_charts.append(fig)
-    
+
     return category_charts
 
 def export_charts_to_ppt(charts, filename="charts.pptx"):
