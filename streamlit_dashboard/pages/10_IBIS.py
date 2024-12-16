@@ -45,7 +45,7 @@ def main():
 
     # Multi-select dropdown for industries
     industries = data['Industry'].unique()
-    selected_industries = st.multiselect("Select Industries", industries, default="Shoe Repair")
+    selected_industries = st.multiselect("Select Industries", industries, default=industries)
 
     if not selected_industries:
         st.warning("Please select at least one industry.")
@@ -54,19 +54,20 @@ def main():
     # Filter data based on selected industries
     filtered_data = data[data['Industry'].isin(selected_industries)]
 
-    # Generate bar charts for each category
-    categories = [col for col in data.columns if col not in ['Industry', 'Category']]
-    for category in categories:
-        st.subheader(f"Bar Chart for {category}")
+    # Generate bar chart with x-axis = "Year", y-axis = "Value", and Legend = "Business"
+    if "Year" in filtered_data.columns and "Value" in filtered_data.columns and "Business" in filtered_data.columns:
+        st.subheader("Bar Chart for Yearly Values by Business")
         fig = px.bar(
             filtered_data,
-            x="Category",
-            y=category,
-            color="Industry",
+            x="Year",
+            y="Value",
+            color="Business",
             barmode="group",
-            title=f"{category} by Category and Industry"
+            title="Yearly Values by Business"
         )
         st.plotly_chart(fig)
+    else:
+        st.error("The required columns ('Year', 'Value', 'Business') are not present in the data.")
 
 if __name__ == "__main__":
     main()
