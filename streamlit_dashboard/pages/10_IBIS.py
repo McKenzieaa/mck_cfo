@@ -115,7 +115,8 @@ def create_category_charts(df):
                 y=1, 
                 xanchor='left', 
                 yanchor='top'
-            )
+            ),
+            yaxis=dict(showgrid=False)
         )
 
         category_charts.append(fig)
