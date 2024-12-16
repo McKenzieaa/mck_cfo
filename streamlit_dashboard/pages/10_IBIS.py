@@ -39,14 +39,13 @@ def create_chart(df):
 
     return fig
 
-# Streamlit interface
+
 st.title("Industry Data Visualization")
 
-# Dropdown for industry selection
-industry_options = ["Industry 1", "Industry 2", "Industry 3"]  # Replace with actual industry names from your database
+df_industries = get_data()
+industry_options = df_industries["Industry"].tolist() 
 industry = st.selectbox("Select Industry", industry_options)
 
-# Get the data based on the selected industry
 df = get_data(industry)
 
 # Create the chart
