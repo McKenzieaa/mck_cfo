@@ -99,7 +99,7 @@ def main():
                 y="Value",
                 title=f"Yearly Values for Category: {category}",
                 labels={"Value": "Total Value", "Year": "Year"},
-                template="plotly_dark"  # Optional styling for charts
+                template="plotly_white"  # Optional styling for charts
             )
             st.plotly_chart(fig)
         except ValueError as e:
