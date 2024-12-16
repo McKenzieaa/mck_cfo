@@ -600,24 +600,24 @@ industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
 def get_industries():
-        host = st.secrets["mysql"]["host"]
-        user = st.secrets["mysql"]["user"]
-        password = st.secrets["mysql"]["password"]
-        database = st.secrets["mysql"]["database"]
+    host = st.secrets["mysql"]["host"]
+    user = st.secrets["mysql"]["user"]
+    password = st.secrets["mysql"]["password"]
+    database = st.secrets["mysql"]["database"]
 
         # Connect to the database
-        connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
+    connection = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
         )
 
         # Query to get distinct industries
-        query = "SELECT DISTINCT Industry FROM ibis_report"
-        df = pd.read_sql(query, connection)
-        connection.close()
-        return df
+    query = "SELECT DISTINCT Industry FROM ibis_report"
+    df_ibis = pd.read_sql(query, connection)
+    connection.close()
+    return df_ibis
 
     # Function to get data for the selected industry
 def get_data(industry):
@@ -1498,11 +1498,11 @@ with st.expander("Benchmarking"):
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
-    
     df_industries = get_industries()
     industry_options = df_industries["Industry"].tolist()
     industry = st.selectbox("Select Industry", industry_options)
-    create_category_charts
+    ibischarts = create_category_charts['category_charts']
+
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
 
