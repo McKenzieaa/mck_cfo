@@ -1382,7 +1382,7 @@ with st.expander("Benchmarking"):
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
-    def get_industries():
+def get_industries():
         host = st.secrets["mysql"]["host"]
         user = st.secrets["mysql"]["user"]
         password = st.secrets["mysql"]["password"]
@@ -1403,7 +1403,7 @@ with st.expander("IBIS"):
         return df
 
     # Function to get data for the selected industry
-    def get_data(industry):
+def get_data(industry):
         host = st.secrets["mysql"]["host"]
         user = st.secrets["mysql"]["user"]
         password = st.secrets["mysql"]["password"]
@@ -1423,7 +1423,7 @@ with st.expander("IBIS"):
         connection.close()
         return df
 
-    def create_category_charts(df):
+def create_category_charts(df):
         category_charts = []
 
         bar_color = '#032649'
