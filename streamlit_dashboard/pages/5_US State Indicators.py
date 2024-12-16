@@ -90,7 +90,7 @@ def download_csv(state_name, data_type):
         csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
-        csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
+        csv_data['observation_date'] = pd.to_datetime(csv_data['observation_date'])
         return csv_data
     else:
         st.error(f"Error downloading {data_type} data for {state_name}.")
@@ -145,6 +145,7 @@ def plot_unemployment_labour_chart(state_name):
     labour_data = download_csv(state_name, "labour")
 
     if unemployment_data is not None and labour_data is not None:
+        unemployment_data = unemployment_data.rename(columns={'observation_date': 'DATE'})
         unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
         labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
 

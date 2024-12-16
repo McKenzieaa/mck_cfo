@@ -959,13 +959,14 @@ def download_csv(state_name, data_type):
         return None
 
     data_id = data_ids["ur_id"] if data_type == "unemployment" else data_ids["labour_id"]
-    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={data_id}&cosd=1976-01-01&coed={today}"
+    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={data_id}&cosd=1976-01-01"
 
     response = requests.get(url)
     if response.status_code == 200:
         csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
+        csv_data_data = csv_data.rename(columns={'observation_date': 'DATE'})
         csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
         return csv_data
     else:
