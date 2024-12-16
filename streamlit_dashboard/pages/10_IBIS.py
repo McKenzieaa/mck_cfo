@@ -126,26 +126,41 @@ def create_category_charts(df):
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(charts, filename="charts.pptx"):
     prs = Presentation()
-
+    
+    # Define chart positions (in Inches)
+    positions = [
+        {"left": Inches(1), "top": Inches(1), "width": Inches(6), "height": Inches(3)},  # Position for Chart 1
+        {"left": Inches(1), "top": Inches(4.5), "width": Inches(6), "height": Inches(3)},  # Position for Chart 2
+        {"left": Inches(7.5), "top": Inches(1), "width": Inches(6), "height": Inches(3)},  # Position for Chart 3
+        {"left": Inches(7.5), "top": Inches(4.5), "width": Inches(6), "height": Inches(3)},  # Position for Chart 4
+    ]
+    
+    # Iterate through charts and add them to slides
     for i, chart in enumerate(charts):
         slide = prs.slides.add_slide(prs.slide_layouts[5])  # Use a blank slide layout
-        title = slide.shapes.title
-        title.text = f"Chart {i + 1}"
-
-        # Save the chart as an image in-memory
+        
+        # Create an in-memory image of the chart
         image_stream = io.BytesIO()
         chart.write_image(image_stream, format='png')
         image_stream.seek(0)
-
-        # Add the image to the slide
-        slide.shapes.add_picture(image_stream, Inches(1), Inches(1), width=Inches(8), height=Inches(4.5))
-
+        
+        # Define position for the chart (use positions cyclically if there are more charts than positions defined)
+        pos = positions[i % len(positions)]
+        
+        # Add the chart image to the slide
+        slide.shapes.add_picture(
+            image_stream,
+            pos["left"],
+            pos["top"],
+            width=pos["width"],
+            height=pos["height"]
+        )
+    
     # Save the PowerPoint file to a buffer
     ppt_buffer = io.BytesIO()
     prs.save(ppt_buffer)
     ppt_buffer.seek(0)
     return ppt_buffer
-
 # Streamlit interface
 st.title("IBIS - Industry Analysis")
 
