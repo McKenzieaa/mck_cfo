@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import mysql.connector
 import plotly.express as px
+from pptx import Presentation
+from pptx.util import Inches
+import io
 
 # Function to get distinct industries
 def get_industries():
@@ -69,8 +72,32 @@ def create_category_charts(df):
     
     return category_charts
 
+def export_charts_to_ppt(charts, filename="charts.pptx"):
+    prs = Presentation()
+
+    for i, chart in enumerate(charts):
+        slide = prs.slides.add_slide(prs.slide_layouts[5])  # Use a blank slide layout
+        title = slide.shapes.title
+        title.text = f"Chart {i + 1}"
+
+        # Save the chart as an image in-memory
+        image_stream = io.BytesIO()
+        chart.write_image(image_stream, format='png')
+        image_stream.seek(0)
+
+        # Add the image to the slide
+        slide.shapes.add_picture(image_stream, Inches(1), Inches(1), width=Inches(8), height=Inches(4.5))
+
+    # Save the PowerPoint file to a buffer
+    ppt_buffer = io.BytesIO()
+    prs.save(ppt_buffer)
+    ppt_buffer.seek(0)
+    return ppt_buffer
+
+
+
 # Streamlit interface
-st.title("Industry Data Visualization")
+st.title("IBIS - Industry Analysis")
 
 # Get the list of industries
 df_industries = get_industries()
