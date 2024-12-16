@@ -149,12 +149,17 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statitics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name} ", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "IBIS", category_charts, slide_number=7, positions = [
+    # Add category charts to slide 7
+    slide = ppt.slides[7]
+    positions = [
         {"left": Inches(1), "top": Inches(1), "width": Inches(6), "height": Inches(3)},  # Position for Chart 1
         {"left": Inches(1), "top": Inches(4.5), "width": Inches(6), "height": Inches(3)},  # Position for Chart 2
         {"left": Inches(7.5), "top": Inches(1), "width": Inches(6), "height": Inches(3)},  # Position for Chart 3
         {"left": Inches(7.5), "top": Inches(4.5), "width": Inches(6), "height": Inches(3)},  # Position for Chart 4
-    ])
+    ]
+
+    for chart, pos in zip(category_charts, positions):
+        update_figure_slide(ppt, "IBIS Chart", chart, slide_number=7, **pos)
 
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9] 
@@ -1510,7 +1515,7 @@ with st.expander("IBIS"):
 
             for i, chart in enumerate(ibischarts):
                 category_name = df_selected['Category'].unique()[i]
-                st.subheader(f"Category: {category_name}")
+                st.subheader(f"{category_name}")
                 st.plotly_chart(chart, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
