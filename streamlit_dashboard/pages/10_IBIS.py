@@ -3,8 +3,7 @@ import pandas as pd
 import mysql.connector
 import plotly.express as px
 
-# Connect to the MySQL database using credentials from st.secrets
-def get_data(industry):
+def get_data():
     host = st.secrets["mysql"]["host"]
     user = st.secrets["mysql"]["user"]
     password = st.secrets["mysql"]["password"]
@@ -18,7 +17,8 @@ def get_data(industry):
         database=database
     )
 
-    query = f"SELECT * FROM ibis_report WHERE industry = '{industry}'"
+    # Query to get distinct industries
+    query = "SELECT DISTINCT Industry FROM ibis_report"
     df = pd.read_sql(query, connection)
     connection.close()
     return df
