@@ -49,37 +49,34 @@ def create_category_charts(df):
     category_charts = []
     
     # Define the colors
-    bar_color = '#032649'  # Dark blue for bars
-    line_color = '#EB8928'  # Orange for lines
+    bar_color = '#032649'
+    line_color = '#EB8928'
     
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
 
-        # Create a bar chart with a dynamic x-axis and custom color
         fig = px.bar(
             category_data, 
             x='Year', 
             y='Value', 
-            color='Category',  # Still allow category distinction for color
+            color='Category',
             title=f"{category} - Value vs Change",
             labels={'Value': 'Value', 'Year': 'Year'},
-            color_discrete_sequence=[bar_color]  # Set dark blue color for bars
+            color_discrete_sequence=[bar_color]
         )
-        
-        # Add a line for the change percentage with the specified orange color
+
         fig.add_scatter(
             x=category_data['Year'], 
             y=df['Change'], 
             mode='lines', 
             name=f'{category} Change',
-            line=dict(color=line_color)  # Set orange color for the line
+            line=dict(color=line_color)
         )
-        
-        # Ensure x-axis is dynamic (auto)
+
         fig.update_layout(
-            xaxis=dict(automargin=True, title='Year'),  # Ensure x-axis labels adjust dynamically
+            xaxis=dict(automargin=True, title='Year'),
             yaxis=dict(title='Value'),
-            title=dict(x=0.5),  # Center-align the chart title
+            title=dict(x=0.5),
         )
 
         category_charts.append((category, fig))
