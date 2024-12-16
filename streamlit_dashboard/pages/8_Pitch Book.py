@@ -197,10 +197,10 @@ df_unemp['month'] = pd.to_numeric(time_split_unemp[1], errors='coerce').astype('
 
 # Population Data
 df_pop = pd.read_csv(url_pop)
-df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
-df_pop['date'] = pd.to_datetime(df_pop['date'])
-df_pop['year'] = df_pop['date'].dt.year
-df_pop['month'] = df_pop['date'].dt.month
+df_pop = df_pop.rename(columns={'DATE': 'Date', 'POPTHM': 'population'})
+df_pop['Date'] = pd.to_datetime(df_pop['Date'])
+df_pop['year'] = df_pop['Date'].dt.year
+df_pop['month'] = df_pop['Date'].dt.month
 
 # External Driver Data
 external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles.csv"
@@ -1490,7 +1490,7 @@ with st.expander("IBIS"):
                     yanchor='top'
                 ),
                 yaxis=dict(showgrid=False),
-                margin=dict(l=10, r=10, t=30,b=50),height=400,width=600
+                margin=dict(l=50, r=50, t=50,b=50),height=400,width=600
             )
 
             category_charts.append(fig)
