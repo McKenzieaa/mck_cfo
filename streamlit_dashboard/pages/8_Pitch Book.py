@@ -191,7 +191,7 @@ df_unemp['month'] = pd.to_numeric(time_split_unemp[1], errors='coerce').astype('
 
 # Population Data
 df_pop = pd.read_csv(url_pop)
-df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
+df_pop = df_pop.rename(columns={'observation_date': 'date', 'POPTHM': 'population'})
 df_pop['date'] = pd.to_datetime(df_pop['date'])
 df_pop['year'] = df_pop['date'].dt.year
 df_pop['month'] = df_pop['date'].dt.month
