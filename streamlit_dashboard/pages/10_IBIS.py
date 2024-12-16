@@ -63,12 +63,12 @@ def create_category_charts(df):
         # Calculate the change for the category
         category_data['Change'] = category_data['Value'].pct_change() * 100
         
-        # Create a subplot with secondary y-axis
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-        # Get the last value for displaying in the data label
+        # Get the last value for each category
         last_value = category_data['Value'].iloc[-1]
         last_change = category_data['Change'].iloc[-1]
+
+        # Create a subplot with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         # Add bar chart for 'Value' on the primary y-axis
         fig.add_trace(
@@ -77,8 +77,8 @@ def create_category_charts(df):
                 y=category_data['Value'],
                 name='Value',
                 marker_color=bar_color,
-                text=[f"{v}" if i != len(category_data) - 1 else f"{v} (Last)" for i, v in enumerate(category_data['Value'])],  # Add last value label
-                hoverinfo='text+name'
+                text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
+                textposition="outside"  # Place text outside the bars
             ),
             secondary_y=False
         )
@@ -91,8 +91,8 @@ def create_category_charts(df):
                 name='Change (%)',
                 mode='lines+markers',
                 line=dict(color=line_color),
-                text=[f"{c:.2f}%" if i != len(category_data) - 1 else f"{c:.2f}% (Last)" for i, c in enumerate(category_data['Change'])],  # Add last change label
-                hoverinfo='text+name'
+                text=[f"{change:.2f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
+                textposition="top center"  # Place text above the last marker
             ),
             secondary_y=True
         )
@@ -121,7 +121,6 @@ def create_category_charts(df):
         category_charts.append(fig)
 
     return category_charts
-
 
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(charts, filename="charts.pptx"):
