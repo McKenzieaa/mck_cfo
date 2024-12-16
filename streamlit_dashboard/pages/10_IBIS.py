@@ -149,6 +149,9 @@ if not df.empty:
     for chart in charts:
         st.plotly_chart(chart)
 
+    # Display debug message
+    st.write("Charts are ready for export!")
+
     # Add "Export to PowerPoint" button
     if st.button("Export Charts to PowerPoint"):
         ppt_buffer = export_charts_to_ppt(charts)
