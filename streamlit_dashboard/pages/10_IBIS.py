@@ -89,23 +89,27 @@ def main():
     # Unique categories
     categories = grouped_data['Category'].unique()
 
-    # Loop through categories to create different charts
-    for category in categories:
-        st.subheader(f"Bar Chart for Category: {category}")
-        category_data = grouped_data[grouped_data['Category'] == category]
-        
+    # Dropdown for category selection
+    selected_category = st.selectbox("Select a Category", categories)
+
+    if selected_category:
+        # Filter data based on selected category
+        category_data = grouped_data[grouped_data['Category'] == selected_category]
+
+        # Generate bar chart based on selected category
+        st.subheader(f"Bar Chart for Category: {selected_category}")
         try:
             fig = px.bar(
                 category_data,
                 x="Year",
                 y="Value",
-                title=f"Yearly Values for Category: {category}",
+                title=f"Yearly Values for Category: {selected_category}",
                 labels={"Value": "Total Value", "Year": "Year"},
                 template="plotly_dark"  # Optional styling for charts
             )
             st.plotly_chart(fig)
         except ValueError as e:
-            st.error(f"Error creating the bar chart for {category}: {e}")
+            st.error(f"Error creating the bar chart for {selected_category}: {e}")
             st.write("Debugging Data:", category_data)
 
 if __name__ == "__main__":
