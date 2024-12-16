@@ -3,7 +3,8 @@ import pandas as pd
 import mysql.connector
 import plotly.express as px
 
-def get_data():
+# Function to get distinct industries
+def get_industries():
     host = st.secrets["mysql"]["host"]
     user = st.secrets["mysql"]["user"]
     password = st.secrets["mysql"]["password"]
@@ -19,6 +20,27 @@ def get_data():
 
     # Query to get distinct industries
     query = "SELECT DISTINCT Industry FROM ibis_report"
+    df = pd.read_sql(query, connection)
+    connection.close()
+    return df
+
+# Function to get data for the selected industry
+def get_data(industry):
+    host = st.secrets["mysql"]["host"]
+    user = st.secrets["mysql"]["user"]
+    password = st.secrets["mysql"]["password"]
+    database = st.secrets["mysql"]["database"]
+
+    # Connect to the database
+    connection = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+    )
+
+    # Query to get data for the selected industry
+    query = f"SELECT * FROM ibis_report WHERE Industry = '{industry}'"
     df = pd.read_sql(query, connection)
     connection.close()
     return df
@@ -39,13 +61,17 @@ def create_chart(df):
 
     return fig
 
-
+# Streamlit interface
 st.title("Industry Data Visualization")
 
-df_industries = get_data()
+# Get the list of industries
+df_industries = get_industries()
 industry_options = df_industries["Industry"].tolist() 
+
+# Dropdown for industry selection
 industry = st.selectbox("Select Industry", industry_options)
 
+# Get the data for the selected industry
 df = get_data(industry)
 
 # Create the chart
