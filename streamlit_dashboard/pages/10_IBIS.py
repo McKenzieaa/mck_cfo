@@ -55,7 +55,7 @@ def main():
     filtered_data = data[data['Industry'].isin(selected_industries)]
 
     # Generate bar chart with x-axis = "Year", y-axis = "Value", and Legend = "Business"
-    if "Year" in filtered_data.columns and "Value" in filtered_data.columns and "Business" in filtered_data.columns:
+    if "Year" in filtered_data.columns and "Value" in filtered_data.columns and "Category" in filtered_data.columns:
         st.subheader("Bar Chart for Yearly Values by Business")
         fig = px.bar(
             filtered_data,
