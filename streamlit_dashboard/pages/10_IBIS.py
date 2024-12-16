@@ -45,7 +45,10 @@ def main():
 
     # Multi-select dropdown for industries
     industries = data['Industry'].unique()
-    selected_industries = st.multiselect("Select Industries", industries, default=["Soyabean Farming"])
+
+    # Ensure that the default industry exists in the list
+    default_industry = "Soyabean Farming" if "Soyabean Farming" in industries else industries[0]
+    selected_industries = st.multiselect("Select Industries", industries, default=[default_industry])
 
     if not selected_industries:
         st.warning("Please select at least one industry.")
