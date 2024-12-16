@@ -54,7 +54,7 @@ def create_category_charts(df):
     
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
-        category_data['Change'] = df['Change'] + "%"
+        category_data['Change'] = df['Change'] 
         
         # Create a bar chart with a dynamic x-axis and custom color
         fig = px.bar(
