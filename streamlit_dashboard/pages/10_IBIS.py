@@ -95,7 +95,6 @@ def create_category_charts(df):
             title_text=f"{category} - Value vs Change",
             xaxis_title="Year",
             yaxis_title="Value",
-            labels={'Value': 'Value', 'Year': 'Year'}
         )
 
         # Set secondary y-axis title
