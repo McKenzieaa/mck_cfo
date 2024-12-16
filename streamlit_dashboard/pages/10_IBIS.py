@@ -51,7 +51,6 @@ def get_data(industry):
     connection.close()
     return df
 
-# Function to create separate charts for each category
 def create_category_charts(df):
     category_charts = []
 
@@ -67,13 +66,19 @@ def create_category_charts(df):
         # Create a subplot with secondary y-axis
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
+        # Get the last value for displaying in the data label
+        last_value = category_data['Value'].iloc[-1]
+        last_change = category_data['Change'].iloc[-1]
+
         # Add bar chart for 'Value' on the primary y-axis
         fig.add_trace(
             go.Bar(
                 x=category_data['Year'],
                 y=category_data['Value'],
                 name='Value',
-                marker_color=bar_color
+                marker_color=bar_color,
+                text=[f"{v}" if i != len(category_data) - 1 else f"{v} (Last)" for i, v in enumerate(category_data['Value'])],  # Add last value label
+                hoverinfo='text+name'
             ),
             secondary_y=False
         )
@@ -85,7 +90,9 @@ def create_category_charts(df):
                 y=category_data['Change'],
                 name='Change (%)',
                 mode='lines+markers',
-                line=dict(color=line_color)
+                line=dict(color=line_color),
+                text=[f"{c:.2f}%" if i != len(category_data) - 1 else f"{c:.2f}% (Last)" for i, c in enumerate(category_data['Change'])],  # Add last change label
+                hoverinfo='text+name'
             ),
             secondary_y=True
         )
@@ -101,9 +108,20 @@ def create_category_charts(df):
         fig.update_yaxes(title_text="Value", secondary_y=False)
         fig.update_yaxes(title_text="Change (%)", secondary_y=True)
 
+        # Update the legend position (upper-left)
+        fig.update_layout(
+            legend=dict(
+                x=0, 
+                y=1, 
+                xanchor='left', 
+                yanchor='top'
+            )
+        )
+
         category_charts.append(fig)
 
     return category_charts
+
 
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(charts, filename="charts.pptx"):
