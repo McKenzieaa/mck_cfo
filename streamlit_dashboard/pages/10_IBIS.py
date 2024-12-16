@@ -45,38 +45,32 @@ def get_data(industry):
     connection.close()
     return df
 
+# Function to create separate charts for each category
 def create_category_charts(df):
     category_charts = []
     
-    # Define the colors
-    bar_color = '#032649'
-    line_color = '#EB8928'
-    
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
-
+        # category_data['Change'] = category_data['Value'].pct_change() * 100
+        
+        # Create a bar chart with a dynamic x-axis
         fig = px.bar(
             category_data, 
             x='Year', 
             y='Value', 
-            color='Category',
+            color='Category', 
             title=f"{category} - Value vs Change",
-            labels={'Value': 'Value', 'Year': 'Year'},
-            color_discrete_sequence=[bar_color]
+            labels={'Value': 'Value', 'Year': 'Year'}
         )
-
-        fig.add_scatter(
-            x=category_data['Year'], 
-            y=df['Change'], 
-            mode='lines', 
-            name=f'{category} Change',
-            line=dict(color=line_color)
-        )
-
+        
+        # Add a line for the change percentage for this category
+        fig.add_scatter(x=category_data['Year'], y=df['Change'], mode='lines', name=f'{category} Change')
+        
+        # Ensure x-axis is dynamic (auto)
         fig.update_layout(
-            xaxis=dict(automargin=True, title='Year'),
+            xaxis=dict(automargin=True, title='Year'),  # Ensure x-axis labels adjust dynamically
             yaxis=dict(title='Value'),
-            title=dict(x=0.5),
+            title=dict(x=0.5),  # Center-align the chart title
         )
 
         category_charts.append((category, fig))
