@@ -966,7 +966,7 @@ def download_csv(state_name, data_type):
         csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
-        csv_data_data = csv_data.rename(columns={'observation_date': 'DATE'})
+        csv_data = csv_data.rename(columns={'observation_date': 'DATE'})
         csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
         return csv_data
     else:

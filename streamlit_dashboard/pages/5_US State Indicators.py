@@ -147,6 +147,7 @@ def plot_unemployment_labour_chart(state_name):
     if unemployment_data is not None and labour_data is not None:
         unemployment_data = unemployment_data.rename(columns={'observation_date': 'DATE'})
         unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
+        labour_data = labour_data.rename(columns={'observation_date': 'DATE'})
         labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
 
         merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
