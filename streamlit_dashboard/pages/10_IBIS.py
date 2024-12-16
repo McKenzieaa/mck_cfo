@@ -77,21 +77,28 @@ def main():
         st.write("Null Values Preview:", filtered_data[filtered_data[["Year", "Value"]].isnull()])
         return
 
+    # Fill missing values with zeros or another appropriate strategy
+    filtered_data.fillna({"Value": 0}, inplace=True)
+
+    # Ensure that 'Year' and 'Value' are integer types for proper grouping
+    filtered_data["Year"] = filtered_data["Year"].astype(int)
+    
+    # Group data by Year and sum 'Value' (you can modify aggregation as needed)
+    grouped_data = filtered_data.groupby("Year", as_index=False).agg({"Value": "sum"})
+    
     # Generate bar chart
-    st.subheader("Bar Chart for Yearly Values by Category")
+    st.subheader("Bar Chart for Yearly Values")
     try:
         fig = px.bar(
-            filtered_data,
+            grouped_data,
             x="Year",
             y="Value",
-            color=None,  # Remove legend
-            barmode="group",
             title="Yearly Values by Category"
         )
         st.plotly_chart(fig)
     except ValueError as e:
         st.error(f"Error creating the bar chart: {e}")
-        st.write("Debugging Data:", filtered_data)
+        st.write("Debugging Data:", grouped_data)
 
 if __name__ == "__main__":
     main()
