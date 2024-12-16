@@ -54,8 +54,7 @@ def create_category_charts(df):
     
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
-        category_data['Change'] = df['Change'] 
-        
+
         # Create a bar chart with a dynamic x-axis and custom color
         fig = px.bar(
             category_data, 
@@ -70,7 +69,7 @@ def create_category_charts(df):
         # Add a line for the change percentage with the specified orange color
         fig.add_scatter(
             x=category_data['Year'], 
-            y=category_data['Change'], 
+            y=df['Change'], 
             mode='lines', 
             name=f'{category} Change',
             line=dict(color=line_color)  # Set orange color for the line
