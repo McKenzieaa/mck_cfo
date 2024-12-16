@@ -3,18 +3,33 @@ import pandas as pd
 import mysql.connector
 import plotly.express as px
 
+# Load MySQL credentials from Streamlit secrets
+host = st.secrets["mysql"]["host"]
+user = st.secrets["mysql"]["user"]
+password = st.secrets["mysql"]["password"]
+database = st.secrets["mysql"]["database"]
+
+# Function to establish MySQL connection
+def get_connection():
+    try:
+        return mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database
+        )
+    except mysql.connector.Error as e:
+        st.error(f"Error connecting to MySQL: {e}")
+        st.stop()
+
 # Function to fetch data from the MySQL table
 def fetch_data():
-    # Replace with your actual database connection details
-    connection = mysql.connector.connect(
-        host='your_host',
-        user='your_user',
-        password='your_password',
-        database='your_database'
-    )
+    connection = get_connection()
     query = "SELECT * FROM ibis_report"
-    data = pd.read_sql(query, connection)
-    connection.close()
+    try:
+        data = pd.read_sql(query, connection)
+    finally:
+        connection.close()
     return data
 
 # Streamlit App
@@ -30,18 +45,7 @@ def main():
 
     # Multi-select dropdown for industries
     industries = data['Industry'].unique()
-    default_industry = "Soyabean Farming"
-
-    # Check if the default industry exists in the options
-    if default_industry not in industries:
-        st.warning(f"Default industry '{default_industry}' not found in the available options.")
-        default_industry = None  # Set to None or handle as needed
-
-    selected_industries = st.multiselect(
-        "Select Industries",
-        industries,
-        default=[default_industry] if default_industry else []
-    )
+    selected_industries = st.multiselect("Select Industries", industries, default=["Soyabean Farming"])
 
     if not selected_industries:
         st.warning("Please select at least one industry.")
@@ -49,6 +53,9 @@ def main():
 
     # Filter data based on selected industries
     filtered_data = data[data['Industry'].isin(selected_industries)]
+
+    # Debugging: Show filtered data structure
+    st.write("Filtered Data Preview:", filtered_data.head())
 
     # Check for required columns
     required_columns = ["Year", "Value", "Category"]
@@ -67,6 +74,7 @@ def main():
     # Handle missing or null values
     if filtered_data[["Year", "Value"]].isnull().any().any():
         st.error("Null or invalid values detected in 'Year' or 'Value'. Please check your data.")
+        st.write("Null Values Preview:", filtered_data[filtered_data[["Year", "Value"]].isnull()])
         return
 
     # Dropdown for selecting industry
