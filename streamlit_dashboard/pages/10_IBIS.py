@@ -99,13 +99,13 @@ def create_category_charts(df):
 
         # Update axis titles
         fig.update_layout(
-            title_text=f"{category} - Value vs Change",
+            # title_text=f"{category} - Value vs Change",
             xaxis_title="Year",
             yaxis_title="Value",
         )
 
         # Set secondary y-axis title
-        fig.update_yaxes(title_text="Value", secondary_y=False)
+        fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
         fig.update_yaxes(title_text="Change (%)", secondary_y=True)
 
         # Update the legend position (upper-left)
