@@ -6,6 +6,8 @@ from pptx import Presentation
 from pptx.util import Inches
 import io
 
+st.set_page_config(page_title="IBIS-Industry Analysis", layout="wide")
+
 # Function to get distinct industries
 def get_industries():
     host = st.secrets["mysql"]["host"]
