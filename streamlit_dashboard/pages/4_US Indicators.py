@@ -33,12 +33,21 @@ time_split_unemp = df_unemp['time'].str.split('M', expand=True)
 df_unemp['year'] = pd.to_numeric(time_split_unemp[0], errors='coerce').astype('Int64')
 df_unemp['month'] = pd.to_numeric(time_split_unemp[1], errors='coerce').astype('Int64')
 
-# Population Data
+
 df_pop = pd.read_csv(url_pop)
-df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
-df_pop['date'] = pd.to_datetime(df_pop['date'])
-df_pop['year'] = df_pop['date'].dt.year
-df_pop['month'] = df_pop['date'].dt.month
+print("Columns in df_pop:", df_pop.columns)
+
+if 'DATE' in df_pop.columns and 'POPTHM' in df_pop.columns:
+    df_pop = df_pop.rename(columns={'DATE': 'date', 'POPTHM': 'population'})
+else:
+    raise ValueError("The expected columns 'DATE' and 'POPTHM' are not in the data. Check the source file.")
+
+if 'date' in df_pop.columns:
+    df_pop['date'] = pd.to_datetime(df_pop['date'])
+    df_pop['year'] = df_pop['date'].dt.year
+    df_pop['month'] = df_pop['date'].dt.month
+else:
+    raise ValueError("'date' column not found after renaming.")
 
 # External Driver Data
 external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles.csv"
