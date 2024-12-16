@@ -51,29 +51,18 @@ def create_category_charts(df):
     
     for category in df['Category'].unique():
         category_data = df[df['Category'] == category]
+        
+        # # Calculate the change for the category
         # category_data['Change'] = category_data['Value'].pct_change() * 100
         
-        # Create a bar chart with a dynamic x-axis
-        fig = px.bar(
-            category_data, 
-            x='Year', 
-            y='Value', 
-            color='Category', 
-            title=f"{category} - Value vs Change",
-            labels={'Value': 'Value', 'Year': 'Year'}
-        )
+        # Create a bar chart with a line showing the change for this category
+        fig = px.bar(category_data, x='Year', y='Value', color='Category', title=f"{category} - Value vs Change",
+                     labels={'Value': 'Value', 'Year': 'Year'})
         
         # Add a line for the change percentage for this category
         fig.add_scatter(x=category_data['Year'], y=df['Change'], mode='lines', name=f'{category} Change')
-        
-        # Ensure x-axis is dynamic (auto)
-        fig.update_layout(
-            xaxis=dict(automargin=True, title='Year'),  # Ensure x-axis labels adjust dynamically
-            yaxis=dict(title='Value'),
-            title=dict(x=0.5),  # Center-align the chart title
-        )
 
-        category_charts.append((category, fig))
+        category_charts.append(fig)
     
     return category_charts
 
