@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import mysql.connector
+import plotly.express as px
 
 # Function to fetch data from the MySQL table
 def fetch_data():
