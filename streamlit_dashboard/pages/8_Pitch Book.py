@@ -1498,15 +1498,19 @@ with st.expander("Benchmarking"):
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
-    df_industries = get_industries()  # Fetch industries
-    industry_options = df_industries["Industry"].tolist()  # List of industries
-    industry = st.selectbox("Select Industry", industry_options)  # Dropdown for industries
+    df_industries = get_industries() 
+    industry_options = df_industries["Industry"].tolist()
+    industry = st.selectbox("Select Industry", industry_options)
 
     if industry:
         df_selected = get_data(industry)
+
         if not df_selected.empty:
             ibischarts = create_category_charts(df_selected)
-            for chart in ibischarts:
+
+            for i, chart in enumerate(ibischarts):
+                category_name = df_selected['Category'].unique()[i]
+                st.subheader(f"Category: {category_name}")
                 st.plotly_chart(chart, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
