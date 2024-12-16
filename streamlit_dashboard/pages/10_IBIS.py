@@ -66,6 +66,7 @@ def main():
     # Ensure data types are correct
     try:
         filtered_data["Year"] = pd.to_datetime(filtered_data["Year"], errors="coerce").dt.year
+        filtered_data["Year"] = filtered_data["Year"].astype('Int64')  # Ensure Year is an integer
         filtered_data["Value"] = pd.to_numeric(filtered_data["Value"], errors="coerce")
     except Exception as e:
         st.error(f"Error converting data types: {e}")
@@ -77,28 +78,33 @@ def main():
         st.write("Null Values Preview:", filtered_data[filtered_data[["Year", "Value"]].isnull()])
         return
 
-    # Fill missing values with zeros or another appropriate strategy
+    # Fill missing values with zeros (or another strategy)
     filtered_data.fillna({"Value": 0}, inplace=True)
 
-    # Ensure that 'Year' and 'Value' are integer types for proper grouping
-    filtered_data["Year"] = filtered_data["Year"].astype(int)
-    
-    # Group data by Year and sum 'Value' (you can modify aggregation as needed)
-    grouped_data = filtered_data.groupby("Year", as_index=False).agg({"Value": "sum"})
-    
-    # Generate bar chart
-    st.subheader("Bar Chart for Yearly Values")
-    try:
-        fig = px.bar(
-            grouped_data,
-            x="Year",
-            y="Value",
-            title="Yearly Values by Category"
-        )
-        st.plotly_chart(fig)
-    except ValueError as e:
-        st.error(f"Error creating the bar chart: {e}")
-        st.write("Debugging Data:", grouped_data)
+    # Group data by Year and Category, then sum 'Value'
+    grouped_data = filtered_data.groupby(["Year", "Category"], as_index=False).agg({"Value": "sum"})
+
+    # Unique categories
+    categories = grouped_data['Category'].unique()
+
+    # Loop through categories to create different charts
+    for category in categories:
+        st.subheader(f"Bar Chart for Category: {category}")
+        category_data = grouped_data[grouped_data['Category'] == category]
+        
+        try:
+            fig = px.bar(
+                category_data,
+                x="Year",
+                y="Value",
+                title=f"Yearly Values for Category: {category}",
+                labels={"Value": "Total Value", "Year": "Year"},
+                template="plotly_dark"  # Optional styling for charts
+            )
+            st.plotly_chart(fig)
+        except ValueError as e:
+            st.error(f"Error creating the bar chart for {category}: {e}")
+            st.write("Debugging Data:", category_data)
 
 if __name__ == "__main__":
     main()
