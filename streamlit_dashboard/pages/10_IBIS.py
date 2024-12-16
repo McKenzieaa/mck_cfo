@@ -82,7 +82,7 @@ def main():
     filtered_data.fillna({"Value": 0}, inplace=True)
 
     # Group data by Year and Category, then sum 'Value'
-    grouped_data = filtered_data.groupby(["Year", "Category"], as_index=False).agg({"Value": "sum"})
+    grouped_data = filtered_data.groupby(["Year", "Category"], as_index=False).agg({"Value": "avg"})
 
     # Unique categories
     categories = grouped_data['Category'].unique()
