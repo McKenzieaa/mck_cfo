@@ -133,7 +133,12 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.margin_left = Inches(0.05)
             cell.margin_right = Inches(0.05)
 
-def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig, category_charts):
+def export_all_to_pptx(
+    labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
+    fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
+    labour_fig, gdp_fig, category_charts, income_statement_df, 
+    balance_sheet_df, state_name
+):
     # Load the custom template
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
     ppt = Presentation(template_path)  # Load the template
@@ -147,9 +152,10 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.70, height=3.90, left=5, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=4.4)
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
-    update_figure_slide(ppt, f"Labour force Statitics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
-    update_figure_slide(ppt, f"GDP - {state_name} ", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "IBIS Chart", chart, slide_number=7, **pos)
+    update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
+
+    # Define positions for category charts
     positions = [
         {"left": Inches(1), "top": Inches(1), "width": Inches(6), "height": Inches(3)},  # Position for Chart 1
         {"left": Inches(1), "top": Inches(4.5), "width": Inches(6), "height": Inches(3)},  # Position for Chart 2
@@ -157,6 +163,7 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
         {"left": Inches(7.5), "top": Inches(4.5), "width": Inches(6), "height": Inches(3)},  # Position for Chart 4
     ]
 
+    # Add category charts to slide 7
     for chart, pos in zip(category_charts, positions):
         update_figure_slide(ppt, "IBIS Chart", chart, slide_number=7, **pos)
 
