@@ -1532,7 +1532,8 @@ if st.button("Export Charts to PowerPoint", key="export_button"):
         pptx_file = export_all_to_pptx(
             labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
             fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
-            labour_fig, gdp_fig, create_category_charts
+            labour_fig, gdp_fig, create_category_charts, 
+            income_statement_df, balance_sheet_df, state_name
         )
 
         st.download_button(
