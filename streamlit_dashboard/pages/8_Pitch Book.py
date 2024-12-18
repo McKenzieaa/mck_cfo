@@ -157,7 +157,7 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
-    ibischarts = create_category_charts(df)
+    ibischarts = create_category_charts
 
     for i, chart in enumerate(ibischarts):
         category_name = df['Category'].unique()[i]
