@@ -109,40 +109,53 @@ if selected_industry:
         how='left'
     )
 
-    # Create Bar Charts for Income Statement and Balance Sheet
-    if selected_industry:
-        # Income Statement Bar Chart
-        income_fig = px.bar(
-            income_statement_df,
-            x="LineItems",
-            y=["RMA Percent"],
-            title="Income Statement Comparison",
-            # labels={"value": "Percentage (%)", "LineItems": "Items"},
-            # barmode="group",
-            text_auto=True
-        )
-        income_fig.update_layout(
-            xaxis_tickangle=45,
-            height=400,
-            margin=dict(t=50, b=50, l=50, r=50)
-        )
-        
-        # Balance Sheet Bar Chart
-        balance_fig = px.bar(
-            balance_sheet_df,
-            x="LineItems",
-            y=["RMA Percent"],
-            title="Balance Sheet Comparison",
-            # labels={"value": "Percentage (%)", "LineItems": "Items"},
-            # barmode="group",
-            text_auto=True
-        )
-        balance_fig.update_layout(
-            xaxis_tickangle=45,
-            height=400,
-            margin=dict(t=50, b=50, l=50, r=50)
-        )
+if selected_industry:
+    # Convert percentages to numeric for plotting
+    income_statement_df['RMA Percent'] = pd.to_numeric(
+        income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
+    )
+    income_statement_df['Public Comp Percent'] = pd.to_numeric(
+        income_statement_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
+    )
 
+    balance_sheet_df['RMA Percent'] = pd.to_numeric(
+        balance_sheet_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
+    )
+    balance_sheet_df['Public Comp Percent'] = pd.to_numeric(
+        balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
+    )
+
+    # Income Statement Bar Chart
+    income_fig = px.bar(
+        income_statement_df,
+        x="LineItems",
+        y=["RMA Percent", "Public Comp Percent"],
+        title="Income Statement Comparison",
+        labels={"value": "Percentage (%)", "LineItems": "Items"},
+        barmode="group",
+        text_auto=True
+    )
+    income_fig.update_layout(
+        xaxis_tickangle=45,
+        height=400,
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
+    
+    # Balance Sheet Bar Chart
+    balance_fig = px.bar(
+        balance_sheet_df,
+        x="LineItems",
+        y=["RMA Percent", "Public Comp Percent"],
+        title="Balance Sheet Comparison",
+        labels={"value": "Percentage (%)", "LineItems": "Items"},
+        barmode="group",
+        text_auto=True
+    )
+    balance_fig.update_layout(
+        xaxis_tickangle=45,
+        height=400,
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
 
     # Display Income Statement and Balance Sheet tables
     st.write("Income Statement")
