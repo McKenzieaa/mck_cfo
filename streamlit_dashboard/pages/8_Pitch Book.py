@@ -1509,31 +1509,41 @@ with st.expander("Benchmarking"):
             income_statement_df,
             x="LineItems",
             y=["RMA Percent", "Public Comp Percent"],
-            # title="Income Statement Comparison",
-            labels={"value": "Percentage (%)", "LineItems": "Items"},
             barmode="group",
             text_auto=True
+        )
+        # Apply custom colors
+        income_fig.update_traces(
+            marker_color=["#032649", "#EB8928"],
+            selector=dict(type="bar")
         )
         income_fig.update_layout(
             xaxis_tickangle=45,
             height=400,
-            margin=dict(t=50, b=50, l=50, r=50)
+            margin=dict(t=50, b=50, l=50, r=50),
+            title="Income Statement Comparison",
+            labels={"value": "Percentage (%)", "LineItems": "Items"}
         )
-        
+
         # Balance Sheet Bar Chart
         balance_fig = px.bar(
             balance_sheet_df,
             x="LineItems",
             y=["RMA Percent", "Public Comp Percent"],
-            # title="Balance Sheet Comparison",
-            labels={"value": "Percentage (%)", "LineItems": "Items"},
             barmode="group",
             text_auto=True
+        )
+        # Apply custom colors
+        balance_fig.update_traces(
+            marker_color=["#032649", "#EB8928"],
+            selector=dict(type="bar")
         )
         balance_fig.update_layout(
             xaxis_tickangle=45,
             height=400,
-            margin=dict(t=50, b=50, l=50, r=50)
+            margin=dict(t=50, b=50, l=50, r=50),
+            title="Balance Sheet Comparison",
+            labels={"value": "Percentage (%)", "LineItems": "Items"}
         )
 
         # Display Income Statement and Balance Sheet tables
