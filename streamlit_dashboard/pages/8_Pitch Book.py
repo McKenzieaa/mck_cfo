@@ -136,7 +136,7 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
 def export_all_to_pptx(
     labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
     fig1_precedent, fig2_precedent, fig1_public, fig2_public,
-    labour_fig, gdp_fig, category_charts, income_statement_df,
+    labour_fig, gdp_fig,  income_statement_df,
     balance_sheet_df, state_name
 ):
     # Load the custom template
@@ -154,7 +154,7 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "IBIS Chart", category_charts, slide_number=7, width=5, height=2.50, left=0.08, top=4.4)
+    # update_figure_slide(ppt, "IBIS Chart", category_charts, slide_number=7, width=5, height=2.50, left=0.08, top=4.4)
     
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
@@ -1520,7 +1520,7 @@ if st.button("Export Charts to PowerPoint", key="export_button"):
         pptx_file = export_all_to_pptx(
             labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
             fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
-            labour_fig, gdp_fig, create_category_charts, 
+            labour_fig, gdp_fig,  
             income_statement_df, balance_sheet_df, state_name
         )
 

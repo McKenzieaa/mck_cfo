@@ -21,13 +21,7 @@ categories = {
     for cat_code, category, data_type, program in category_data
 }
 
-# st.sidebar.header("Market Size Selection")
 selected_categories = ['Electric Power Generation, Transmission and Distribution']
-# selected_categories = st.sidebar.multiselect(
-#     'Select Categories',
-#     list(categories.keys()),
-#     default=['Electric Power Generation, Transmission and Distribution']
-# )
 
 def get_market_size_data(selected_categories):
     """Fetch and prepare market size data based on selected categories."""
