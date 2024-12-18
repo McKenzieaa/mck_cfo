@@ -160,7 +160,7 @@ def export_all_to_pptx(
     ibischarts = create_category_charts(df)
 
     for i, chart in enumerate(ibischarts):
-        category_name = df_selected['Category'].unique()[i]
+        category_name = df['Category'].unique()[i]
         st.subheader(f"{category_name}")
         st.plotly_chart(chart, use_container_width=True)
         
