@@ -1526,7 +1526,7 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='')
+            xaxis=dict(title='',tickfont=dict(size=10))
         )
 
         # Balance Sheet Bar Chart
@@ -1550,7 +1550,7 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='')
+            xaxis=dict(title='',tickfont=dict(size=10))
         )
 
         st.write("Income Statement")
