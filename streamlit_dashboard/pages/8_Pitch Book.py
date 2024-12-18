@@ -134,7 +134,7 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.margin_left = Inches(0.05)
             cell.margin_right = Inches(0.05)
 
-def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig, income_statement_df, create_category_charts, balance_sheet_df, state_name):
+def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig, income_statement_df,  balance_sheet_df, state_name):
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
     ppt = Presentation(template_path)  # Load the template
 
@@ -152,10 +152,10 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
-    ibischarts = create_category_charts(income_statement_df)  # Ensure that this is a list of Plotly figures
-    for i, chart in enumerate(ibischarts):
-        category_name = income_statement_df['Category'].unique()[i]
-        update_figure_slide(ppt, f"IBIS Chart - {category_name}", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
+    # ibischarts = create_category_charts(income_statement_df)  # Ensure that this is a list of Plotly figures
+    # for i, chart in enumerate(ibischarts):
+    #     category_name = income_statement_df['Category'].unique()[i]
+    #     update_figure_slide(ppt, f"IBIS Chart - {category_name}", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
 
     slide = ppt.slides[9]
     add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
