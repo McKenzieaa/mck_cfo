@@ -113,7 +113,6 @@ if selected_industry:
         balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
     )
 
-    # Income Statement Bar Chart
     income_fig = px.bar(
         income_statement_df,
         x="LineItems",
@@ -137,7 +136,6 @@ if selected_industry:
         xaxis=dict(title='',tickfont=dict(size=10))
     )
 
-    # Balance Sheet Bar Chart
     balance_fig = px.bar(
         balance_sheet_df,
         x="LineItems",
