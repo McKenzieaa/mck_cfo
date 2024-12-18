@@ -144,10 +144,10 @@ def export_all_to_pptx(
     ppt = Presentation(template_path)  # Load the template
 
     # Use the existing slides (slide_number corresponds to the slide index)
-    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=12, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=12, width=9, height=3, left=0.45, top=3.60)
-    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=11, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=11, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Precedent - EV/Revenue", fig1_precedent, slide_number=13, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=13, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=12, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=12, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.70, height=3.90, left=5, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=4.4)
@@ -640,7 +640,6 @@ def get_data(industry):
         df = pd.read_sql(query, connection)
         connection.close()
         return df
-
 def create_category_charts(df):
         category_charts = []
 

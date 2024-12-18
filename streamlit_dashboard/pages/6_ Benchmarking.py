@@ -109,59 +109,55 @@ if selected_industry:
         how='left'
     )
 
+    # Create Bar Charts for Income Statement and Balance Sheet
+    if selected_industry:
+        # Income Statement Bar Chart
+        income_fig = px.bar(
+            income_statement_df,
+            x="LineItems",
+            y=["RMA Percent", "Public Comp Percent"],
+            title="Income Statement Comparison",
+            labels={"value": "Percentage (%)", "LineItems": "Items"},
+            barmode="group",
+            text_auto=True
+        )
+        income_fig.update_layout(
+            xaxis_tickangle=45,
+            height=400,
+            margin=dict(t=50, b=50, l=50, r=50)
+        )
+        
+        # Balance Sheet Bar Chart
+        balance_fig = px.bar(
+            balance_sheet_df,
+            x="LineItems",
+            y=["RMA Percent", "Public Comp Percent"],
+            title="Balance Sheet Comparison",
+            labels={"value": "Percentage (%)", "LineItems": "Items"},
+            barmode="group",
+            text_auto=True
+        )
+        balance_fig.update_layout(
+            xaxis_tickangle=45,
+            height=400,
+            margin=dict(t=50, b=50, l=50, r=50)
+        )
+
+
     # Display Income Statement and Balance Sheet tables
     st.write("Income Statement")
     st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
+    st.write("Income Statement Bar Chart")
+    st.plotly_chart(income_fig, use_container_width=True)
+
     st.write("Balance Sheet")
     st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
+    st.write("Balance Sheet Bar Chart")
+    st.plotly_chart(balance_fig, use_container_width=True)
 
-# Bar Chart for Income Statement
-if not income_statement_df.empty:
-    st.write("Income Statement Chart")
-    # Ensure LineItems are strings for x-axis
-    income_statement_df['LineItems'] = income_statement_df['LineItems'].astype(str)
-
-    income_chart = px.bar(
-        income_statement_df,
-        x='LineItems',  # Use LineItems for x-axis
-        y=["RMA Percent", "Public Comp Percent"],  # Y-axis: Percentages for RMA and Public Comps
-        title="Income Statement Comparison",
-        labels={"value": "Percentage", "LineItems": "Items"},  # Axis labels
-        barmode="group"  # Group bars side by side
-    )
-    income_chart.update_layout(
-        xaxis_tickangle=45,  # Tilt x-axis labels for readability
-        xaxis_title="Line Items",  # Add proper x-axis title
-        yaxis_title="Percentage (%)",  # Add proper y-axis title
-    )
-    st.plotly_chart(income_chart, use_container_width=True)
-
-
-# Bar Chart for Balance Sheet
-if not balance_sheet_df.empty:
-    st.write("Balance Sheet Chart")
-    # Grouping Balance Sheet items by Assets and Liabilities & Equity
-    balance_sheet_df['Category'] = balance_sheet_df['LineItems'].apply(
-        lambda x: "Assets" if x in ["Cash", "Accounts Receivables", "Inventories", "Fixed Assets", "PPE", "Total Assets"]
-        else "Liabilities & Equity"
-    )
-
-    balance_chart = px.bar(
-        balance_sheet_df,
-        x="LineItems",
-        y=["RMA Percent", "Public Comp Percent"],
-        color="Category",
-        title="Balance Sheet Comparison",
-        labels={"value": "Percentage", "LineItems": "Items"},
-        barmode="group"
-    )
-    balance_chart.update_layout(xaxis_tickangle=45)
-    st.plotly_chart(balance_chart, use_container_width=True)
-
-
-        # Function to create and download PowerPoint presentation
+# Function to create and download PowerPoint presentation
 def create_ppt(income_df, balance_df):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]  # Title and Content layout
