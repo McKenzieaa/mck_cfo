@@ -1550,13 +1550,13 @@ with st.expander("Benchmarking"):
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-        st.write("Income Statement Bar Chart")
+        # st.write("Income Statement Bar Chart")
         st.plotly_chart(income_fig, use_container_width=True)
 
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
-        st.write("Balance Sheet Bar Chart")
+        # st.write("Balance Sheet Bar Chart")
         st.plotly_chart(balance_fig, use_container_width=True)
 
 with st.expander("IBIS"):
