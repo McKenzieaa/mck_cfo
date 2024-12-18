@@ -124,7 +124,7 @@ if selected_industry:
     )
 
     income_fig.update_layout(
-        xaxis_tickangle=45,
+        xaxis_tickangle=0,
         height=400,
         margin=dict(t=50, b=50, l=50, r=50),
         showlegend=True, 
@@ -134,7 +134,8 @@ if selected_industry:
             y=1,
             traceorder='normal',
             orientation='h'
-        )
+        ),
+        xaxis=dict(title='')
     )
 
     # Balance Sheet Bar Chart
@@ -147,7 +148,7 @@ if selected_industry:
     )
 
     balance_fig.update_layout(
-        xaxis_tickangle=45,
+        xaxis_tickangle=0,
         height=400,
         margin=dict(t=50, b=50, l=50, r=50),
         showlegend=True, 
@@ -157,7 +158,8 @@ if selected_industry:
             y=1,
             traceorder='normal',
             orientation='h'
-        )
+        ),
+        xaxis=dict(title='')
     )
 
     st.write("Income Statement")
