@@ -158,17 +158,6 @@ def export_all_to_pptx(
     # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
-    # Create category charts for IBIS section (Make sure create_category_charts returns a list of Plotly figures)
-    ibischarts = create_category_charts(df_selected)  # Ensure that this is a list of Plotly figures
-
-    for i, chart in enumerate(ibischarts):
-        category_name = df_selected['Category'].unique()[i]
-        st.subheader(f"{category_name}")
-        st.plotly_chart(chart, use_container_width=True)
-        
-        # Add each chart to PowerPoint slide (Make sure chart is a Plotly figure)
-        
-
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
     add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
