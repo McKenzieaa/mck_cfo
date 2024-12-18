@@ -154,7 +154,7 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "IBIS Chart", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, "IBIS Chart", category_charts, slide_number=7, width=5, height=2.50, left=0.08, top=4.4)
     
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
