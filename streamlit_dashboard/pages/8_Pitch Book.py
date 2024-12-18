@@ -1521,8 +1521,8 @@ with st.expander("Benchmarking"):
             xaxis_tickangle=45,
             height=400,
             margin=dict(t=50, b=50, l=50, r=50),
-            title="Income Statement Comparison",
-            labels={"value": "Percentage (%)", "LineItems": "Items"}
+            # title="Income Statement Comparison",
+            # labels={"value": "Percentage (%)", "LineItems": "Items"}
         )
 
         # Balance Sheet Bar Chart
@@ -1542,8 +1542,8 @@ with st.expander("Benchmarking"):
             xaxis_tickangle=45,
             height=400,
             margin=dict(t=50, b=50, l=50, r=50),
-            title="Balance Sheet Comparison",
-            labels={"value": "Percentage (%)", "LineItems": "Items"}
+            # title="Balance Sheet Comparison",
+            # labels={"value": "Percentage (%)", "LineItems": "Items"}
         )
 
         # Display Income Statement and Balance Sheet tables
