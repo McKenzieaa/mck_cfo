@@ -130,33 +130,56 @@ if selected_industry:
         income_statement_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        # title="Income Statement Comparison",
         labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
     )
+
+    # Update bar colors
+    income_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
+
+    # Update layout to remove legend title and position it to the upper left
     income_fig.update_layout(
         xaxis_tickangle=45,
         height=400,
-        margin=dict(t=50, b=50, l=50, r=50)
+        margin=dict(t=50, b=50, l=50, r=50),
+        showlegend=True,  # Ensure legend is visible
+        legend_title=None,  # Remove legend title
+        legend=dict(
+            x=0,  # Position of legend (upper left)
+            y=1,
+            traceorder='normal',
+            orientation='h'
+        )
     )
-    
+
     # Balance Sheet Bar Chart
     balance_fig = px.bar(
         balance_sheet_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        # title="Balance Sheet Comparison",
         labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
     )
+
+    # Update bar colors
+    balance_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
+
+    # Update layout to remove legend title and position it to the upper left
     balance_fig.update_layout(
         xaxis_tickangle=45,
         height=400,
-        margin=dict(t=50, b=50, l=50, r=50)
+        margin=dict(t=50, b=50, l=50, r=50),
+        showlegend=True,  # Ensure legend is visible
+        legend_title=None,  # Remove legend title
+        legend=dict(
+            x=0,  # Position of legend (upper left)
+            y=1,
+            traceorder='normal',
+            orientation='h'
+        )
     )
-
     # Display Income Statement and Balance Sheet tables
     st.write("Income Statement")
     st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
