@@ -130,7 +130,7 @@ if selected_industry:
         income_statement_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        title="Income Statement Comparison",
+        # title="Income Statement Comparison",
         labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
@@ -146,7 +146,7 @@ if selected_industry:
         balance_sheet_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        title="Balance Sheet Comparison",
+        # title="Balance Sheet Comparison",
         labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
