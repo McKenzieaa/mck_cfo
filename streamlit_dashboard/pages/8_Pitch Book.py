@@ -712,7 +712,7 @@ def create_category_charts(df):
             )
 
             category_charts.append(fig)
-
+        st.plotly_chart(fig, use_container_width=True)
         return category_charts
 
 def fetch_cpi_data(series_id, df_cleaned):
