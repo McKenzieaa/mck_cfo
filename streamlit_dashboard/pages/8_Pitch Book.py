@@ -88,15 +88,16 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
         print(f"Skipping slide '{title}' because the figure is None.")
         return  # Skip if fig is None
 
-    slide = ppt.slides[slide_number] 
-
-    fig_image = BytesIO()
-    fig.write_image(fig_image, format="png") 
-    fig_image.seek(0)
-
-    # Use Inches for size and position only in the add_picture() function
-    slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))
-    fig_image.close()
+    # Ensure the figure is a Plotly figure
+    if isinstance(fig, px.Figure):  # Check if it's a Plotly figure
+        slide = ppt.slides[slide_number]  # Select the slide
+        fig_image = BytesIO()  # Create an in-memory image buffer
+        fig.write_image(fig_image, format="png")  # Save the figure to the image buffer
+        fig_image.seek(0)  # Rewind the buffer to the start
+        slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))  # Add the image to the slide
+        fig_image.close()  # Close the image buffer
+    else:
+        print(f"Error: Expected a Plotly figure, but got {type(fig)}")
 
 def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), header_font_size=Pt(12)):
     # Create a table shape on the slide
@@ -136,7 +137,7 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
 def export_all_to_pptx(
     labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
     fig1_precedent, fig2_precedent, fig1_public, fig2_public,
-    labour_fig, gdp_fig, income_statement_df, category_charts,
+    labour_fig, gdp_fig, income_statement_df, create_category_charts,
     balance_sheet_df, state_name
 ):
     # Load the custom template
@@ -154,14 +155,24 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, f"IBIS Chart - {category_name}", category_charts, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
     # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
+    # Create category charts for IBIS section (Make sure create_category_charts returns a list of Plotly figures)
+    ibischarts = create_category_charts(df_selected)  # Ensure that this is a list of Plotly figures
+
+    for i, chart in enumerate(ibischarts):
+        category_name = df_selected['Category'].unique()[i]
+        st.subheader(f"{category_name}")
+        st.plotly_chart(chart, use_container_width=True)
+        
+        # Add each chart to PowerPoint slide (Make sure chart is a Plotly figure)
+        update_figure_slide(ppt, f"IBIS Chart - {category_name}", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
+
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
-    add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(10))
-    add_table_to_slide(slide, balance_sheet_df, left=5.2, top=0.9, width=4.3, height=5.65, header_font_size=Pt(10))
+    add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
+    add_table_to_slide(slide, balance_sheet_df, left=5.2, top=0.9, width=4.3, height=5.65, header_font_size=Pt(12))
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
