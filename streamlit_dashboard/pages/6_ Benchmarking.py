@@ -111,42 +111,30 @@ if selected_industry:
 
 if selected_industry:
     # Convert percentages to numeric for plotting
-    income_statement_df['RMA Percent'] = pd.to_numeric(
-        income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
-    )
-    income_statement_df['Public Comp Percent'] = pd.to_numeric(
-        income_statement_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
-    )
+    income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].round(0).astype(int).astype(str) + '%'
+    income_statement_df['Public Comp Percent'] = income_statement_df['Public Comp Percent'].round(0).astype(int).astype(str) + '%'
 
-    balance_sheet_df['RMA Percent'] = pd.to_numeric(
-        balance_sheet_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
-    )
-    balance_sheet_df['Public Comp Percent'] = pd.to_numeric(
-        balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
-    )
+    balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].round(0).astype(int).astype(str) + '%'
+    balance_sheet_df['Public Comp Percent'] = balance_sheet_df['Public Comp Percent'].round(0).astype(int).astype(str) + '%'
 
     # Income Statement Bar Chart
     income_fig = px.bar(
         income_statement_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        labels={"value": "Percentage (%)", "LineItems": "Items"},
+        # labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
     )
 
-    # # Update bar colors
-    # income_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
-
-    # Update layout to remove legend title and position it to the upper left
     income_fig.update_layout(
         xaxis_tickangle=45,
         height=400,
         margin=dict(t=50, b=50, l=50, r=50),
-        showlegend=True,  # Ensure legend is visible
-        legend_title=None,  # Remove legend title
+        showlegend=True, 
+        legend_title=None,
         legend=dict(
-            x=0,  # Position of legend (upper left)
+            x=0, 
             y=1,
             traceorder='normal',
             orientation='h'
@@ -158,29 +146,24 @@ if selected_industry:
         balance_sheet_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
     )
 
-    # # Update bar colors
-    # balance_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
-
-    # Update layout to remove legend title and position it to the upper left
     balance_fig.update_layout(
         xaxis_tickangle=45,
         height=400,
         margin=dict(t=50, b=50, l=50, r=50),
-        showlegend=True,  # Ensure legend is visible
-        legend_title=None,  # Remove legend title
+        showlegend=True, 
+        legend_title=None,
         legend=dict(
-            x=0,  # Position of legend (upper left)
+            x=0,
             y=1,
             traceorder='normal',
             orientation='h'
         )
     )
-    # Display Income Statement and Balance Sheet tables
+
     st.write("Income Statement")
     st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
 
