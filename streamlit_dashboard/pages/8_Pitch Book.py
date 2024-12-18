@@ -157,15 +157,15 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
-    # Create category charts for IBIS section
-    ibischarts = create_category_charts(df_selected)  # This returns a list of Plotly figures
+    # Create category charts for IBIS section (Make sure create_category_charts returns a list of Plotly figures)
+    ibischarts = create_category_charts(df_selected)  # Ensure that this is a list of Plotly figures
 
     for i, chart in enumerate(ibischarts):
         category_name = df_selected['Category'].unique()[i]
         st.subheader(f"{category_name}")
         st.plotly_chart(chart, use_container_width=True)
         
-        # Add each chart to PowerPoint slide
+        # Add each chart to PowerPoint slide (Make sure chart is a Plotly figure)
         update_figure_slide(ppt, f"IBIS Chart - {category_name}", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
 
     # Add Benchmarking Tables to Slide
@@ -178,7 +178,6 @@ def export_all_to_pptx(
     ppt.save(ppt_bytes)
     ppt_bytes.seek(0)
     return ppt_bytes
-
 
 # Streamlit page configuration
 st.set_page_config(page_title="Pitch Book", layout="wide")
