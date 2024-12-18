@@ -2,7 +2,7 @@ import dask.dataframe as dd
 import streamlit as st
 import pandas as pd
 import numpy as np
-import s3fs  # For accessing S3 data
+import s3fs 
 from io import BytesIO
 from pptx import Presentation
 from pptx.util import Inches
@@ -14,12 +14,10 @@ storage_options = {
         'client_kwargs': {'region_name': st.secrets["aws"]["AWS_DEFAULT_REGION"]}
 }
 
-# Define S3 file paths
 s3_path_rma = "s3://documentsapi/industry_data/rma_data.parquet"
 s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
 
-# Load the RMA data from S3 with Dask
-df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)  # Set to True if the bucket is public
+df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)
 df_rma = df_rma.rename(columns={
     'ReportID': 'Report_ID',      
     'Line Items': 'LineItems',    
@@ -35,35 +33,28 @@ usecols = [
     "Total Current Liabilities (in %)", "Other Liabilities (in %)", "Total Liabilities (in %)",
     "Net Worth (in %)", "Total Liabilities & Equity (in %)"
 ]
-# Load the public company data
+
 df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options,usecols=usecols, engine='openpyxl')
 df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
 
-# Filter out any missing or non-string values in the Industry column for both datasets
 industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
 industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
 industries = sorted(set(industries_rma).union(set(industries_public)))
 
-# Streamlit app title
 st.title("Benchmarking")
 
-# Single dropdown for selecting an industry
 selected_industry = st.selectbox("Select Industry", industries)
 
-# Define Income Statement and Balance Sheet LineItems
 income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses","Profit Before Taxes", "Net Income"]
 balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets","Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
 
-# Filter and prepare data only if an industry is selected
 if selected_industry:
 
     filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
 
-    # Map "Assets" and "Liabilities & Equity" to "Balance Sheet" if applicable
     if 'Report_ID' in filtered_df_rma.columns:
         filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
 
-    # RMA Percent for Income Statement and Balance Sheet
     income_statement_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Income Statement'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
     balance_sheet_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Balance Sheet'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
 
@@ -81,12 +72,9 @@ if selected_industry:
     df_unpivoted = df_unpivoted.rename(columns={'Value': 'Public Comp Percent'})
     df_unpivoted['Public Comp Percent'] = df_unpivoted['Public Comp Percent'].round(0).astype(int).astype(str) + '%'
 
-
-    # Split Public Comps data into Income Statement and Balance Sheet based on LineItems
     income_statement_df_public = df_unpivoted[df_unpivoted['LineItems'].isin(income_statement_items)]
     balance_sheet_df_public = df_unpivoted[df_unpivoted['LineItems'].isin(balance_sheet_items)]
 
-    # Merge RMA and Public Comps for Income Statement and Balance Sheet tables
     income_statement_df = pd.merge(
         pd.DataFrame({'LineItems': income_statement_items}),
         income_statement_df_rma,
@@ -110,7 +98,7 @@ if selected_industry:
     )
 
 if selected_industry:
-    # Convert percentages to numeric for plotting
+
     income_statement_df['RMA Percent'] = pd.to_numeric(
         income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
     )
@@ -184,7 +172,6 @@ if selected_industry:
     st.write("Balance Sheet Bar Chart")
     st.plotly_chart(balance_fig, use_container_width=True)
 
-# Function to create and download PowerPoint presentation
 def create_ppt(income_df, balance_df):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]  # Title and Content layout
@@ -241,6 +228,5 @@ def create_ppt(income_df, balance_df):
     ppt_bytes.seek(0)
     return ppt_bytes
 
-# Button to download the PowerPoint file
 ppt_bytes = create_ppt(income_statement_df, balance_sheet_df)
 st.download_button(label="Download PowerPoint", data=ppt_bytes, file_name="Benchmarking_Report.pptx", mime="application/vnd.openxmlformats-officedocument.presentationml.presentation")
