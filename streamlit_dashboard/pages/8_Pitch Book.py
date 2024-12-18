@@ -1425,9 +1425,9 @@ with st.expander("Benchmarking"):
     industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries = sorted(set(industries_rma).union(set(industries_public)))
-    
-    income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses","Profit Before Taxes", "Net Income"]
-    balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets","Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
+
+    income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses", "Profit Before Taxes", "Net Income"]
+    balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets", "Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
     
     selected_industry = st.selectbox("Select Industry", industries)
     if selected_industry:
@@ -1481,8 +1481,8 @@ with st.expander("Benchmarking"):
 
         income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
         balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
-    if selected_industry:
 
+        # Convert to numeric for chart generation
         income_statement_df['RMA Percent'] = pd.to_numeric(
             income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
         income_statement_df['Public Comp Percent'] = pd.to_numeric(
@@ -1514,7 +1514,7 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='',tickfont=dict(size=10)),
+            xaxis=dict(title='', tickfont=dict(size=10)),
             yaxis=dict(title='')
         )
 
@@ -1539,17 +1539,16 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='',tickfont=dict(size=10)),
+            xaxis=dict(title='', tickfont=dict(size=10)),
             yaxis=dict(title='')
         )
 
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
-        # st.plotly_chart(income_fig, use_container_width=True)
-
+        st.plotly_chart(income_fig, use_container_width=True)
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
-        # st.plotly_chart(balance_fig, use_container_width=True)
+        st.plotly_chart(balance_fig, use_container_width=True)
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
