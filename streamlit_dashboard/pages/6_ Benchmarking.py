@@ -115,10 +115,10 @@ if selected_industry:
         income_fig = px.bar(
             income_statement_df,
             x="LineItems",
-            y=["RMA Percent", "Public Comp Percent"],
+            y=["RMA Percent"],
             title="Income Statement Comparison",
-            labels={"value": "Percentage (%)", "LineItems": "Items"},
-            barmode="group",
+            # labels={"value": "Percentage (%)", "LineItems": "Items"},
+            # barmode="group",
             text_auto=True
         )
         income_fig.update_layout(
@@ -131,10 +131,10 @@ if selected_industry:
         balance_fig = px.bar(
             balance_sheet_df,
             x="LineItems",
-            y=["RMA Percent", "Public Comp Percent"],
+            y=["RMA Percent"],
             title="Balance Sheet Comparison",
-            labels={"value": "Percentage (%)", "LineItems": "Items"},
-            barmode="group",
+            # labels={"value": "Percentage (%)", "LineItems": "Items"},
+            # barmode="group",
             text_auto=True
         )
         balance_fig.update_layout(
