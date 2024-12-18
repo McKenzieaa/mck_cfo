@@ -134,9 +134,9 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.margin_right = Inches(0.05)
 
 def export_all_to_pptx(
-    labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
-    fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
-    labour_fig, gdp_fig, category_charts, income_statement_df, 
+    labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
+    fig1_precedent, fig2_precedent, fig1_public, fig2_public,
+    labour_fig, gdp_fig, category_charts, income_statement_df,
     balance_sheet_df, state_name
 ):
     # Load the custom template
@@ -168,7 +168,7 @@ def export_all_to_pptx(
         update_figure_slide(ppt, "IBIS Chart", chart, slide_number=7, **pos)
 
     # Add Benchmarking Tables to Slide
-    slide = ppt.slides[9] 
+    slide = ppt.slides[9]
     add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
     add_table_to_slide(slide, balance_sheet_df, left=5.2, top=0.9, width=4.3, height=5.65, header_font_size=Pt(12))
 
@@ -610,121 +610,78 @@ df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
-def get_industries():
+def get_data(industry):
     host = st.secrets["mysql"]["host"]
     user = st.secrets["mysql"]["user"]
     password = st.secrets["mysql"]["password"]
     database = st.secrets["mysql"]["database"]
 
-        # Connect to the database
+    # Connect to the database
     connection = mysql.connector.connect(
         host=host,
         user=user,
         password=password,
         database=database
-        )
+    )
 
-        # Query to get distinct industries
-    query = "SELECT DISTINCT Industry FROM ibis_report"
-    df_ibis = pd.read_sql(query, connection)
+    # Query to get data for the selected industry
+    query = f"SELECT * FROM ibis_report WHERE Industry = '{industry}'"
+    df = pd.read_sql(query, connection)
     connection.close()
-    return df_ibis
+    return df
 
-    # Function to get data for the selected industry
-def get_data(industry):
-        host = st.secrets["mysql"]["host"]
-        user = st.secrets["mysql"]["user"]
-        password = st.secrets["mysql"]["password"]
-        database = st.secrets["mysql"]["database"]
-
-        # Connect to the database
-        connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
-
-        # Query to get data for the selected industry
-        query = f"SELECT * FROM ibis_report WHERE Industry = '{industry}'"
-        df = pd.read_sql(query, connection)
-        connection.close()
-        return df
 
 def create_category_charts(df):
-        category_charts = []
+    category_charts = []
 
-        bar_color = '#032649'
-        line_color = '#EB8928'
+    bar_color = '#032649'
+    line_color = '#EB8928'
 
-        for category in df['Category'].unique():
-            category_data = df[df['Category'] == category]
-            
-            # Calculate the change for the category
-            category_data['Change'] = category_data['Value'].pct_change() * 100
-            
-            # Get the last value for each category
-            last_value = category_data['Value'].iloc[-1]
-            last_change = category_data['Change'].iloc[-1]
+    for category in df['Category'].unique():
+        category_data = df[df['Category'] == category]
 
-            # Create a subplot with secondary y-axis
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
+        # Calculate the change for the category
+        category_data['Change'] = category_data['Value'].pct_change() * 100
 
-            # Add bar chart for 'Value' on the primary y-axis
-            fig.add_trace(
-                go.Bar(
-                    x=category_data['Year'],
-                    y=category_data['Value'],
-                    name='Value',
-                    marker_color=bar_color,
-                    text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
-                    textposition="outside"  # Place text outside the bars
-                ),
-                secondary_y=False
-            )
+        # Create a subplot with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-            # Add line chart for 'Change' on the secondary y-axis
-            fig.add_trace(
-                go.Scatter(
-                    x=category_data['Year'],
-                    y=category_data['Change'],
-                    name='Change (%)',
-                    mode='lines+markers',
-                    line=dict(color=line_color),
-                    text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
-                    textposition="top center"  # Place text above the last marker
-                ),
-                secondary_y=True
-            )
+        # Add bar chart for 'Value' on the primary y-axis
+        fig.add_trace(
+            go.Bar(
+                x=category_data['Year'],
+                y=category_data['Value'],
+                name='Value',
+                marker_color=bar_color,
+            ),
+            secondary_y=False
+        )
 
-            # Update axis titles
-            fig.update_layout(
-                # title_text=f"{category} - Value vs Change",
-                xaxis_title="Year",
-                yaxis_title="Value",
-            )
+        # Add line chart for 'Change' on the secondary y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=category_data['Year'],
+                y=category_data['Change'],
+                name='Change (%)',
+                mode='lines+markers',
+                line=dict(color=line_color),
+            ),
+            secondary_y=True
+        )
 
-            # Set secondary y-axis title
-            fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
-            fig.update_yaxes(title_text="Change (%)", secondary_y=True)
+        # Update axis titles and layout
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+            legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
+            margin=dict(l=50, r=50, t=50, b=50),
+            height=400,
+            width=600
+        )
 
-            # Update the legend position (upper-left)
-            fig.update_layout(
-                legend=dict(
-                    x=0, 
-                    y=1, 
-                    xanchor='left', 
-                    yanchor='top'
-                ),
-                yaxis=dict(showgrid=False),
-                margin=dict(l=50, r=50, t=50,b=50),height=400,width=600
-            )
+        category_charts.append(fig)
 
-            category_charts.append(fig)
-
-        return category_charts
-
-
+    return category_charts
 
 def fetch_cpi_data(series_id, df_cleaned):
     selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
@@ -1506,42 +1463,48 @@ with st.expander("Benchmarking"):
 
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
-
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
-    df_industries = get_industries() 
-    industry_options = df_industries["Industry"].tolist()
-    industry = st.selectbox("Select Industry", industry_options)
 
-    if industry:
-        df_selected = get_data(industry)
-
-        if not df_selected.empty:
-            ibischarts = create_category_charts(df_selected)
-
-            for i, chart in enumerate(ibischarts):
-                category_name = df_selected['Category'].unique()[i]
-                st.subheader(f"{category_name}")
-                st.plotly_chart(chart, use_container_width=True)
+    try:
+        # Fetch industry options
+        df_industries = get_data() 
+        if df_industries.empty:
+            st.warning("No industries available in the database.")
         else:
-            st.warning(f"No data available for the selected industry: {industry}")
+            industry_options = df_industries["Industry"].tolist()
+            industry = st.selectbox("Select Industry", ["Select an industry"] + industry_options)
+
+            if industry and industry != "Select an industry":
+                # Fetch data for the selected industry
+                df_selected = get_data(industry)
+
+                if not df_selected.empty:
+                    # Generate and display category charts
+                    ibischarts = create_category_charts(df_selected)
+
+                    for category_name, chart in zip(df_selected['Category'].unique(), ibischarts):
+                        st.subheader(f"{category_name}")
+                        st.plotly_chart(chart, use_container_width=True)
+                else:
+                    st.warning(f"No data available for the selected industry: {industry}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
-
         pptx_file = export_all_to_pptx(
-            labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
-            fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
+            labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
+            fig1_precedent, fig2_precedent, fig1_public, fig2_public,
             labour_fig, gdp_fig, create_category_charts, 
             income_statement_df, balance_sheet_df, state_name
         )
 
         st.download_button(
-            label="Download PowerPoint", 
+            label="Download PowerPoint",
             data=pptx_file,
             file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation" 
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
-
     except Exception as e:
         st.error(f"Error during PowerPoint export: {e}")
