@@ -118,7 +118,6 @@ if selected_industry:
         income_statement_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        # labels={"value": "Percentage (%)", "LineItems": "Items"},
         barmode="group",
         text_auto=True
     )
@@ -135,7 +134,7 @@ if selected_industry:
             traceorder='normal',
             orientation='h'
         ),
-        xaxis=dict(title='')
+        xaxis=dict(title='',tickfont=dict(size=10))
     )
 
     # Balance Sheet Bar Chart
@@ -159,7 +158,7 @@ if selected_industry:
             traceorder='normal',
             orientation='h'
         ),
-        xaxis=dict(title='')
+        xaxis=dict(title='',tickfont=dict(size=10))
     )
 
     st.write("Income Statement")
