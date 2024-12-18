@@ -1489,7 +1489,7 @@ with st.expander("Benchmarking"):
         income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
         balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
     if selected_industry:
-        # Convert percentages to numeric for plotting
+
         income_statement_df['RMA Percent'] = pd.to_numeric(
             income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
         )
@@ -1509,17 +1509,24 @@ with st.expander("Benchmarking"):
             income_statement_df,
             x="LineItems",
             y=["RMA Percent", "Public Comp Percent"],
+            # labels={"value": "Percentage (%)", "LineItems": "Items"},
             barmode="group",
             text_auto=True
         )
-        # Apply custom colors
-        income_fig.update_traces(marker_color=["#032649", "#EB8928"])
+
         income_fig.update_layout(
             xaxis_tickangle=45,
             height=400,
             margin=dict(t=50, b=50, l=50, r=50),
-            # title="Income Statement Comparison",
-            # labels={"value": "Percentage (%)", "LineItems": "Items"}
+            showlegend=True, 
+            legend_title=None,
+            legend=dict(
+                x=0, 
+                y=1,
+                traceorder='normal',
+                orientation='h'
+            ),
+            xaxis=dict(title='')
         )
 
         # Balance Sheet Bar Chart
@@ -1530,27 +1537,28 @@ with st.expander("Benchmarking"):
             barmode="group",
             text_auto=True
         )
-        # Apply custom colors
-        balance_fig.update_traces(marker_color=["#032649", "#EB8928"])
+
         balance_fig.update_layout(
             xaxis_tickangle=45,
             height=400,
             margin=dict(t=50, b=50, l=50, r=50),
-            # title="Balance Sheet Comparison",
-            # labels={"value": "Percentage (%)", "LineItems": "Items"}
+            showlegend=True, 
+            legend_title=None,
+            legend=dict(
+                x=0,
+                y=1,
+                traceorder='normal',
+                orientation='h'
+            ),
+            xaxis=dict(title='')
         )
 
-        # Display Income Statement and Balance Sheet tables
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
-
-        # st.write("Income Statement Bar Chart")
         st.plotly_chart(income_fig, use_container_width=True)
 
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
-
-        # st.write("Balance Sheet Bar Chart")
         st.plotly_chart(balance_fig, use_container_width=True)
 
 with st.expander("IBIS"):
