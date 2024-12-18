@@ -3,7 +3,7 @@ import numpy as np
 import zipfile
 import io
 import dask.dataframe as dd
-import plotly.graph_objects as go
+import plotly.graph_objs as go
 import streamlit as st
 import plotly.express as px
 import pandas as pd
@@ -88,9 +88,8 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
         print(f"Skipping slide '{title}' because the figure is None.")
         return  # Skip if fig is None
 
-    slide = ppt.slides[slide_number]
+    slide = ppt.slides[slide_number] 
 
-    # Make sure to handle plotly.graph_objects.Figure
     fig_image = BytesIO()
     fig.write_image(fig_image, format="png") 
     fig_image.seek(0)
@@ -134,7 +133,13 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
             cell.margin_left = Inches(0.05)
             cell.margin_right = Inches(0.05)
 
-def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, fig1_precedent, fig2_precedent, fig1_public, fig2_public, labour_fig, gdp_fig, income_statement_df,  balance_sheet_df, state_name):
+def export_all_to_pptx(
+    labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
+    fig1_precedent, fig2_precedent, fig1_public, fig2_public,
+    labour_fig, gdp_fig, income_statement_df, income_fig, balance_fig,
+    balance_sheet_df, state_name
+):
+    # Load the custom template
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
     ppt = Presentation(template_path)  # Load the template
 
@@ -149,23 +154,21 @@ def export_all_to_pptx(labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
-    # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
-    # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
-    # ibischarts = create_category_charts(income_statement_df)  # Ensure that this is a list of Plotly figures
-    # for i, chart in enumerate(ibischarts):
-    #     category_name = income_statement_df['Category'].unique()[i]
-    #     update_figure_slide(ppt, f"IBIS Chart - {category_name}", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
-
+    # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
     add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
     add_table_to_slide(slide, balance_sheet_df, left=5.2, top=0.9, width=4.3, height=5.65, header_font_size=Pt(12))
 
+    # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
     ppt.save(ppt_bytes)
     ppt_bytes.seek(0)
     return ppt_bytes
 
+# Streamlit page configuration
 st.set_page_config(page_title="Pitch Book", layout="wide")
 
 # Define URLs and Paths
@@ -1425,9 +1428,9 @@ with st.expander("Benchmarking"):
     industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
     industries = sorted(set(industries_rma).union(set(industries_public)))
-
-    income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses", "Profit Before Taxes", "Net Income"]
-    balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets", "Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
+    
+    income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses","Profit Before Taxes", "Net Income"]
+    balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets","Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
     
     selected_industry = st.selectbox("Select Industry", industries)
     if selected_industry:
@@ -1481,8 +1484,8 @@ with st.expander("Benchmarking"):
 
         income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
         balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
+    if selected_industry:
 
-        # Convert to numeric for chart generation
         income_statement_df['RMA Percent'] = pd.to_numeric(
             income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
         income_statement_df['Public Comp Percent'] = pd.to_numeric(
@@ -1514,7 +1517,7 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='', tickfont=dict(size=10)),
+            xaxis=dict(title='',tickfont=dict(size=10)),
             yaxis=dict(title='')
         )
 
@@ -1539,13 +1542,14 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='', tickfont=dict(size=10)),
+            xaxis=dict(title='',tickfont=dict(size=10)),
             yaxis=dict(title='')
         )
 
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
         st.plotly_chart(income_fig, use_container_width=True)
+
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
         st.plotly_chart(balance_fig, use_container_width=True)
@@ -1562,10 +1566,10 @@ with st.expander("IBIS"):
         if not df_selected.empty:
             ibischarts = create_category_charts(df_selected)
 
-            for i, category_charts in enumerate(ibischarts):
+            for i, chart in enumerate(ibischarts):
                 category_name = df_selected['Category'].unique()[i]
                 st.subheader(f"{category_name}")
-                st.plotly_chart(category_charts, use_container_width=True)
+                st.plotly_chart(chart, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
 
@@ -1575,7 +1579,7 @@ if st.button("Export Charts to PowerPoint", key="export_button"):
         pptx_file = export_all_to_pptx(
             labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
             fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
-            labour_fig, gdp_fig, category_charts,
+            labour_fig, gdp_fig,
             income_statement_df, balance_sheet_df, state_name
         )
 
