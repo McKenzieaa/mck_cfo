@@ -1513,10 +1513,7 @@ with st.expander("Benchmarking"):
             text_auto=True
         )
         # Apply custom colors
-        income_fig.update_traces(
-            marker_color=["#032649", "#EB8928"],
-            selector=dict(type="bar")
-        )
+        income_fig.update_traces(marker_color=["#032649", "#EB8928"])
         income_fig.update_layout(
             xaxis_tickangle=45,
             height=400,
@@ -1534,10 +1531,7 @@ with st.expander("Benchmarking"):
             text_auto=True
         )
         # Apply custom colors
-        balance_fig.update_traces(
-            marker_color=["#032649", "#EB8928"],
-            selector=dict(type="bar")
-        )
+        balance_fig.update_traces(marker_color=["#032649", "#EB8928"])
         balance_fig.update_layout(
             xaxis_tickangle=45,
             height=400,
