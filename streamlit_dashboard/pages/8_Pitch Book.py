@@ -136,7 +136,7 @@ def add_table_to_slide(slide, df, left, top, width, height, font_size=Pt(10), he
 def export_all_to_pptx(
     labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
     fig1_precedent, fig2_precedent, fig1_public, fig2_public,
-    labour_fig, gdp_fig,  income_statement_df,create_category_charts,
+    labour_fig, gdp_fig, income_statement_df, create_category_charts,
     balance_sheet_df, state_name, income_fig, balance_fig
 ):
     # Load the custom template
@@ -155,9 +155,19 @@ def export_all_to_pptx(
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
     update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "RMA-Balance Sheer", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
-    update_figure_slide(ppt, "IBIS Chart", create_category_charts, slide_number=7, width=5, height=2.50, left=0.08, top=4.4)
-    
+    update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
+
+    # Create category charts for IBIS section
+    ibischarts = create_category_charts(df_selected)  # This returns a list of Plotly figures
+
+    for i, chart in enumerate(ibischarts):
+        category_name = df_selected['Category'].unique()[i]
+        st.subheader(f"{category_name}")
+        st.plotly_chart(chart, use_container_width=True)
+        
+        # Add each chart to PowerPoint slide
+        update_figure_slide(ppt, f"IBIS Chart - {category_name}", chart, slide_number=7, width=5, height=2.50, left=0.08, top=4.4 + i * 3)
+
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
     add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
@@ -643,76 +653,75 @@ def get_data(industry):
         connection.close()
         return df
 def create_category_charts(df):
-        category_charts = []
+    category_charts = []
 
-        bar_color = '#032649'
-        line_color = '#EB8928'
+    bar_color = '#032649'
+    line_color = '#EB8928'
 
-        for category in df['Category'].unique():
-            category_data = df[df['Category'] == category]
-            
-            # Calculate the change for the category
-            category_data['Change'] = category_data['Value'].pct_change() * 100
-            
-            # Get the last value for each category
-            last_value = category_data['Value'].iloc[-1]
-            last_change = category_data['Change'].iloc[-1]
+    for category in df['Category'].unique():
+        category_data = df[df['Category'] == category]
+       
+        # Get the last value for each category
+        last_value = category_data['Value'].iloc[-1]
+        last_change = category_data['Change'].iloc[-1]
 
-            # Create a subplot with secondary y-axis
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
+        # Create a subplot with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-            # Add bar chart for 'Value' on the primary y-axis
-            fig.add_trace(
-                go.Bar(
-                    x=category_data['Year'],
-                    y=category_data['Value'],
-                    name='Value',
-                    marker_color=bar_color,
-                    text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
-                    textposition="outside"  # Place text outside the bars
-                ),
-                secondary_y=False
-            )
+        # Add bar chart for 'Value' on the primary y-axis
+        fig.add_trace(
+            go.Bar(
+                x=category_data['Year'],
+                y=category_data['Value'],
+                name='Value',
+                marker_color=bar_color,
+                text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
+                textposition="outside"  # Place text outside the bars
+            ),
+            secondary_y=False
+        )
 
-            # Add line chart for 'Change' on the secondary y-axis
-            fig.add_trace(
-                go.Scatter(
-                    x=category_data['Year'],
-                    y=category_data['Change'],
-                    name='Change (%)',
-                    mode='lines+markers',
-                    line=dict(color=line_color),
-                    text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
-                    textposition="top center"  # Place text above the last marker
-                ),
-                secondary_y=True
-            )
+        # Add line chart for 'Change' on the secondary y-axis
+        fig.add_trace(
+            go.Scatter(
+                x=category_data['Year'],
+                y=category_data['Change'],
+                name='Change (%)',
+                mode='lines+markers',
+                line=dict(color=line_color),
+                text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
+                textposition="top center"  # Place text above the last marker
+            ),
+            secondary_y=True
+        )
 
-            # Update axis titles
-            fig.update_layout(
-                # title_text=f"{category} - Value vs Change",
-                xaxis_title="Year",
-                yaxis_title="Value",
-            )
+        # Update axis titles
+        fig.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Value",
+        )
 
-            # Set secondary y-axis title
-            fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
-            fig.update_yaxes(title_text="Change (%)", secondary_y=True)
+        # Set secondary y-axis title
+        fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
+        fig.update_yaxes(title_text="Change (%)", secondary_y=True)
 
-            # Update the legend position (upper-left)
-            fig.update_layout(
-                legend=dict(
-                    x=0, 
-                    y=1, 
-                    xanchor='left', 
-                    yanchor='top'
-                ),
-                yaxis=dict(showgrid=False),
-                margin=dict(l=50, r=50, t=50,b=50),height=400,width=600
-            )
+        # Update the legend position (upper-left)
+        fig.update_layout(
+            legend=dict(
+                x=0, 
+                y=1, 
+                xanchor='left', 
+                yanchor='top'
+            ),
+            yaxis=dict(showgrid=False),
+            margin=dict(l=50, r=50, t=50,b=50),
+            height=400,
+            width=600
+        )
 
-            category_charts.append(fig)
-        return category_charts
+        category_charts.append(fig)
+
+    return category_charts
 
 def fetch_cpi_data(series_id, df_cleaned):
     selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
