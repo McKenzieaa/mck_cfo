@@ -1505,7 +1505,6 @@ with st.expander("Benchmarking"):
             income_statement_df,
             x="LineItems",
             y=["RMA Percent", "Public Comp Percent"],
-            # labels={"value": "Percentage (%)", "LineItems": "Items"},
             barmode="group",
             text_auto=True
         )
