@@ -160,8 +160,8 @@ def export_all_to_pptx(
 
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
-    add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(12))
-    add_table_to_slide(slide, balance_sheet_df, left=5.2, top=0.9, width=4.3, height=5.65, header_font_size=Pt(12))
+    add_table_to_slide(slide, income_statement_df, left=0.35, top=0.90, width=4.3, height=3.4, header_font_size=Pt(10))
+    add_table_to_slide(slide, balance_sheet_df, left=5.2, top=0.9, width=4.3, height=5.65, header_font_size=Pt(10))
 
     # Save the PPT file to BytesIO and return the bytes
     ppt_bytes = BytesIO()
