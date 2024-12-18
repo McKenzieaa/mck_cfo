@@ -1524,22 +1524,22 @@ with st.expander("IBIS"):
         else:
             st.warning(f"No data available for the selected industry: {industry}")
 
-if st.button("Export Charts to PowerPoint", key="export_button"):
-    try:
+            if st.button("Export Charts to PowerPoint", key="export_button"):
+                try:
 
-        pptx_file = export_all_to_pptx(
-            labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
-            fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
-            labour_fig, gdp_fig, create_category_charts, 
-            income_statement_df, balance_sheet_df, state_name
-        )
+                    pptx_file = export_all_to_pptx(
+                        labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
+                        fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
+                        labour_fig, gdp_fig, create_category_charts, 
+                        income_statement_df, balance_sheet_df, state_name
+                    )
 
-        st.download_button(
-            label="Download PowerPoint", 
-            data=pptx_file,
-            file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation" 
-        )
+                    st.download_button(
+                        label="Download PowerPoint", 
+                        data=pptx_file,
+                        file_name=f"Pitch_Book_{date.today().strftime('%Y-%m-%d')}.pptx",
+                        mime="application/vnd.openxmlformats-officedocument.presentationml.presentation" 
+                    )
 
-    except Exception as e:
-        st.error(f"Error during PowerPoint export: {e}")
+                except Exception as e:
+                    st.error(f"Error during PowerPoint export: {e}")
