@@ -135,8 +135,8 @@ if selected_industry:
         text_auto=True
     )
 
-    # Update bar colors
-    income_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
+    # # Update bar colors
+    # income_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
 
     # Update layout to remove legend title and position it to the upper left
     income_fig.update_layout(
@@ -163,8 +163,8 @@ if selected_industry:
         text_auto=True
     )
 
-    # Update bar colors
-    balance_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
+    # # Update bar colors
+    # balance_fig.update_traces(marker=dict(color=["#032649", "#EB8928"]))
 
     # Update layout to remove legend title and position it to the upper left
     balance_fig.update_layout(
