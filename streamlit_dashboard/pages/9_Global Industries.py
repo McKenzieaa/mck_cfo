@@ -140,7 +140,7 @@ with st.expander("", expanded=True):
                 font=dict(size=8)  # Set font size to 8
             )
         )
-        st.plotly_chart(fig1)
+        # st.plotly_chart(fig1)
 
     fig2 = px.line(
         df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
@@ -155,7 +155,7 @@ with st.expander("", expanded=True):
         title="Average Price of Electricity (Cents per Kilowatthour)"
     )
     fig3.update_traces(line_color="#0068c9")
-    st.plotly_chart(fig3)
+    # st.plotly_chart(fig3)
 
     # Electricity Generation Map
     # st.sidebar.header("Electricity Generation")
@@ -180,7 +180,7 @@ with st.expander("", expanded=True):
         )
     )
 
-    st.plotly_chart(fig4)
+    # st.plotly_chart(fig4)
 
     # Renewable Share of Electricity
     # st.sidebar.header("Renewable Share Selection")
@@ -194,7 +194,7 @@ with st.expander("", expanded=True):
             title="Renewable Share of Electricity"
         )
         fig5.update_traces(line_color="#0068c9")
-        st.plotly_chart(fig5)
+        # st.plotly_chart(fig5)
 
     # Solar Projects Coming Up Next 12 Months
     # st.sidebar.header("Map of Solar Projects Coming Up Next 12 Months")
@@ -219,7 +219,20 @@ with st.expander("", expanded=True):
     )
     fig6.update_layout(barmode='stack')
     fig6.update_xaxes(title_text="")
-    st.plotly_chart(fig6)
+    # st.plotly_chart(fig6)
+
+    # Display charts in columns
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig3, use_container_width=True)
+
+    with col2:
+        st.plotly_chart(fig4, use_container_width=True)
+        st.plotly_chart(fig5, use_container_width=True)
+        st.plotly_chart(fig6, use_container_width=True)
 
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
