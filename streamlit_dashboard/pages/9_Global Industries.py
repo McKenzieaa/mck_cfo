@@ -304,4 +304,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6):
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
-export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6)
+export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6, fig7)
