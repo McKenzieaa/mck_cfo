@@ -233,6 +233,8 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig4, use_container_width=True)
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
+
+    st.write("Value Chain Analysis")
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", caption="Value Chain",use_container_width=False)
 
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
