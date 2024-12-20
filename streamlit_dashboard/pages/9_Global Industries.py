@@ -233,7 +233,7 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig4, use_container_width=True)
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
-    st.image("https://www.google.com/imgres?q=electricity%20supply%20chain%20diagram&imgurl=https%3A%2F%2Fwww.energy-uk.org.uk%2Fwp-content%2Fuploads%2F2023%2F04%2FEUK-Different-parts-of-energy-market-diagram.webp&imgrefurl=https%3A%2F%2Fwww.energy-uk.org.uk%2Finsights%2Fdifferent-parts-of-the-energy-market%2F&docid=cZAjE6ZsAbD0XM&tbnid=HwLP5qGByzm7XM&vet=12ahUKEwi-xabZgIiIAxUiyqACHbPAK_IQM3oECEMQAA..i&w=1800&h=991&hcb=2&ved=2ahUKEwi-xabZgIiIAxUiyqACHbPAK_IQM3oECEMQAA", caption="Value Chain", use_column_width=True)
+    st.image("https://www.google.com/imgres?q=electricity%20supply%20chain%20diagram&imgurl=https%3A%2F%2Fwww.energy-uk.org.uk%2Fwp-content%2Fuploads%2F2023%2F04%2FEUK-Different-parts-of-energy-market-diagram.webp&imgrefurl=https%3A%2F%2Fwww.energy-uk.org.uk%2Finsights%2Fdifferent-parts-of-the-energy-market%2F&docid=cZAjE6ZsAbD0XM&tbnid=HwLP5qGByzm7XM&vet=12ahUKEwi-xabZgIiIAxUiyqACHbPAK_IQM3oECEMQAA..i&w=1800&h=991&hcb=2&ved=2ahUKEwi-xabZgIiIAxUiyqACHbPAK_IQM3oECEMQAA", caption="Value Chain",use_container_width=False)
 
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
