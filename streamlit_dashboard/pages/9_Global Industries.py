@@ -233,7 +233,7 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig4, use_container_width=True)
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
-    st.image(f"streamlit_dashboard\data\value_chain.png", caption="Value Chain", use_column_width=True)
+    st.image("value_chain.png", caption="Value Chain", use_column_width=True)
 
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
