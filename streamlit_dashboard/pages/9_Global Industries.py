@@ -286,6 +286,7 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6):
     add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
     add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
     add_slide_with_chart(prs, fig6, "Per Capita Electricity-2023")
+    add_slide_with_chart(prs, fig7, "Energy Source Consumption")
 
     pptx_stream = BytesIO()
     prs.save(pptx_stream)
