@@ -121,6 +121,7 @@ df_ene_cons = pd.read_csv(ene_cons)
 df_ene_cons = df_ene_cons[df_ene_cons['Description'].str.contains("Residential|Transportation|Industrial|Commercial", case=False, na=False)]
 df_ene_cons['Year'] = df_ene_cons['YYYYMM'].astype(str).str[:4]
 df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
+df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
 df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
 
 # ENERGY
@@ -234,6 +235,7 @@ with st.expander("", expanded=True):
         x='Year', y='Value', color='Description',
         title='Energy Source Distribution Over Years',
         labels={'Value': 'Energy Value', 'Year': 'Year'},
+        
         color_discrete_sequence=px.colors.qualitative.Set2
     )
 
