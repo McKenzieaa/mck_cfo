@@ -117,7 +117,7 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
 })
 
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
-df_ene_cons = pd.read_csv(url)
+df_ene_cons = pd.read_csv(ene_cons)
 df_ene_cons = df_ene_cons[['Year', 'Energy Source', 'Value']]
 df_ene_cons = df_ene_cons.groupby(['Year', 'Energy Source'], as_index=False).sum()
 
