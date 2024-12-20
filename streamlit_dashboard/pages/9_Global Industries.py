@@ -115,11 +115,13 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
     'nuclear_elec_per_capita': 'Nuclear',
     'renewables_elec_per_capita': 'Renewables'
 })
-
+# Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
 df_ene_cons = pd.read_csv(ene_cons)
-df_ene_cons = df_ene_cons[['YYYYMM', 'Description', 'Value']]
-df_ene_cons = df_ene_cons.groupby(['YYYYMM', 'Description'], as_index=False).sum()
+df_ene_cons = df_ene_cons[df_ene_cons['Description'].str.contains("Residential|Transportation|Industrial|Commercial", case=False, na=False)]
+df_ene_cons['Year'] = df_ene_cons['YYYYMM'].astype(str).str[:4]
+df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
+df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
 
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
@@ -229,9 +231,9 @@ with st.expander("", expanded=True):
  
     fig7 = px.bar(
         df_ene_cons,
-        x='YYYYMM', y='Value', color='Description',
+        x='Year', y='Value', color='Description',
         title='Energy Source Distribution Over Years',
-        labels={'Value': 'Energy Value', 'YYYYMM': 'Year'},
+        labels={'Value': 'Energy Value', 'Year': 'Year'},
         color_discrete_sequence=px.colors.qualitative.Set2
     )
 
