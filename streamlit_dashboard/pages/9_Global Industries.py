@@ -234,8 +234,8 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
 
-    st.write("<h2 style='font-weight: bold; font-size:24px;'>Value Chanin</h2>")
-    st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", caption="Value Chain",use_container_width=False)
+    st.write("<h2 style='font-weight: bold; font-size:24px;'>Value Chain</h2>", unsafe_allow_html=True)
+    st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
 
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
