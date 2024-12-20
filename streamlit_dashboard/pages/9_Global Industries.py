@@ -116,6 +116,11 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
     'renewables_elec_per_capita': 'Renewables'
 })
 
+ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
+df_ene_cons = pd.read_csv(url)
+df_ene_cons = df_ene_cons[['Year', 'Energy Source', 'Value']]
+df_ene_cons = df_ene_cons.groupby(['Year', 'Energy Source'], as_index=False).sum()
+
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=True): 
@@ -220,6 +225,15 @@ with st.expander("", expanded=True):
     fig6.update_layout(barmode='stack')
     fig6.update_xaxes(title_text="")
     # st.plotly_chart(fig6)
+    # Additional Bar Chart (Fig 7)
+ 
+    fig7 = px.bar(
+        df_ene_cons,
+        x='YYYYMM', y='Value', color='Description',
+        title='Energy Source Distribution Over Years',
+        labels={'Value': 'Energy Value', 'YYYYMM': 'Year'},
+        color_discrete_sequence=px.colors.qualitative.Set2
+    )
 
     # Display charts in columns
     col1, col2 = st.columns(2)
@@ -233,6 +247,8 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig4, use_container_width=True)
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
+    
+    st.plotly_chart(fig7, use_container_width=True)
 
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
