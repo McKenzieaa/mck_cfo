@@ -234,9 +234,7 @@ with st.expander("", expanded=True):
         df_ene_cons,
         x='Year', y='Value', color='Description',
         title='Energy Source Distribution Over Years',
-        labels={'Value': 'Energy Value', 'Year': 'Year'},
-        
-        color_discrete_sequence=px.colors.qualitative.Set2
+        labels={'Value': 'Energy Value', 'Year': 'Year'}
     )
 
     # Display charts in columns
