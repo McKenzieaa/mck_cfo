@@ -296,7 +296,7 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6):
 def export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6):
     # st.subheader("Export Charts")
     if st.button("Export Charts to PowerPoint"):
-        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6)
+        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
