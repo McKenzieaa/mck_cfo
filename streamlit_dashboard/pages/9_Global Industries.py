@@ -122,7 +122,7 @@ df_ene_cons = df_ene_cons[df_ene_cons['Description'].str.contains("Residential|T
 df_ene_cons['Year'] = df_ene_cons['YYYYMM'].astype(str).str[:4]
 df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
 df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
-df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
+# df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
 
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
