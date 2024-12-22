@@ -313,7 +313,7 @@ st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", u
 with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -326,8 +326,15 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
         img_stream.seek(0)
         slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
 
+    # Add slides with charts
     add_slide_with_chart(prs, fig1, "Market Size - Yearly")
     add_slide_with_chart(prs, fig2, "Electricity End Use")
+    
+    # Add value chain image to slide 3
+    slide = prs.slides.add_slide(slide_layout)
+    slide.shapes.title.text = "Value Chain Analysis"
+    slide.shapes.add_picture(value_chain_image_path, Inches(1), Inches(1), width=Inches(8))
+    
     add_slide_with_chart(prs, fig3, "Average Price of Electricity")
     add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
     add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
@@ -340,10 +347,9 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
-    # st.subheader("Export Charts")
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path):
     if st.button("Export Charts to PowerPoint"):
-        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8)
+        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
@@ -351,4 +357,6 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
-export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8)
+# Example of calling the function
+value_chain_image_path = "https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp"
+export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
