@@ -10,8 +10,57 @@ from pptx.util import Inches
 import plotly.io as pio
 from io import StringIO
 import os
+import mysql.connector
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
+
+# MySQL database connection details 
+host = st.secrets["mysql"]["host"]
+user = st.secrets["mysql"]["user"]
+password = st.secrets["mysql"]["password"]
+database = st.secrets["mysql"]["database"]
+
+# Connect to the MySQL database
+try:
+    conn = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+    )
+except mysql.connector.Error as e:
+    st.error(f"Error connecting to MySQL: {e}")
+    st.stop()
+
+# Query to fetch the data from the MySQL table
+query = """
+SELECT 
+    `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
+FROM 
+    precedent_table
+"""
+
+try:
+    df_pt = pd.read_sql(query, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL: {e}")
+    st.stop()
+
+# Close the MySQL connection
+conn.close()
+industries_pt = [
+    'Hydroelectric Power Generation',
+    'Natural Gas Extraction',
+    'Petroleum and Petroleum Products Merchant Wholesalers (except Bulk Stations and Terminals)',
+    'Crude Petroleum Extraction',
+    'Pipeline Transportation of Natural Gas',
+    'Natural Gas Distribution',
+    'Industrial Gas Manufacturing'
+]
+df_pt_filter = df_pt[df_pt['Industry'].isin(industries_pt)]
+df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
+
+# Selected Countries
 selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
     
 category_data = [
@@ -324,6 +373,19 @@ with st.expander("", expanded=True):
              title="Electricity Generation (2023)",
              labels={'Category': 'Energy Source'},
              height=600)
+    
+    fig11 = px.bar(df_pt_grouped, 
+              x='Year', 
+              y='EV/Revenue', 
+              title="Average EV/Revenue by Year for Filtered Industries",
+              labels={'EV/Revenue': 'Average EV/Revenue'},
+              height=400)
+    fig12 = px.bar(df_pt_grouped, 
+              x='Year', 
+              y='EV/EBITDA', 
+              title="Average EV/EBITDA by Year for Filtered Industries",
+              labels={'EV/EBITDA': 'Average EV/EBITDA'},
+              height=400)
 
     col1, col2 = st.columns(2)
 
@@ -343,6 +405,9 @@ with st.expander("", expanded=True):
     
     st.plotly_chart(fig9, use_container_width=True)
     st.plotly_chart(fig10, use_container_width=True)
+    st.plotly_chart(fig11, use_container_width=True)
+    st.plotly_chart(fig12, use_container_width=True)
+
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
 
@@ -359,7 +424,7 @@ with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -396,15 +461,18 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     add_slide_with_chart(prs, fig8, "Energy Source Distribution Over Years")
     add_slide_with_chart(prs, fig9, "Renewables as a Percentage of Electricity Production")
     add_slide_with_chart(prs, fig10, "Per capita electricity generation by source, 2023")
+    add_slide_with_chart(prs, fig11, "Precedent Transaction - EV/Revenue")
+    add_slide_with_chart(prs, fig12, "Precedent Transaction - EV/EBITDA")
+
     pptx_stream = BytesIO()
     prs.save(pptx_stream)
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path):
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -415,4 +483,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, f
             st.error(f"Error: {e}")
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
-export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path)
+export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path)
