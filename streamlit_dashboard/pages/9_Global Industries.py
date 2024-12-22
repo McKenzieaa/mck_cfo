@@ -144,7 +144,7 @@ source_category_mapping = {
 }
 df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
 df_electricity_gen2_2023 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
-df_agg = df_electricity_gen2_2023.groupby(['Category', 'Description']).sum().reset_index()
+# df_agg = df_electricity_gen2_2023.groupby(['Category', 'Description']).sum().reset_index()
 
 # Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
@@ -317,12 +317,12 @@ with st.expander("", expanded=True):
     )
     fig9.update_yaxes(tickformat=".1%")
 
-    fig10 = px.bar(df_agg, 
+    fig10 = px.bar(df_electricity_gen2, 
              x='Category', 
-             y=df_agg.columns.difference(['Category', 'Description']),
+             y='Value',
              color='Description',
              title="Electricity Generation by Category and Description (2023)",
-             labels={'Category': 'Energy Source Category', 'value': 'Generation Value'},
+             labels={'Category': 'Energy Source Category'},
              height=600)
 
     col1, col2 = st.columns(2)
