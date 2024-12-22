@@ -368,5 +368,5 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_c
         )
 
 # Example of calling the function
-value_chain_image_path = r"streamlit_dashboard\data\value_chain.png"  # Ensure this path is correct
+value_chain_image_path = "streamlit_dashboard\data\value_chain.png"  # Ensure this path is correct
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
