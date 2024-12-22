@@ -118,38 +118,33 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
     'renewables_elec_per_capita': 'Renewables'
 })
  
-
 ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
 df_electricity_gen2 = pd.read_csv(ele_gen_url)
-print(df_electricity_gen2.columns)
-df_electricity_gen2['Description'] = df_electricity_gen2['DescriptionColumn'].str.extract(r'From (.*?),')
+df_electricity_gen2['Description'] = df_electricity_gen2['Description'].str.extract(r'From (.*?),')
+df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Description'].notna()]
+df_electricity_gen2.drop(columns=['MSN'], inplace=True)
+df_electricity_gen2.drop(columns=['Column_Order'], inplace=True, errors='ignore')
 df_electricity_gen2['Year'] = df_electricity_gen2['YYYYMM'].astype(str).str[:4]
+df_electricity_gen2['YYYYMM'] = df_electricity_gen2['YYYYMM'].astype(str)
+df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['YYYYMM'].str.endswith('13')]
 df_electricity_gen2.drop(columns=['YYYYMM'], inplace=True)
-categories = {
-    'Fossil Fuel': ['Natural Gas', 'Coal', 'Petroleum', 'Other Gases'],
-    'Nuclear': ['Nuclear'],
-    'Hydroelectric': ['Hydroelectric (pumped)', 'Hydroelectric (conventional)'],
-    'Solar': ['Solar'],
-    'Wind': ['Wind']
+source_category_mapping = {
+    'Coal': 'Fossil Fuel',
+    'Petroleum': 'Fossil Fuel',
+    'Natural Gas': 'Fossil Fuel',
+    'Other Fossil Gases': 'Fossil Fuel',
+    'Nuclear Electric Power': 'Nuclear',
+    'Hydroelectric Pumped Storage': 'Hydroelectric',
+    'Conventional Hydroelectric Power': 'Hydroelectric',
+    'Wood': 'Other',
+    'Waste': 'Other',
+    'Geothermal': 'Other',
+    'Solar': 'Solar',
+    'Wind': 'Wind'
 }
-
-def categorize(row):
-    for category, sources in categories.items():
-        if any(source in row['Description'] for source in sources):
-            return category
-    return 'Others'
-
-df_electricity_gen2['Category'] = df_electricity_gen2.apply(categorize, axis=1)
-df_electricity_gen2['Others'] = df_electricity_gen2['Total'] - df_electricity_gen2[[
-    'Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 'Hydroelectric (pumped)',
-    'Hydroelectric (conventional)', 'Solar', 'Wind'
-]].sum(axis=1)
-
-df_elec_gen_2023 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
-pivot_df = df_elec_gen_2023.groupby('Category')[[
-    'Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 'Hydroelectric (pumped)', 
-    'Hydroelectric (conventional)', 'Solar', 'Wind', 'Others']].sum()
-pivot_df.reset_index(inplace=True)
+df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
+df_electricity_gen2_2023 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
+df_agg = df_electricity_gen2_2023.groupby(['Category', 'Description']).sum().reset_index()
 
 # Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
@@ -322,19 +317,13 @@ with st.expander("", expanded=True):
     )
     fig9.update_yaxes(tickformat=".1%")
 
-    fig10 = px.bar(pivot_df, 
+    fig10 = px.bar(df_agg, 
              x='Category', 
-             y=['Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 
-                 'Hydroelectric (pumped)', 'Hydroelectric (conventional)', 'Solar', 
-                 'Wind', 'Others'], 
-             title='Energy Generation by Category in 2023',
-             labels={'value': 'Energy Generation (MWh)', 'Category': 'Energy Categories'},
+             y=df_agg.columns.difference(['Category', 'Description']),
+             color='Description',
+             title="Electricity Generation by Category and Description (2023)",
+             labels={'Category': 'Energy Source Category', 'value': 'Generation Value'},
              height=600)
-
-    fig10.update_layout(barmode='stack', 
-                  xaxis_title='Energy Categories',
-                  yaxis_title='Energy Generation (MWh or other unit)', 
-                  legend_title='Subcategories')
 
     col1, col2 = st.columns(2)
 
