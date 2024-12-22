@@ -9,6 +9,7 @@ from pptx import Presentation
 from pptx.util import Inches
 import plotly.io as pio
 from io import StringIO
+import os
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
     
@@ -333,7 +334,16 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_i
     # Add value chain image to slide 3
     slide = prs.slides.add_slide(slide_layout)
     slide.shapes.title.text = "Value Chain Analysis"
-    slide.shapes.add_picture(value_chain_image_path, Inches(1), Inches(1), width=Inches(8))
+    
+    if os.path.exists(value_chain_image_path):
+        # Read the image into a BytesIO stream
+        img_stream = BytesIO()
+        with open(value_chain_image_path, "rb") as img_file:
+            img_stream.write(img_file.read())
+        img_stream.seek(0)
+        slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
+    else:
+        raise FileNotFoundError(f"The image at {value_chain_image_path} was not found.")
     
     add_slide_with_chart(prs, fig3, "Average Price of Electricity")
     add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
@@ -358,5 +368,5 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_c
         )
 
 # Example of calling the function
-value_chain_image_path = r"streamlit_dashboard\data\value_chain.png"
+value_chain_image_path = r"streamlit_dashboard\data\value_chain.png"  # Ensure this path is correct
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
