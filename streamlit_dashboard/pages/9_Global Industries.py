@@ -332,17 +332,17 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig2, use_container_width=True)
         st.plotly_chart(fig3, use_container_width=True)
         st.plotly_chart(fig7, use_container_width=True)
-        st.plotly_chart(fig9, use_container_width=True)
+        
 
     with col2:
         st.plotly_chart(fig4, use_container_width=True)
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
         st.plotly_chart(fig8, use_container_width=True)
-        st.plotly_chart(fig10, use_container_width=True)
+        
     
-    
-
+    st.plotly_chart(fig9, use_container_width=True)
+    st.plotly_chart(fig10, use_container_width=True)
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
 
