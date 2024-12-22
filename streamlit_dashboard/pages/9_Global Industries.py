@@ -86,13 +86,19 @@ df_electricity_gen = pd.read_csv(url2)
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
 df_electricity_gen2 = pd.read_csv(url2)
-df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['year'] == 2023]
+rename_columns = {
+    'coal_elec_per_capita': 'Coal',
+    'hydro_elec_per_capita': 'Hydro Power',
+    'nuclear_elec_per_capita': 'Nuclear Power',
+    'oil_elec_per_capita': 'Oil',
+    'solar_elec_per_capita': 'Solar',
+    'wind_elec_per_capita': 'Wind',
+    'biofuel_elec_per_capita': 'Biofuel',
+    'other_renewables_energy_per_capita': 'Other Renewables'
+}
 df_electricity_gen2 = df_electricity_gen2[(df_electricity_gen2['year'] == 2023) & (df_electricity_gen2['country'].isin(selected_countries))]
-columns_elec = [
-    'coal_elec_per_capita', 'hydro_elec_per_capita', 'nuclear_elec_per_capita', 
-    'oil_elec_per_capita', 'solar_elec_per_capita', 'wind_elec_per_capita', 
-    'biofuel_elec_per_capita', 'other_renewables_energy_per_capita'
-]
+df_electricity_gen2 = df_electricity_gen2.rename(columns=rename_columns)
+columns_elec = ['Coal', 'Hydro Power', 'Nuclear Power', 'Oil', 'Solar', 'Wind', 'Biofuel', 'Other Renewables']
 
 # df_per_cap_elec_gen['total_elec_per_capita'] = (
 #     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
