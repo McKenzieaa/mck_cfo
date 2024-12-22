@@ -321,8 +321,8 @@ with st.expander("", expanded=True):
              x='Category', 
              y='Value',
              color='Description',
-             title="Electricity Generation by Category and Description (2023)",
-             labels={'Category': 'Energy Source Category'},
+             title="Electricity Generation (2023)",
+             labels={'Category': 'Energy Source'},
              height=600)
 
     col1, col2 = st.columns(2)
