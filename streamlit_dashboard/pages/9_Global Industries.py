@@ -11,15 +11,6 @@ import plotly.io as pio
 from io import StringIO
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
-
-def download_image(image_url):
-    """Downloads an image from a URL and returns a BytesIO object."""
-    response = requests.get(image_url)
-    if response.status_code == 200:
-        image_stream = BytesIO(response.content)
-        return image_stream  # Return only the BytesIO object, not a tuple
-    else:
-        raise Exception(f"Failed to download image from {image_url}")
     
 category_data = [
     ('22T', 'Utilities', 'QREV', 'QSS'),
@@ -339,14 +330,10 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_i
     add_slide_with_chart(prs, fig1, "Market Size - Yearly")
     add_slide_with_chart(prs, fig2, "Electricity End Use")
     
-    # Download and add value chain image to slide 3
-    value_chain_image_stream = download_image(value_chain_image_path)
+    # Add value chain image to slide 3
     slide = prs.slides.add_slide(slide_layout)
     slide.shapes.title.text = "Value Chain Analysis"
-    
-    # Use the BytesIO stream for the image
-    value_chain_image_stream.seek(0)  # Make sure the stream is at the correct position
-    slide.shapes.add_picture(value_chain_image_stream, Inches(1), Inches(1), width=Inches(8))
+    slide.shapes.add_picture(value_chain_image_path, Inches(1), Inches(1), width=Inches(8))
     
     add_slide_with_chart(prs, fig3, "Average Price of Electricity")
     add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
@@ -371,5 +358,5 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_c
         )
 
 # Example of calling the function
-value_chain_image_path = "https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp"
+value_chain_image_path = r"streamlit_dashboard\data\value_chain.png"
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
