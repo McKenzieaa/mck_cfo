@@ -81,28 +81,49 @@ df_avg_price.rename(columns={df_avg_price.columns[0]: "Year"}, inplace=True)
 df_electricity_gen = pd.read_csv(url2)
 df_renew_share = df_electricity_gen.dropna(subset=['renewables_share_elec'])
 
-# Per Capita Electricty Data
-ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
-df_electricity_gen = pd.read_csv(ele_gen_url)
+df_electricity_gen = pd.read_csv(url2)
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
+# df_per_cap_elec_gen['total_elec_per_capita'] = (
+#     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
+# )
+# top_10_countries = df_per_cap_elec_gen.nlargest(10, 'total_elec_per_capita')
+# df_per_cap_elec_gen = top_10_countries.melt(
+#     id_vars=['country'],
+#     value_vars=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'],
+#     var_name='Energy Source',
+#     value_name='Per Capita Generation'
+# )
 
+# df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].replace({
+#     'fossil_elec_per_capita': 'Fossil',
+#     'nuclear_elec_per_capita': 'Nuclear',
+#     'renewables_elec_per_capita': 'Renewables'
+# })
+# df_per_cap_elec_gen_pivot = df_per_cap_elec_gen.pivot(index='country', columns='Energy Source', values='Per Capita Generation')
+
+selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
+df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['country'].isin(selected_countries)]
+
+df_per_cap_elec_gen = df_per_cap_elec_gen.melt(
+    id_vars=['country'],
+    value_vars=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'],
+    var_name='Energy Source',
+    value_name='Per Capita Generation'
+)
+
+df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].replace({
+    'fossil_elec_per_capita': 'Fossil',
+    'nuclear_elec_per_capita': 'Nuclear',
+    'renewables_elec_per_capita': 'Renewables'
+})
+ 
+# Electricity Net Generation: Electric Power Sector - Table 7.2b
 ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
 df_electricity_gen2 = pd.read_csv(ele_gen_url)
-
-# Extract 'Description' between "From" and ","
 df_electricity_gen2['Description'] = df_electricity_gen2['column_name'].str.extract(r'From (.*?),')
-
-# Rename 'YYYYMM' to 'Year' and extract the first 4 characters
 df_electricity_gen2['Year'] = df_electricity_gen2['YYYYMM'].astype(str).str[:4]
-
-# Drop the original 'YYYYMM' column if necessary
 df_electricity_gen2.drop(columns=['YYYYMM'], inplace=True)
-
-# Categorizing columns
-# Assuming the columns for energy sources have specific names, e.g., 'Natural Gas', 'Coal', etc.
-# You'll need to adjust column names as per your dataset.
-
 categories = {
     'Fossil Fuel': ['Natural Gas', 'Coal', 'Petroleum', 'Other Gases'],
     'Nuclear': ['Nuclear'],
@@ -111,7 +132,6 @@ categories = {
     'Wind': ['Wind']
 }
 
-# Adding a column for the categorized energy source
 def categorize(row):
     for category, sources in categories.items():
         if any(source in row['Description'] for source in sources):
@@ -133,39 +153,6 @@ pivot_df = df_elec_gen_2023.groupby('Category')[[
 # Reset the index to make 'Category' a column (for Plotly)
 pivot_df.reset_index(inplace=True)
 
-# df_per_cap_elec_gen['total_elec_per_capita'] = (
-#     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
-# )
-# top_10_countries = df_per_cap_elec_gen.nlargest(10, 'total_elec_per_capita')
-# df_per_cap_elec_gen = top_10_countries.melt(
-#     id_vars=['country'],
-#     value_vars=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'],
-#     var_name='Energy Source',
-#     value_name='Per Capita Generation'
-# )
-
-# df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].replace({
-#     'fossil_elec_per_capita': 'Fossil',
-#     'nuclear_elec_per_capita': 'Nuclear',
-#     'renewables_elec_per_capita': 'Renewables'
-# })
-# df_per_cap_elec_gen_pivot = df_per_cap_elec_gen.pivot(index='country', columns='Energy Source', values='Per Capita Generation')
-
-
-df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['country'].isin(selected_countries)]
-
-df_per_cap_elec_gen = df_per_cap_elec_gen.melt(
-    id_vars=['country'],
-    value_vars=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'],
-    var_name='Energy Source',
-    value_name='Per Capita Generation'
-)
-
-df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].replace({
-    'fossil_elec_per_capita': 'Fossil',
-    'nuclear_elec_per_capita': 'Nuclear',
-    'renewables_elec_per_capita': 'Renewables'
-})
 # Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
 df_ene_cons = pd.read_csv(ene_cons)
@@ -346,7 +333,6 @@ with st.expander("", expanded=True):
              labels={'value': 'Energy Generation (MWh)', 'Category': 'Energy Categories'},
              height=600)
 
-# Update layout for better appearance
     fig10.update_layout(barmode='stack', 
                   xaxis_title='Energy Categories',
                   yaxis_title='Energy Generation (MWh or other unit)', 
