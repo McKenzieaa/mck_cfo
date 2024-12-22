@@ -125,7 +125,9 @@ df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
 df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
 # df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
 
+# Share of electricity production from renewables
 share_elec_prod = "https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
+
 try:
     response = requests.get(share_elec_prod)
     response.raise_for_status()  # Raise an HTTPError for bad responses
@@ -134,9 +136,21 @@ try:
 except requests.exceptions.RequestException as e:
     print(f"Failed to fetch data: {e}")
     exit()
-df_share_elec_prod = pd.read_csv(share_elec_prod)
+
 df_share_elec_prod.rename(columns={'Entity': 'Countries'}, inplace=True)
 filt_share_elec_prod = df_share_elec_prod[df_share_elec_prod['Countries'].isin(selected_countries)]
+
+if 'Year' in filt_share_elec_prod.columns and 'renewable_share_of_electricity__pct' in filt_share_elec_prod.columns:
+    # Clean and convert data types
+    filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
+    filt_share_elec_prod['Year'] = pd.to_numeric(filt_share_elec_prod['Year'], errors='coerce')
+    filt_share_elec_prod['renewable_share_of_electricity__pct'] = pd.to_numeric(
+        filt_share_elec_prod['renewable_share_of_electricity__pct'], errors='coerce'
+    )
+    filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
+else:
+    raise ValueError("Required columns 'Year' or 'renewable_share_of_electricity__pct' are missing from the DataFrame.")
+
 
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
@@ -251,27 +265,20 @@ with st.expander("", expanded=True):
         labels={'Value': 'Energy Value', 'Year': 'Year'}
     )
 
-    if 'Year' in filt_share_elec_prod.columns and 'renewable_share_of_electricity__pct' in filt_share_elec_prod.columns:
-        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
-        filt_share_elec_prod['Year'] = pd.to_numeric(filt_share_elec_prod['Year'], errors='coerce')
-        filt_share_elec_prod['renewable_share_of_electricity__pct'] = pd.to_numeric(
-            filt_share_elec_prod['renewable_share_of_electricity__pct'], errors='coerce'
-        )
-        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
-    else:
-        raise ValueError("Required columns 'Year' or 'renewable_share_of_electricity__pct' are missing from the DataFrame.")
-    
     fig8 = px.line(
-    filt_share_elec_prod,
-    x='Year',
-    y='renewable_share_of_electricity__pct',
-    color='Countries',
-    title='Renewables as a Percentage of Electricity Production',
-    labels={
-        'Year': 'Year',
-        'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
-        'Countries': 'Countries'}
+        filt_share_elec_prod,
+        x='Year',
+        y='renewable_share_of_electricity__pct',
+        color='Countries',
+        title='Renewables as a Percentage of Electricity Production',
+        labels={
+            'Year': 'Year',
+            'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
+            'Countries': 'Countries'
+        }
     )
+
+    # Format y-axis as a percentage
     fig8.update_yaxes(tickformat=".1%")
 
     col1, col2 = st.columns(2)
