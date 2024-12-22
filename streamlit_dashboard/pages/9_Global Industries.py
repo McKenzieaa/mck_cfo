@@ -335,16 +335,17 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_i
     slide = prs.slides.add_slide(slide_layout)
     slide.shapes.title.text = "Value Chain Analysis"
     
+    # Check if image exists and read it into BytesIO
     if os.path.exists(value_chain_image_path):
-        # Read the image into a BytesIO stream
         img_stream = BytesIO()
         with open(value_chain_image_path, "rb") as img_file:
             img_stream.write(img_file.read())
         img_stream.seek(0)
         slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
     else:
-        raise FileNotFoundError(f"The image at {value_chain_image_path} was not found.")
-    
+        raise FileNotFoundError(f"The image at {value_chain_image_path} was not found. Please check the path.")
+
+    # Add other slides with charts
     add_slide_with_chart(prs, fig3, "Average Price of Electricity")
     add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
     add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
@@ -359,14 +360,19 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_i
 
 def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path):
     if st.button("Export Charts to PowerPoint"):
-        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
-        st.download_button(
-            label="Download PowerPoint",
-            data=pptx_file,
-            file_name="Energy_Industry_Analysis_Report.pptx",
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        )
+        try:
+            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
+            st.download_button(
+                label="Download PowerPoint",
+                data=pptx_file,
+                file_name="Energy_Industry_Analysis_Report.pptx",
+                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            )
+        except FileNotFoundError as e:
+            st.error(f"Error: {e}")
 
-# Example of calling the function
-value_chain_image_path = "streamlit_dashboard\data\value_chain.png"  # Ensure this path is correct
+# Example of calling the function with corrected file path
+value_chain_image_path = r"streamlit_dashboard\data\value_chain.png"  # Use raw string or correct the slashes
+
+# Example call to the function (ensure fig1, fig2, etc. are defined)
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
