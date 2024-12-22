@@ -374,6 +374,6 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_c
         except FileNotFoundError as e:
             st.error(f"Error: {e}")
 
-value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
+value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/valuechain.png"
 # Example call to the function (ensure fig1, fig2, etc. are defined)
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
