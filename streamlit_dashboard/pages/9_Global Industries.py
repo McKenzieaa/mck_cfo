@@ -298,12 +298,12 @@ with st.expander("", expanded=True):
     fig8.update_yaxes(tickformat=".1%")
 
     fig9 = px.bar(df_electricity_gen2, 
-             x='country', 
-             y=columns_elec, 
-             title="Per capita electricity generation by source, 2023", 
-             labels={'value': 'Electricity generation (kWh per capita)', 'variable': 'Energy source'},
-             height=400)
-
+              y='country',  # Use 'y' for country as the vertical axis
+              x=columns_elec,  # The electricity generation sources are now on the x-axis
+              title="Per capita electricity generation by source, 2023", 
+              labels={'value': 'Electricity generation (kWh per capita)', 'variable': 'Energy source'},
+              height=400,
+              orientation='h')  # Set orientation to horizontal
     col1, col2 = st.columns(2)
 
     with col1:
