@@ -8,6 +8,7 @@ from io import BytesIO
 from pptx import Presentation
 from pptx.util import Inches
 import plotly.io as pio
+from io import StringIO
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
@@ -123,8 +124,16 @@ df_ene_cons['Year'] = df_ene_cons['YYYYMM'].astype(str).str[:4]
 df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
 df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
 # df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
+share_elec_prod = "https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
 
-share_elec_prod ="https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
+try:
+    response = requests.get(share_elec_prod)
+    response.raise_for_status()  # Raise an HTTPError for bad responses
+    csv_data = StringIO(response.text)  # Convert text content to a file-like object
+    df_share_elec_prod = pd.read_csv(csv_data)
+except requests.exceptions.RequestException as e:
+    print(f"Failed to fetch data: {e}")
+    exit()
 df_share_elec_prod = pd.read_csv(share_elec_prod)
 df_share_elec_prod.rename(columns={'Entity': 'Countries'}, inplace=True)
 df_share_elec_prod = df_share_elec_prod[df_share_elec_prod['Countries'].isin(selected_countries)]
