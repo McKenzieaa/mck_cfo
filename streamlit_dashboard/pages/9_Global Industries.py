@@ -82,23 +82,56 @@ df_electricity_gen = pd.read_csv(url2)
 df_renew_share = df_electricity_gen.dropna(subset=['renewables_share_elec'])
 
 # Per Capita Electricty Data
-df_electricity_gen = pd.read_csv(url2)
+ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
+df_electricity_gen = pd.read_csv(ele_gen_url)
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
-df_electricity_gen2 = pd.read_csv(url2)
-rename_columns = {
-    'coal_elec_per_capita': 'Coal',
-    'hydro_elec_per_capita': 'Hydro Power',
-    'nuclear_elec_per_capita': 'Nuclear Power',
-    'oil_elec_per_capita': 'Oil',
-    'solar_elec_per_capita': 'Solar',
-    'wind_elec_per_capita': 'Wind',
-    'biofuel_elec_per_capita': 'Biofuel',
-    'other_renewables_energy_per_capita': 'Other Renewables'
+
+ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
+df_electricity_gen2 = pd.read_csv(ele_gen_url)
+
+# Extract 'Description' between "From" and ","
+df_electricity_gen2['Description'] = df_electricity_gen2['column_name'].str.extract(r'From (.*?),')
+
+# Rename 'YYYYMM' to 'Year' and extract the first 4 characters
+df_electricity_gen2['Year'] = df_electricity_gen2['YYYYMM'].astype(str).str[:4]
+
+# Drop the original 'YYYYMM' column if necessary
+df_electricity_gen2.drop(columns=['YYYYMM'], inplace=True)
+
+# Categorizing columns
+# Assuming the columns for energy sources have specific names, e.g., 'Natural Gas', 'Coal', etc.
+# You'll need to adjust column names as per your dataset.
+
+categories = {
+    'Fossil Fuel': ['Natural Gas', 'Coal', 'Petroleum', 'Other Gases'],
+    'Nuclear': ['Nuclear'],
+    'Hydroelectric': ['Hydroelectric (pumped)', 'Hydroelectric (conventional)'],
+    'Solar': ['Solar'],
+    'Wind': ['Wind']
 }
-df_electricity_gen2 = df_electricity_gen2[(df_electricity_gen2['year'] == 2023) & (df_electricity_gen2['country'].isin(selected_countries))]
-df_electricity_gen2 = df_electricity_gen2.rename(columns=rename_columns)
-columns_elec = ['Coal', 'Hydro Power', 'Nuclear Power', 'Oil', 'Solar', 'Wind', 'Biofuel', 'Other Renewables']
+
+# Adding a column for the categorized energy source
+def categorize(row):
+    for category, sources in categories.items():
+        if any(source in row['Description'] for source in sources):
+            return category
+    return 'Others'  # If not found in any category, it's categorized as 'Others'
+
+df_electricity_gen2['Category'] = df_electricity_gen2.apply(categorize, axis=1)
+
+# Calculate the 'Others' category (balancing figure: total minus the ones taken)
+df_electricity_gen2['Others'] = df_electricity_gen2['Total'] - df_electricity_gen[[
+    'Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 'Hydroelectric (pumped)',
+    'Hydroelectric (conventional)', 'Solar', 'Wind'
+]].sum(axis=1)
+df_elec_gen_2023 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
+pivot_df = df_elec_gen_2023.groupby('Category')[[
+    'Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 'Hydroelectric (pumped)', 
+    'Hydroelectric (conventional)', 'Solar', 'Wind', 'Others']].sum()
+
+# Reset the index to make 'Category' a column (for Plotly)
+pivot_df.reset_index(inplace=True)
 
 # df_per_cap_elec_gen['total_elec_per_capita'] = (
 #     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
@@ -304,13 +337,21 @@ with st.expander("", expanded=True):
     )
     fig9.update_yaxes(tickformat=".1%")
 
-    fig10 = px.bar(df_electricity_gen2, 
-              y='country',  # Use 'y' for country as the vertical axis
-              x=columns_elec,  # The electricity generation sources are now on the x-axis
-              title="Per capita electricity generation by source, 2023", 
-              labels={'value': 'Electricity generation (kWh per capita)', 'variable': 'Energy source'},
-              height=400,
-              orientation='h')  # Set orientation to horizontal
+    fig10 = px.bar(pivot_df, 
+             x='Category', 
+             y=['Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 
+                 'Hydroelectric (pumped)', 'Hydroelectric (conventional)', 'Solar', 
+                 'Wind', 'Others'], 
+             title='Energy Generation by Category in 2023',
+             labels={'value': 'Energy Generation (MWh)', 'Category': 'Energy Categories'},
+             height=600)
+
+# Update layout for better appearance
+    fig10.update_layout(barmode='stack', 
+                  xaxis_title='Energy Categories',
+                  yaxis_title='Energy Generation (MWh or other unit)', 
+                  legend_title='Subcategories')
+
     col1, col2 = st.columns(2)
 
     with col1:
