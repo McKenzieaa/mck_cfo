@@ -314,6 +314,7 @@ st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", u
 with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
+
 def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
@@ -335,7 +336,9 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_i
     slide = prs.slides.add_slide(slide_layout)
     slide.shapes.title.text = "Value Chain Analysis"
     
-    # Check if image exists and read it into BytesIO
+    # Debug: Print the full path to check where the script is looking for the image
+    print(f"Looking for image at: {os.path.abspath(value_chain_image_path)}")
+    
     if os.path.exists(value_chain_image_path):
         img_stream = BytesIO()
         with open(value_chain_image_path, "rb") as img_file:
