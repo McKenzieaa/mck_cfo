@@ -144,8 +144,7 @@ source_category_mapping = {
 }
 df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
 df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
-mean_value = df_electricity_gen2['Value'].mean()
-
+df_electricity_gen2['Value'] = pd.to_numeric(df_electricity_gen2['Value'], errors='coerce').mean()
 
 # Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
