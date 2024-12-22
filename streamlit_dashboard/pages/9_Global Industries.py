@@ -342,15 +342,11 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_c
         img_stream.seek(0)
         slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
 
-    # Add slides with charts
     add_slide_with_chart(prs, fig1, "Market Size - Yearly")
     add_slide_with_chart(prs, fig2, "Electricity End Use")
-    
-    # Add value chain image to slide 3
     slide = prs.slides.add_slide(slide_layout)
     slide.shapes.title.text = "Value Chain Analysis"
-    
-    # Debug: Print the full path to check where the script is looking for the image
+
     print(f"Looking for image at: {os.path.abspath(value_chain_image_path)}")
     
     if os.path.exists(value_chain_image_path):
