@@ -377,15 +377,18 @@ with st.expander("", expanded=True):
     fig11 = px.bar(df_pt_grouped, 
               x='Year', 
               y='EV/Revenue', 
-              title="Average EV/Revenue by Year for Filtered Industries",
+              title="Recent Deals - EV/Revenue",
               labels={'EV/Revenue': 'Average EV/Revenue'},
               height=400)
+    fig11.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+    
     fig12 = px.bar(df_pt_grouped, 
               x='Year', 
               y='EV/EBITDA', 
-              title="Average EV/EBITDA by Year for Filtered Industries",
+              title="Recent Deals - EV/EBITDA",
               labels={'EV/EBITDA': 'Average EV/EBITDA'},
               height=400)
+    fig12.update_traces(texttemplate='%{text:.2f}', textposition='outside')
 
     col1, col2 = st.columns(2)
 
