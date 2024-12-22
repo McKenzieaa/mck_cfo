@@ -121,6 +121,7 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
 # Electricity Net Generation: Electric Power Sector - Table 7.2b
 ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
 df_electricity_gen2 = pd.read_csv(ele_gen_url)
+print(df_electricity_gen2.columns)
 df_electricity_gen2['Description'] = df_electricity_gen2['column_name'].str.extract(r'From (.*?),')
 df_electricity_gen2['Year'] = df_electricity_gen2['YYYYMM'].astype(str).str[:4]
 df_electricity_gen2.drop(columns=['YYYYMM'], inplace=True)
