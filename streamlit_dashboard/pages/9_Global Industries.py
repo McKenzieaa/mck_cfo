@@ -251,20 +251,20 @@ with st.expander("", expanded=True):
         labels={'Value': 'Energy Value', 'Year': 'Year'}
     )
 
-    if 'Year' in filt_share_elec_prod.columns and 'Renewables - % electricity' in filt_share_elec_prod.columns:
-        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'Renewables - % electricity'])
+    if 'Year' in filt_share_elec_prod.columns and 'renewable_share_of_electricity__pct' in filt_share_elec_prod.columns:
+        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
         filt_share_elec_prod['Year'] = pd.to_numeric(filt_share_elec_prod['Year'], errors='coerce')
-        filt_share_elec_prod['Renewables - % electricity'] = pd.to_numeric(
-            filt_share_elec_prod['Renewables - % electricity'], errors='coerce'
+        filt_share_elec_prod['renewable_share_of_electricity__pct'] = pd.to_numeric(
+            filt_share_elec_prod['renewable_share_of_electricity__pct'], errors='coerce'
         )
-        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'Renewables - % electricity'])
+        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
     else:
         raise ValueError("Required columns 'Year' or 'Renewables - % electricity' are missing from the DataFrame.")
     
     fig8 = px.line(
     filt_share_elec_prod,
     x='Year',
-    y='Renewables - % electricity',
+    y='renewable_share_of_electricity__pct',
     color='Countries',
     title='Renewables as a Percentage of Electricity Production',
     labels={
