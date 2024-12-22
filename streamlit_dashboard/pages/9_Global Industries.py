@@ -144,7 +144,7 @@ source_category_mapping = {
 }
 df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
 df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
-df_electricity_gen2['Value'].mean()
+mean_value = df_electricity_gen2['Value'].mean()
 
 
 # Energy Consumption
