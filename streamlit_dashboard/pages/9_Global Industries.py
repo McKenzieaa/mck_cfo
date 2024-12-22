@@ -143,8 +143,9 @@ source_category_mapping = {
     'Wind': 'Wind'
 }
 df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
-df_electricity_gen2_2023 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
-# df_agg = df_electricity_gen2_2023.groupby(['Category', 'Description']).sum().reset_index()
+df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
+df_electricity_gen2['Value'].mean()
+
 
 # Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
