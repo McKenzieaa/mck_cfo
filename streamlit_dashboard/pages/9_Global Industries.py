@@ -13,13 +13,16 @@ from io import StringIO
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
 def download_image(image_url):
-    """Downloads an image from a URL and returns a BytesIO object."""
+    """Downloads an image from a URL and returns a BytesIO object with a file extension."""
     response = requests.get(image_url)
     if response.status_code == 200:
-        return BytesIO(response.content)
+        # Determine file extension (default to .png)
+        img_format = image_url.split('.')[-1] if '.' in image_url else 'png'
+        image_stream = BytesIO(response.content)
+        return image_stream, img_format
     else:
         raise Exception(f"Failed to download image from {image_url}")
-
+    
 category_data = [
     ('22T', 'Utilities', 'QREV', 'QSS'),
     ('2211T', 'Electric Power Generation, Transmission and Distribution', 'QREV', 'QSS')
