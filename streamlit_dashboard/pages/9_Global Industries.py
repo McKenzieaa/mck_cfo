@@ -124,22 +124,11 @@ df_ene_cons['Year'] = df_ene_cons['YYYYMM'].astype(str).str[:4]
 df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
 df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
 # df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
-share_elec_prod = "https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
 
-try:
-    response = requests.get(share_elec_prod)
-    response.raise_for_status()  # Raise an HTTPError for bad responses
-    csv_data = StringIO(response.text)  # Convert text content to a file-like object
-    df_share_elec_prod = pd.read_csv(csv_data)
-except requests.exceptions.RequestException as e:
-    print(f"Failed to fetch data: {e}")
-    exit()
+share_elec_prod = "https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
 df_share_elec_prod = pd.read_csv(share_elec_prod)
 df_share_elec_prod.rename(columns={'Entity': 'Countries'}, inplace=True)
-df_share_elec_prod = df_share_elec_prod[df_share_elec_prod['Countries'].isin(selected_countries)]
-
-
-
+filt_share_elec_prod = df_share_elec_prod[df_share_elec_prod['Countries'].isin(selected_countries)]
 
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
@@ -254,8 +243,18 @@ with st.expander("", expanded=True):
         labels={'Value': 'Energy Value', 'Year': 'Year'}
     )
 
+    if 'Year' in filt_share_elec_prod.columns and 'Renewables - % electricity' in filt_share_elec_prod.columns:
+        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'Renewables - % electricity'])
+        filt_share_elec_prod['Year'] = pd.to_numeric(filt_share_elec_prod['Year'], errors='coerce')
+        filt_share_elec_prod['Renewables - % electricity'] = pd.to_numeric(
+            filt_share_elec_prod['Renewables - % electricity'], errors='coerce'
+        )
+        filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'Renewables - % electricity'])
+    else:
+        raise ValueError("Required columns 'Year' or 'Renewables - % electricity' are missing from the DataFrame.")
+    
     fig8 = px.line(
-    df_share_elec_prod,
+    filt_share_elec_prod,
     x='Year',
     y='Renewables - % electricity',
     color='Countries',
