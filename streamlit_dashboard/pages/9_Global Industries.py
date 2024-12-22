@@ -124,6 +124,14 @@ df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
 df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
 # df_ene_cons = df_ene_cons.groupby(['Year', 'Description'], as_index=False).sum()
 
+share_elec_prod ="https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
+df_share_elec_prod = pd.read_csv(share_elec_prod)
+df_share_elec_prod.rename(columns={'Entity': 'Countries'}, inplace=True)
+df_share_elec_prod = df_share_elec_prod[df_share_elec_prod['Countries'].isin(selected_countries)]
+
+
+
+
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=True): 
@@ -217,7 +225,7 @@ with st.expander("", expanded=True):
         y='country',
         color='Energy Source',
         orientation='h',  # Horizontal orientation
-        title='Electricity Generation per Capita by Energy Source (Top 10 Countries in 2023)',
+        title='Electricity Generation per Capita by Energy Source (Major Countries in 2023)',
         labels={'country': 'Country', 'Per Capita Generation': 'Percentage of Total Generation'},
         color_discrete_map={
             'Fossil': '#0068c9',        
@@ -237,20 +245,34 @@ with st.expander("", expanded=True):
         labels={'Value': 'Energy Value', 'Year': 'Year'}
     )
 
-    # Display charts in columns
+    fig8 = px.line(
+    df_share_elec_prod,
+    x='Year',
+    y='Renewables - % electricity',
+    color='Countries',
+    title='Renewables as a Percentage of Electricity Production',
+    labels={
+        'Year': 'Year',
+        'Renewables - % electricity': 'Renewables - % Electricity',
+        'Countries': 'Countries'}
+    )
+    fig8.update_yaxes(tickformat=".1%")
+
     col1, col2 = st.columns(2)
 
     with col1:
         st.plotly_chart(fig1, use_container_width=True)
         st.plotly_chart(fig2, use_container_width=True)
         st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig7, use_container_width=True)
 
     with col2:
         st.plotly_chart(fig4, use_container_width=True)
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
+        st.plotly_chart(fig8, use_container_width=True)
     
-    st.plotly_chart(fig7, use_container_width=True)
+    
 
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
@@ -267,7 +289,7 @@ st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", u
 with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -287,16 +309,17 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6):
     add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
     add_slide_with_chart(prs, fig6, "Per Capita Electricity-2023")
     add_slide_with_chart(prs, fig7, "Energy Source Consumption")
+    add_slide_with_chart(prs, fig8, "Share of electricity production from renewables")
 
     pptx_stream = BytesIO()
     prs.save(pptx_stream)
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6):
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8):
     # st.subheader("Export Charts")
     if st.button("Export Charts to PowerPoint"):
-        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7)
+        pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8)
         st.download_button(
             label="Download PowerPoint",
             data=pptx_file,
@@ -304,4 +327,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6):
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
 
-export_chart_options(fig1, fig2, fig3, fig4, fig5,fig6, fig7)
+export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8)
