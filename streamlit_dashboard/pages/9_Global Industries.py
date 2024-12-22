@@ -84,6 +84,14 @@ df_renew_share = df_electricity_gen.dropna(subset=['renewables_share_elec'])
 df_electricity_gen = pd.read_csv(url2)
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
+df_electricity_gen2 = pd.read_csv(url2)
+df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['year'] == 2023]
+columns_elec = [
+    'coal_elec_per_capita', 'hydro_elec_per_capita', 'nuclear_elec_per_capita', 
+    'oil_elec_per_capita', 'solar_elec_per_capita', 'wind_elec_per_capita', 
+    'biofuel_elec_per_capita', 'other_renewables_energy_per_capita'
+]
+
 # df_per_cap_elec_gen['total_elec_per_capita'] = (
 #     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
 # )
@@ -279,9 +287,14 @@ with st.expander("", expanded=True):
             'Countries': 'Countries'
         }
     )
-
-    # Format y-axis as a percentage
     fig8.update_yaxes(tickformat=".1%")
+
+    fig = px.bar(df_electricity_gen2, 
+             x='country', 
+             y=columns_elec, 
+             title="Per capita electricity generation by source, 2023", 
+             labels={'value': 'Electricity generation (kWh per capita)', 'variable': 'Energy source'},
+             height=400)
 
     col1, col2 = st.columns(2)
 
@@ -375,5 +388,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_c
             st.error(f"Error: {e}")
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
-# Example call to the function (ensure fig1, fig2, etc. are defined)
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
