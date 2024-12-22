@@ -274,16 +274,23 @@ with st.expander("", expanded=True):
     fig6.update_layout(barmode='stack')
     fig6.update_xaxes(title_text="")
     # st.plotly_chart(fig6)
-    # Additional Bar Chart (Fig 7)
+
+    df_ene_cons_2023 = df_ene_cons[df_ene_cons['Year'] == '2023']
+    fig7 = px.pie(df_ene_cons_2023, 
+              names='Description', 
+              values='Value', 
+              title='Energy Consumption by Source in 2023',
+              labels={'Value': 'Energy Value', 'Description': 'Energy Source'})
+
  
-    fig7 = px.bar(
+    fig8 = px.bar(
         df_ene_cons,
         x='Year', y='Value', color='Description',
         title='Energy Source Distribution Over Years',
         labels={'Value': 'Energy Value', 'Year': 'Year'}
     )
 
-    fig8 = px.line(
+    fig9 = px.line(
         filt_share_elec_prod,
         x='Year',
         y='renewable_share_of_electricity__pct',
@@ -295,9 +302,9 @@ with st.expander("", expanded=True):
             'Countries': 'Countries'
         }
     )
-    fig8.update_yaxes(tickformat=".1%")
+    fig9.update_yaxes(tickformat=".1%")
 
-    fig9 = px.bar(df_electricity_gen2, 
+    fig10 = px.bar(df_electricity_gen2, 
               y='country',  # Use 'y' for country as the vertical axis
               x=columns_elec,  # The electricity generation sources are now on the x-axis
               title="Per capita electricity generation by source, 2023", 
@@ -318,6 +325,7 @@ with st.expander("", expanded=True):
         st.plotly_chart(fig5, use_container_width=True)
         st.plotly_chart(fig6, use_container_width=True)
         st.plotly_chart(fig8, use_container_width=True)
+        st.plotly_chart(fig10, use_container_width=True)
     
     
 
@@ -337,7 +345,7 @@ with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_chain_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -371,18 +379,18 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_c
     add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
     add_slide_with_chart(prs, fig6, "Per Capita Electricity-2023")
     add_slide_with_chart(prs, fig7, "Energy Source Consumption")
-    add_slide_with_chart(prs, fig8, "Share of electricity production from renewables")
-    add_slide_with_chart(prs, fig9, "Share of electricity production")
-
+    add_slide_with_chart(prs, fig8, "Energy Source Distribution Over Years")
+    add_slide_with_chart(prs, fig9, "Renewables as a Percentage of Electricity Production")
+    add_slide_with_chart(prs, fig10, "Per capita electricity generation by source, 2023")
     pptx_stream = BytesIO()
     prs.save(pptx_stream)
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_chain_image_path):
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_chain_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -393,4 +401,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, v
             st.error(f"Error: {e}")
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
-export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_chain_image_path)
+export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, value_chain_image_path)
