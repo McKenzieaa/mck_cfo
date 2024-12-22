@@ -259,7 +259,7 @@ with st.expander("", expanded=True):
         )
         filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
     else:
-        raise ValueError("Required columns 'Year' or 'Renewables - % electricity' are missing from the DataFrame.")
+        raise ValueError("Required columns 'Year' or 'renewable_share_of_electricity__pct' are missing from the DataFrame.")
     
     fig8 = px.line(
     filt_share_elec_prod,
@@ -269,7 +269,7 @@ with st.expander("", expanded=True):
     title='Renewables as a Percentage of Electricity Production',
     labels={
         'Year': 'Year',
-        'Renewables - % electricity': 'Renewables - % Electricity',
+        'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
         'Countries': 'Countries'}
     )
     fig8.update_yaxes(tickformat=".1%")
