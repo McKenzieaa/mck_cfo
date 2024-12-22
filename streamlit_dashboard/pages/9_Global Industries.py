@@ -12,6 +12,7 @@ from io import StringIO
 import os
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
+selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
     
 category_data = [
     ('22T', 'Utilities', 'QREV', 'QSS'),
@@ -86,6 +87,7 @@ df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita'
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
 df_electricity_gen2 = pd.read_csv(url2)
 df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['year'] == 2023]
+df_electricity_gen2 = df_electricity_gen2[(df_electricity_gen2['year'] == 2023) & (df_electricity_gen2['country'].isin(selected_countries))]
 columns_elec = [
     'coal_elec_per_capita', 'hydro_elec_per_capita', 'nuclear_elec_per_capita', 
     'oil_elec_per_capita', 'solar_elec_per_capita', 'wind_elec_per_capita', 
@@ -110,7 +112,7 @@ columns_elec = [
 # })
 # df_per_cap_elec_gen_pivot = df_per_cap_elec_gen.pivot(index='country', columns='Energy Source', values='Per Capita Generation')
 
-selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
+
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['country'].isin(selected_countries)]
 
 df_per_cap_elec_gen = df_per_cap_elec_gen.melt(
@@ -358,7 +360,6 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, value_c
     else:
         raise FileNotFoundError(f"The image at {value_chain_image_path} was not found. Please check the path.")
 
-    # Add other slides with charts
     add_slide_with_chart(prs, fig3, "Average Price of Electricity")
     add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
     add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
