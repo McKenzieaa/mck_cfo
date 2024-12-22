@@ -118,11 +118,11 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
     'renewables_elec_per_capita': 'Renewables'
 })
  
-# Electricity Net Generation: Electric Power Sector - Table 7.2b
+
 ele_gen_url = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.02B"
 df_electricity_gen2 = pd.read_csv(ele_gen_url)
 print(df_electricity_gen2.columns)
-df_electricity_gen2['Description'] = df_electricity_gen2['column_name'].str.extract(r'From (.*?),')
+df_electricity_gen2['Description'] = df_electricity_gen2['DescriptionColumn'].str.extract(r'From (.*?),')
 df_electricity_gen2['Year'] = df_electricity_gen2['YYYYMM'].astype(str).str[:4]
 df_electricity_gen2.drop(columns=['YYYYMM'], inplace=True)
 categories = {
@@ -137,21 +137,18 @@ def categorize(row):
     for category, sources in categories.items():
         if any(source in row['Description'] for source in sources):
             return category
-    return 'Others'  # If not found in any category, it's categorized as 'Others'
+    return 'Others'
 
 df_electricity_gen2['Category'] = df_electricity_gen2.apply(categorize, axis=1)
-
-# Calculate the 'Others' category (balancing figure: total minus the ones taken)
-df_electricity_gen2['Others'] = df_electricity_gen2['Total'] - df_electricity_gen[[
+df_electricity_gen2['Others'] = df_electricity_gen2['Total'] - df_electricity_gen2[[
     'Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 'Hydroelectric (pumped)',
     'Hydroelectric (conventional)', 'Solar', 'Wind'
 ]].sum(axis=1)
+
 df_elec_gen_2023 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
 pivot_df = df_elec_gen_2023.groupby('Category')[[
     'Natural Gas', 'Coal', 'Petroleum', 'Other Gases', 'Nuclear', 'Hydroelectric (pumped)', 
     'Hydroelectric (conventional)', 'Solar', 'Wind', 'Others']].sum()
-
-# Reset the index to make 'Category' a column (for Plotly)
 pivot_df.reset_index(inplace=True)
 
 # Energy Consumption
