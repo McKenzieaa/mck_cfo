@@ -119,6 +119,7 @@ df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].repl
 # Energy Consumption
 ene_cons = "https://www.eia.gov/totalenergy/data/browser/csv.php?tbl=T07.06"
 df_ene_cons = pd.read_csv(ene_cons)
+df_ene_cons['Description'] = df_ene_cons['Description'].str.split(',', n=1).str[1]
 df_ene_cons = df_ene_cons[df_ene_cons['Description'].str.contains("Residential|Transportation|Industrial|Commercial", case=False, na=False)]
 df_ene_cons['Year'] = df_ene_cons['YYYYMM'].astype(str).str[:4]
 df_ene_cons = df_ene_cons[['Year', 'Description', 'Value']]
@@ -130,8 +131,8 @@ share_elec_prod = "https://ourworldindata.org/grapher/share-electricity-renewabl
 
 try:
     response = requests.get(share_elec_prod)
-    response.raise_for_status()  # Raise an HTTPError for bad responses
-    csv_data = StringIO(response.text)  # Convert text content to a file-like object
+    response.raise_for_status() 
+    csv_data = StringIO(response.text)
     df_share_elec_prod = pd.read_csv(csv_data)
 except requests.exceptions.RequestException as e:
     print(f"Failed to fetch data: {e}")
@@ -141,7 +142,7 @@ df_share_elec_prod.rename(columns={'Entity': 'Countries'}, inplace=True)
 filt_share_elec_prod = df_share_elec_prod[df_share_elec_prod['Countries'].isin(selected_countries)]
 
 if 'Year' in filt_share_elec_prod.columns and 'renewable_share_of_electricity__pct' in filt_share_elec_prod.columns:
-    # Clean and convert data types
+
     filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
     filt_share_elec_prod['Year'] = pd.to_numeric(filt_share_elec_prod['Year'], errors='coerce')
     filt_share_elec_prod['renewable_share_of_electricity__pct'] = pd.to_numeric(
