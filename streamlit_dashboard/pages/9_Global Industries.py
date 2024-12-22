@@ -380,7 +380,7 @@ with st.expander("", expanded=True):
               title="Recent Deals - EV/Revenue",
               labels={'EV/Revenue': 'Average EV/Revenue'},
               height=400)
-    fig11.update_traces(texttemplate='%{text:.1f}', textposition='outside')
+    fig11.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
     fig12 = px.bar(df_pt_grouped, 
               x='Year', 
@@ -388,7 +388,7 @@ with st.expander("", expanded=True):
               title="Recent Deals - EV/EBITDA",
               labels={'EV/EBITDA': 'Average EV/EBITDA'},
               height=400)
-    fig12.update_traces(texttemplate='%{text:.1f}', textposition='outside')
+    fig12.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
     col1, col2 = st.columns(2)
 
