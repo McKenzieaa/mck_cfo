@@ -375,7 +375,7 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_c
             st.error(f"Error: {e}")
 
 # Example of calling the function with corrected file path
-value_chain_image_path = r"streamlit_dashboard\data\value_chain.png"  # Use raw string or correct the slashes
+value_chain_image_path =os.path.abspath("streamlit_dashboard\data\value_chain.png")  # Use raw string or correct the slashes
 
 # Example call to the function (ensure fig1, fig2, etc. are defined)
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, value_chain_image_path)
