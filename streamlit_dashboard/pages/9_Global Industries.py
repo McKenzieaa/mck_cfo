@@ -478,46 +478,52 @@ with st.expander("", expanded=False):
 
 
 def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path):
-    prs = Presentation()
-    slide_layout = prs.slide_layouts[5]
 
-    def add_slide_with_chart(prs, fig, title_text):
-        slide = prs.slides.add_slide(slide_layout)
-        title = slide.shapes.title
-        title.text = title_text
+    template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data","energy_template.pptx")
+    prs = Presentation(template_path)
+
+    def add_chart_to_slide(prs, slide_index, fig, left, top, width, height):
+        slide = prs.slides[slide_index]
         img_stream = BytesIO()
         fig.write_image(img_stream, format="png", engine="kaleido")
         img_stream.seek(0)
-        slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
+        slide.shapes.add_picture(img_stream, left, top, width=width, height=height)
 
-    add_slide_with_chart(prs, fig1, "Market Size - Yearly")
-    add_slide_with_chart(prs, fig2, "Electricity End Use")
-    slide = prs.slides.add_slide(slide_layout)
-    slide.shapes.title.text = "Value Chain Analysis"
+    def add_image_to_slide(prs, slide_index, image_path, left, top, width, height):
+        slide = prs.slides[slide_index]
+        if os.path.exists(image_path):
+            img_stream = BytesIO()
+            with open(image_path, "rb") as img_file:
+                img_stream.write(img_file.read())
+            img_stream.seek(0)
+            slide.shapes.add_picture(img_stream, left, top, width=width, height=height)
+        else:
+            raise FileNotFoundError(f"The image at {image_path} was not found. Please check the path.")
 
-    print(f"Looking for image at: {os.path.abspath(value_chain_image_path)}")
-    
-    if os.path.exists(value_chain_image_path):
-        img_stream = BytesIO()
-        with open(value_chain_image_path, "rb") as img_file:
-            img_stream.write(img_file.read())
-        img_stream.seek(0)
-        slide.shapes.add_picture(img_stream, Inches(1), Inches(1), width=Inches(8))
-    else:
-        raise FileNotFoundError(f"The image at {value_chain_image_path} was not found. Please check the path.")
+    chart_configurations = [
+        (0, fig1, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 1: Market Size
+        (1, fig2, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 2: Electricity End Use
+        (2, value_chain_image_path, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 3: Value Chain
+        (3, fig3, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 4: Average Price
+        (4, fig4, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 5: Electricity Generation
+        (5, fig5, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 6: Renewable Share
+        (6, fig6, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 7: Per Capita Electricity
+        (7, fig7, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 8: Energy Source Consumption
+        (8, fig8, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 9: Energy Source Distribution
+        (9, fig9, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 10: Renewables Percentage
+        (10, fig10, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 11: Per Capita Generation
+        (11, fig11, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 12: Precedent Transaction - EV/Revenue
+        (12, fig12, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 13: Precedent Transaction - EV/EBITDA
+        (13, fig13, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 14: RMA - Income Statement
+        (14, fig14, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 15: RMA - Balance Sheet
+    ]
 
-    add_slide_with_chart(prs, fig3, "Average Price of Electricity")
-    add_slide_with_chart(prs, fig4, f"Electricity Generation by Country ({selected_year})")
-    add_slide_with_chart(prs, fig5, "Renewable Share of Electricity")
-    add_slide_with_chart(prs, fig6, "Per Capita Electricity-2023")
-    add_slide_with_chart(prs, fig7, "Energy Source Consumption")
-    add_slide_with_chart(prs, fig8, "Energy Source Distribution Over Years")
-    add_slide_with_chart(prs, fig9, "Renewables as a Percentage of Electricity Production")
-    add_slide_with_chart(prs, fig10, "Per capita electricity generation by source, 2023")
-    add_slide_with_chart(prs, fig11, "Precedent Transaction - EV/Revenue")
-    add_slide_with_chart(prs, fig12, "Precedent Transaction - EV/EBITDA")
-    add_slide_with_chart(prs, fig13, "RMA - Income Statement")
-    add_slide_with_chart(prs, fig14, "RMA - Balance Sheet")
+    for config in chart_configurations:
+        slide_index, content, left, top, width, height = config
+        if isinstance(content, str):
+            add_image_to_slide(prs, slide_index, content, left, top, width, height)
+        else: 
+            add_chart_to_slide(prs, slide_index, content, left, top, width, height)
 
     pptx_stream = BytesIO()
     prs.save(pptx_stream)
