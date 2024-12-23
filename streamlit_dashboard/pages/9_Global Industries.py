@@ -32,7 +32,7 @@ except mysql.connector.Error as e:
     st.error(f"Error connecting to MySQL: {e}")
     st.stop()
 
-# Query to fetch the data from the MySQL table
+# Precdent Transaction
 query = """
 SELECT 
     `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
@@ -46,8 +46,29 @@ except Exception as e:
     st.error(f"Error loading data from MySQL: {e}")
     st.stop()
 
-# Close the MySQL connection
+# Fetch Public Listed Companies data
+query2 = """
+SELECT `Name`, `Country`, `Enterprise Value (in $)`, `Revenue (in $)`, `EBITDA (in $)`, `Business Description`, `Industry`
+FROM public_comp_table
+"""
+try:
+    df_public = pd.read_sql(query2, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL (Public Companies): {e}")
+    st.stop()
+
+query3 = """
+SELECT `NAICS`, `LineItems`, `Percent`, `ReportID`, `Industry`, `Value_in_$`
+FROM rma_table
+"""
+try:
+    df_rma = pd.read_sql(query3, conn)
+except Exception as e:
+    st.error(f"Error loading data from MySQL (Public Companies): {e}")
+    st.stop()
+
 conn.close()
+
 industries_pt = [
     'Hydroelectric Power Generation',
     'Natural Gas Extraction',
@@ -59,6 +80,13 @@ industries_pt = [
 ]
 df_pt_filter = df_pt[df_pt['Industry'].isin(industries_pt)]
 df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
+
+# RMA Data
+df_rma_filtered = df_rma[df_rma['NAICS'].astype(str).str.startswith('2211')]
+df_rma_filtered = df_rma_filtered.groupby(['ReportID', 'LineItems'], as_index=False)['Value_in_$'].mean()
+df_rma_is = df_rma_filtered[df_rma_filtered['ReportID'] == 'Income Statement']
+df_rma_bs = df_rma_filtered[df_rma_filtered['ReportID'] == 'Balance Sheet']
+
 
 # Selected Countries
 selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
@@ -390,6 +418,24 @@ with st.expander("", expanded=True):
               height=400)
     # fig12.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
+    fig13 = px.bar(
+        df_rma_is,
+        x='LineItems',
+        y='Value_in_$',
+        title="Average Value in $ for Income Statement",
+        labels={'Value_in_$': 'Average Value ($)', 'LineItems': 'Line Items'},
+        text_auto=True
+    )
+
+    fig14 = px.bar(
+        df_rma_bs,
+        x='LineItems',
+        y='Value_in_$',
+        title="Average Value in $ for Income Statement",
+        labels={'Value_in_$': 'Average Value ($)', 'LineItems': 'Line Items'},
+        text_auto=True
+    )
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -410,6 +456,8 @@ with st.expander("", expanded=True):
     st.plotly_chart(fig10, use_container_width=True)
     st.plotly_chart(fig11, use_container_width=True)
     st.plotly_chart(fig12, use_container_width=True)
+    st.plotly_chart(fig13, use_container_width=True)
+    st.plotly_chart(fig14, use_container_width=True)
 
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
@@ -427,7 +475,7 @@ with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path):
     prs = Presentation()
     slide_layout = prs.slide_layouts[5]
 
@@ -466,16 +514,18 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     add_slide_with_chart(prs, fig10, "Per capita electricity generation by source, 2023")
     add_slide_with_chart(prs, fig11, "Precedent Transaction - EV/Revenue")
     add_slide_with_chart(prs, fig12, "Precedent Transaction - EV/EBITDA")
+    add_slide_with_chart(prs, fig13, "RMA - Income Statement")
+    add_slide_with_chart(prs, fig14, "RMA - Balance Sheet")
 
     pptx_stream = BytesIO()
     prs.save(pptx_stream)
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path):
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -486,4 +536,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, f
             st.error(f"Error: {e}")
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
-export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, value_chain_image_path)
+export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path)
