@@ -77,7 +77,7 @@ df_rma_filtered = df_rma_filtered.groupby(['ReportID', 'LineItems'], as_index=Fa
 df_rma_is = df_rma_filtered[df_rma_filtered['ReportID'] == 'Income Statement']
 df_rma_bs = df_rma_filtered[df_rma_filtered['ReportID'].isin(['Assets', 'Liabilities & Equity'])]
 df_rma_bs_grouped = (df_rma_bs.groupby(['ReportID', 'LineItems'], as_index=False)['Value'].mean())
-df_rma_bs_grouped['Grouped_LineItems'] = df_rma_bs_grouped['ReportID'] + ': ' + df_rma_bs_grouped['LineItems']
+df_rma_bs_grouped['Grouped_LineItems'] =  df_rma_bs_grouped['LineItems']
 
 # Selected Countries
 selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
