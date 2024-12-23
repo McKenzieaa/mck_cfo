@@ -304,7 +304,8 @@ with st.expander("", expanded=True):
                 xanchor='left', 
                 yanchor='top',
                 font=dict(size=8)  # Set font size to 8
-            )
+            ),
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0),width=610,height=240
         )
         # st.plotly_chart(fig1)
 
@@ -349,9 +350,6 @@ with st.expander("", expanded=True):
     # st.plotly_chart(fig4)
 
     # Renewable Share of Electricity
-    # st.sidebar.header("Renewable Share Selection")
-    selected_countries = ["World"]
-    # st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
     if selected_countries:
         filtered_df = df_renew_share[df_renew_share["country"].isin(selected_countries)]
         fig5 = px.line(
@@ -359,7 +357,7 @@ with st.expander("", expanded=True):
             x="year", y="renewables_share_elec", color="country",
             title="Renewable Share of Electricity"
         )
-        fig5.update_traces(line_color="#032649")
+        fig5.update_traces(line_color=PRIMARY_COLORS, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=10, r=10, t=10, b=10),width=625,height=250)
         # st.plotly_chart(fig5)
 
     # Solar Projects Coming Up Next 12 Months
@@ -547,13 +545,13 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
             raise FileNotFoundError(f"The image at {image_path} was not found. Please check the path.")
 
     chart_configurations = [
-        (4, fig1, Inches(6.85), Inches(1.30), Inches(2.5), Inches(6.25)),  # Slide 1: Market Size
-        (1, fig2, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 2: Electricity End Use
-        (4, value_chain_image_path, Inches(0.3), Inches(4.1), Inches(5.5), Inches(3)),  # Slide 3: Value Chain
-        (5, solar_image_path, Inches(3.3), Inches(5.9), Inches(0.2), Inches(1.6)),  # Slide 3: Value Chain
-        (3, fig3, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 4: Average Price
+        (4, fig1, Inches(1.35), Inches(6.75), Inches(2.5), Inches(6.20)),  # Slide 3: Market Size
+        (4, fig2, Inches(4), Inches(6.75), Inches(3), Inches(3.4)),  # Slide 3: Electricity End Use
+        (4, value_chain_image_path, Inches(0.3), Inches(4), Inches(2.5), Inches(6.20)),  # Slide 3: Value Chain
+        (5, solar_image_path, Inches(1.3), Inches(0.3), Inches(2.5), Inches(6.25)),  # Slide 4: Solar
+        (4, fig3, Inches(4), Inches(9.90), Inches(3), Inches(3.4)),  # Slide 4: Average Price
         (4, fig4, Inches(6.40), Inches(2.65), Inches(0.25), Inches(1.3)),  # Slide 5: Electricity Generation
-        (5, fig5, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 6: Renewable Share
+        (5, fig5, Inches(1.3), Inches(6.70), Inches(2.5), Inches(6.25)),  # Slide 6: Renewable Share
         (6, fig6, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 7: Per Capita Electricity
         (7, fig7, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 8: Energy Source Consumption
         (8, fig8, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 9: Energy Source Distribution
@@ -561,8 +559,8 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
         (10, fig10, Inches(0.2), Inches(4.5), Inches(6.45), Inches(2.4)),  # Slide 11: Per Capita Generation
         (33, fig11, Inches(1.2), Inches(0.65), Inches(11), Inches(3.75)),  # Slide 12: Precedent Transaction - EV/Revenue
         (33, fig12, Inches(1.2), Inches(3.5), Inches(11), Inches(3.75)),  # Slide 13: Precedent Transaction - EV/EBITDA
-        (13, fig13, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 14: RMA - Income Statement
-        (14, fig14, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 15: RMA - Balance Sheet
+        (36, fig13, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 14: RMA - Income Statement
+        (36, fig14, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 15: RMA - Balance Sheet
         (6, fig15, Inches(5.65), Inches(2.5), Inches(7), Inches(4.5)),  # Slide 6: Per Capita Electricity Generation From Various Sources By Countries (%) 
     ]
 
