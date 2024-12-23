@@ -262,207 +262,207 @@ with st.expander("", expanded=True):
     if market_data is not None:
         yearly_data = market_data.groupby(['Year', 'Category'], as_index=False).agg({'Value': 'mean'})
 
-    PRIMARY_COLORS = {
-        'dark_blue': '#032649',
-        'orange': '#EB8928',
-        'dark_grey': '#595959',
-        'light_grey': '#A5A5A5',
-        'turquoise_blue': '#1C798A'
-        }
+        PRIMARY_COLORS = {
+            'dark_blue': '#032649',
+            'orange': '#EB8928',
+            'dark_grey': '#595959',
+            'light_grey': '#A5A5A5',
+            'turquoise_blue': '#1C798A'
+            }
         
-    fig1 = px.bar(
-        yearly_data,
-        x='Year', y='Value', color='Category',
-        title="Market Size",
-        labels={'Value': 'Market-Size (in millions)', 'Year': ''},
-        color_discrete_sequence=['dark_blue']
+        fig1 = px.bar(
+            yearly_data,
+            x='Year', y='Value', color='Category',
+            title="Market Size",
+            labels={'Value': 'Market-Size (in millions)', 'Year': ''},
+            color_discrete_sequence=['dark_blue']
+            )
+
+        fig1.update_layout(
+            legend=dict(
+                x=0,  # Position at the left
+                y=1,  # Position at the top
+                title="",
+                xanchor='left', 
+                yanchor='top',
+                font=dict(size=8)  # Set font size to 8
+                )
+            )
+            # st.plotly_chart(fig1)
+
+        fig2 = px.line(
+            df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
+            title="Electricity End Use (Billion Kilowatthours)"
+        )
+        fig2.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
+        # st.plotly_chart(fig2)
+
+        # Average Price of Electricity Chart
+        fig3 = px.line(
+            df_avg_price, x="Year", y=df_avg_price.columns[1],
+            title="Average Price of Electricity (Cents per Kilowatthour)"
+        )
+        fig3.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
+        # st.plotly_chart(fig3)
+
+        # Electricity Generation Map
+
+        selected_year =(2023) #st.sidebar.slider("Select Year", 2000, 2023, 2023)
+        df_selected_year = df_electricity_gen[df_electricity_gen["year"] == selected_year]
+        fig4 = px.choropleth(
+            df_selected_year,
+            locations='country',
+            locationmode='country names',
+            color='electricity_generation',
+            title='Electricity Generation, 2023',
+            labels={'electricity_generation': 'in (Twh)'},
+            color_continuous_scale="Blues" 
         )
 
-    fig1.update_layout(
-        legend=dict(
-            x=0,  # Position at the left
-            y=1,  # Position at the top
-            title="",
-            xanchor='left', 
-            yanchor='top',
-            font=dict(size=8)  # Set font size to 8
+        fig4.update_layout(
+            coloraxis_colorbar=dict(
+                title=" ",
+                tickvals=[df_selected_year['electricity_generation'].min(), df_selected_year['electricity_generation'].max()],
+                ticks="outside"
             )
         )
-        # st.plotly_chart(fig1)
 
-    fig2 = px.line(
-        df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
-        title="Electricity End Use (Billion Kilowatthours)"
-    )
-    fig2.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
-    # st.plotly_chart(fig2)
+        # st.plotly_chart(fig4)
 
-    # Average Price of Electricity Chart
-    fig3 = px.line(
-        df_avg_price, x="Year", y=df_avg_price.columns[1],
-        title="Average Price of Electricity (Cents per Kilowatthour)"
-    )
-    fig3.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
-    # st.plotly_chart(fig3)
+        # Renewable Share of Electricity
+        selected_countries = ["World"]
+        # st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
+        if selected_countries:
+            filtered_df = df_renew_share[df_renew_share["country"].isin(selected_countries)]
+            fig5 = px.line(
+                filtered_df,
+                x="year", y="renewables_share_elec", color="country",
+                title="Renewable Share of Electricity"
+            )
+            fig5.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
+            # st.plotly_chart(fig5)
 
-    # Electricity Generation Map
+        # Solar Projects Coming Up Next 12 Months
+        # st.sidebar.header("Map of Solar Projects Coming Up Next 12 Months")
+        solar_url = "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=table_6_05"
+        solar_data = pd.read_html(solar_url)[1]
+        st.dataframe(solar_data)
 
-    selected_year =(2023) #st.sidebar.slider("Select Year", 2000, 2023, 2023)
-    df_selected_year = df_electricity_gen[df_electricity_gen["year"] == selected_year]
-    fig4 = px.choropleth(
-        df_selected_year,
-        locations='country',
-        locationmode='country names',
-        color='electricity_generation',
-        title='Electricity Generation, 2023',
-        labels={'electricity_generation': 'in (Twh)'},
-        color_continuous_scale="Blues" 
-    )
-
-    fig4.update_layout(
-        coloraxis_colorbar=dict(
-            title=" ",
-            tickvals=[df_selected_year['electricity_generation'].min(), df_selected_year['electricity_generation'].max()],
-            ticks="outside"
+        # st.sidebar.header("Per Capita Electricity")
+        fig6 = px.bar(
+            df_per_cap_elec_gen,
+            x='Per Capita Generation',
+            y='country',
+            color='Energy Source',
+            orientation='h',  # Horizontal orientation
+            title='Per Capita Electricity Generation from sources, 2023(kWh)',
+            labels={'country': 'Country', 'Per Capita Generation': '% Total Generation'},
+            color_discrete_map = {
+                'Fossil': PRIMARY_COLORS['dark_blue'],
+                'Nuclear': PRIMARY_COLORS['orange'],
+                'Renewables': PRIMARY_COLORS['turquoise_blue']
+            }
         )
-    )
+        fig6.update_layout(barmode='stack')
+        fig6.update_xaxes(title_text="")
+        # st.plotly_chart(fig6)
 
-    # st.plotly_chart(fig4)
-
-    # Renewable Share of Electricity
-    selected_countries = ["World"]
-    # st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
-    if selected_countries:
-        filtered_df = df_renew_share[df_renew_share["country"].isin(selected_countries)]
-        fig5 = px.line(
-            filtered_df,
-            x="year", y="renewables_share_elec", color="country",
-            title="Renewable Share of Electricity"
+        df_ene_cons_2023 = df_ene_cons[df_ene_cons['Year'] == '2023']
+        fig7 = px.pie(
+            df_ene_cons_2023, 
+            names='Description', 
+            values='Value', 
+            title='Energy Consumption by Source in 2023',
+            labels={'Value': 'Energy Value', 'Description': 'Energy Source'},
+            color='Description',
+            color_discrete_map={
+                'Solar': PRIMARY_COLORS['dark_blue'], 
+                'Wind': ["#0068c9"], 
+                'Coal': PRIMARY_COLORS['turquoise_blue'],
+                'Natural Gas': PRIMARY_COLORS['dark grey'],
+                'Hydro': PRIMARY_COLORS['Light grey'],  
+                'Other':PRIMARY_COLORS['orange']  
+            }
         )
-        fig5.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
-        # st.plotly_chart(fig5)
 
-    # Solar Projects Coming Up Next 12 Months
-    # st.sidebar.header("Map of Solar Projects Coming Up Next 12 Months")
-    solar_url = "https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=table_6_05"
-    solar_data = pd.read_html(solar_url)[1]
-    st.dataframe(solar_data)
+        fig8 = px.bar(
+            df_ene_cons,
+            x='Year', y='Value', color='Description',
+            title='Energy Source Distribution Over Years',
+            labels={'Value': 'Energy Value', 'Year': 'Year'},
+            color_discrete_map={'Residential': PRIMARY_COLORS['dark_blue'],
+                                'Transportation': ["#0068c9"],
+                                'Industrial': PRIMARY_COLORS['turquoise_blue'],
+                                'Commercial':PRIMARY_COLORS['orange'] }
+        )
 
-    # st.sidebar.header("Per Capita Electricity")
-    fig6 = px.bar(
-        df_per_cap_elec_gen,
-        x='Per Capita Generation',
-        y='country',
-        color='Energy Source',
-        orientation='h',  # Horizontal orientation
-        title='Per Capita Electricity Generation from sources, 2023(kWh)',
-        labels={'country': 'Country', 'Per Capita Generation': '% Total Generation'},
-        color_discrete_map = {
-            'Fossil': PRIMARY_COLORS['dark_blue'],
-            'Nuclear': PRIMARY_COLORS['orange'],
-            'Renewables': PRIMARY_COLORS['turquoise_blue']
-        }
-    )
-    fig6.update_layout(barmode='stack')
-    fig6.update_xaxes(title_text="")
-    # st.plotly_chart(fig6)
+        fig9 = px.line(
+            filt_share_elec_prod,
+            x='Year',
+            y='renewable_share_of_electricity__pct',
+            color='Countries',
+            title='Renewables as a Percentage of Electricity Production',
+            labels={
+                'Year': 'Year',
+                'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
+                'Countries': 'Countries'
+            },
+            color_discrete_map=PRIMARY_COLORS
+        )
+        fig9.update_yaxes(tickformat=".1%")
 
-    df_ene_cons_2023 = df_ene_cons[df_ene_cons['Year'] == '2023']
-    fig7 = px.pie(
-        df_ene_cons_2023, 
-        names='Description', 
-        values='Value', 
-        title='Energy Consumption by Source in 2023',
-        labels={'Value': 'Energy Value', 'Description': 'Energy Source'},
-        color='Description',
-        color_discrete_map={
-            'Solar': PRIMARY_COLORS['dark_blue'], 
-            'Wind': ["#0068c9"], 
-            'Coal': PRIMARY_COLORS['turquoise_blue'],
-            'Natural Gas': PRIMARY_COLORS['dark grey'],
-            'Hydro': PRIMARY_COLORS['Light grey'],  
-            'Other':PRIMARY_COLORS['orange']  
-        }
-    )
+        fig10 = px.bar(df_electricity_gen2, 
+                x='Category', 
+                y='Value',
+                color='Description',
+                title="Electricity Generation (2023)",
+                labels={'Category': 'Energy Source'},
+                height=600,
+                color_discrete_map=PRIMARY_COLORS
+        )
+        
+        fig11 = px.bar(df_pt_grouped, 
+                x='Year', 
+                y='EV/Revenue', 
+                title="Recent Deals - EV/Revenue",
+                labels={'EV/Revenue': 'EV/Revenue'},
+                height=400)
+        # fig11.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
-    fig8 = px.bar(
-        df_ene_cons,
-        x='Year', y='Value', color='Description',
-        title='Energy Source Distribution Over Years',
-        labels={'Value': 'Energy Value', 'Year': 'Year'},
-        color_discrete_map={'Residential': PRIMARY_COLORS['dark_blue'],
-                            'Transportation': ["#0068c9"],
-                            'Industrial': PRIMARY_COLORS['turquoise_blue'],
-                            'Commercial':PRIMARY_COLORS['orange'] }
-    )
+        fig12 = px.bar(df_pt_grouped, 
+                x='Year', 
+                y='EV/EBITDA', 
+                title="Recent Deals - EV/EBITDA",
+                labels={'EV/EBITDA': 'EV/EBITDA'},
+                height=400,
+                color_discrete_sequence=['dark_blue'])
+        # fig12.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
-    fig9 = px.line(
-        filt_share_elec_prod,
-        x='Year',
-        y='renewable_share_of_electricity__pct',
-        color='Countries',
-        title='Renewables as a Percentage of Electricity Production',
-        labels={
-            'Year': 'Year',
-            'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
-            'Countries': 'Countries'
-        },
-        color_discrete_map=PRIMARY_COLORS
-    )
-    fig9.update_yaxes(tickformat=".1%")
+        fig13 = px.bar(
+            df_rma_is,
+            x='LineItems',
+            y='Value',
+            title="RMA - Income Statement",
+            labels={'Value': 'Value ($)', 'LineItems': ' '},
+            text_auto=True,
+            color_discrete_sequence=['dark_blue']
+        )
 
-    fig10 = px.bar(df_electricity_gen2, 
-             x='Category', 
-             y='Value',
-             color='Description',
-             title="Electricity Generation (2023)",
-             labels={'Category': 'Energy Source'},
-             height=600,
-             color_discrete_map=PRIMARY_COLORS
-    )
-    
-    fig11 = px.bar(df_pt_grouped, 
-              x='Year', 
-              y='EV/Revenue', 
-              title="Recent Deals - EV/Revenue",
-              labels={'EV/Revenue': 'EV/Revenue'},
-              height=400)
-    # fig11.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
+        fig14 = px.bar(
+            df_rma_bs_grouped,
+            x='Grouped_LineItems',
+            y='Value',
+            color='ReportID',
+            title="RMA - Assets and Liabilities & Equity",
+            labels={'Value_in_$': 'Value ($)', 'Grouped_LineItems': ' '},
+            text_auto=True
+        )
 
-    fig12 = px.bar(df_pt_grouped, 
-              x='Year', 
-              y='EV/EBITDA', 
-              title="Recent Deals - EV/EBITDA",
-              labels={'EV/EBITDA': 'EV/EBITDA'},
-              height=400,
-              color_discrete_sequence=['dark_blue'])
-    # fig12.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
-
-    fig13 = px.bar(
-        df_rma_is,
-        x='LineItems',
-        y='Value',
-        title="RMA - Income Statement",
-        labels={'Value': 'Value ($)', 'LineItems': ' '},
-        text_auto=True,
-        color_discrete_sequence=['dark_blue']
-    )
-
-    fig14 = px.bar(
-        df_rma_bs_grouped,
-        x='Grouped_LineItems',
-        y='Value',
-        color='ReportID',
-        title="RMA - Assets and Liabilities & Equity",
-        labels={'Value_in_$': 'Value ($)', 'Grouped_LineItems': ' '},
-        text_auto=True
-    )
-
-    fig14.update_layout(
-        xaxis_title=" ",
-        yaxis_title="Value ($)",
-        xaxis_tickangle=45
-    )
+        fig14.update_layout(
+            xaxis_title=" ",
+            yaxis_title="Value ($)",
+            xaxis_tickangle=45
+        )
 
     col1, col2 = st.columns(2)
 
