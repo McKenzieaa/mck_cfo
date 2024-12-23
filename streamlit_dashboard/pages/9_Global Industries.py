@@ -288,14 +288,14 @@ with st.expander("", expanded=True):
                 font=dict(size=8)  # Set font size to 8
                 )
             )
-            # st.plotly_chart(fig1)
+        st.plotly_chart(fig1)
 
         fig2 = px.line(
             df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
             title="Electricity End Use (Billion Kilowatthours)"
         )
         fig2.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
-        # st.plotly_chart(fig2)
+        st.plotly_chart(fig2)
 
         # Average Price of Electricity Chart
         fig3 = px.line(
@@ -303,7 +303,7 @@ with st.expander("", expanded=True):
             title="Average Price of Electricity (Cents per Kilowatthour)"
         )
         fig3.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
-        # st.plotly_chart(fig3)
+        st.plotly_chart(fig3)
 
         # Electricity Generation Map
 
