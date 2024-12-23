@@ -293,7 +293,7 @@ with st.expander("", expanded=True):
         df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
         title="Electricity End Use (Billion Kilowatthours)"
     )
-    fig2.update_traces(line_color=PRIMARY_COLORS["dark_blue"])
+    fig2.update_traces(line_color="#032649")
     st.plotly_chart(fig2)
 
     # Average Price of Electricity Chart
@@ -301,7 +301,7 @@ with st.expander("", expanded=True):
         df_avg_price, x="Year", y=df_avg_price.columns[1],
         title="Average Price of Electricity (Cents per Kilowatthour)"
     )
-    fig3.update_traces(line_color=PRIMARY_COLORS["dark_blue"])
+    fig3.update_traces(line_color="#032649")
     # st.plotly_chart(fig3)
 
     # Electricity Generation Map
@@ -340,7 +340,7 @@ with st.expander("", expanded=True):
             x="year", y="renewables_share_elec", color="country",
             title="Renewable Share of Electricity"
         )
-        fig5.update_traces(line_color="#0068c9")
+        fig5.update_traces(line_color="#032649")
         # st.plotly_chart(fig5)
 
     # Solar Projects Coming Up Next 12 Months
@@ -359,9 +359,9 @@ with st.expander("", expanded=True):
         title='Electricity Generation per Capita by Energy Source (Major Countries in 2023)',
         labels={'country': 'Country', 'Per Capita Generation': 'Percentage of Total Generation'},
         color_discrete_map={
-            'Fossil': '#0068c9',        
-            'Nuclear': '#FFA500',      
-            'Renewables': '#1C798A'     
+            'Fossil': '#032649',        
+            'Nuclear': '#1C798A',      
+            'Renewables': '#EB8928'     
         }
     )
     fig6.update_layout(barmode='stack')
