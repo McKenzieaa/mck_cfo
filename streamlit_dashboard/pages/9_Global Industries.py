@@ -261,12 +261,21 @@ with st.expander("", expanded=True):
     market_data = get_market_size_data(selected_categories)
     if market_data is not None:
         yearly_data = market_data.groupby(['Year', 'Category'], as_index=False).agg({'Value': 'mean'})
+
+        PRIMARY_COLORS = {
+            'dark_blue': '#032649',
+            'orange': '#EB8928',
+            'dark_grey': '#595959',
+            'light_grey': '#A5A5A5',
+            'turquoise_blue': '#1C798A'
+        }
+        
         fig1 = px.bar(
             yearly_data,
             x='Year', y='Value', color='Category',
             title="Market Size",
             labels={'Value': 'Market-Size (in millions)', 'Year': ''},
-            color_discrete_sequence=["#0068c9"]
+            color_discrete_sequence=['dark_blue']
         )
 
         fig1.update_layout(
@@ -285,19 +294,19 @@ with st.expander("", expanded=True):
         df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
         title="Electricity End Use (Billion Kilowatthours)"
     )
-    fig2.update_traces(line_color="#0068c9")
-    st.plotly_chart(fig2)
+    fig2.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
+    # st.plotly_chart(fig2)
 
     # Average Price of Electricity Chart
     fig3 = px.line(
         df_avg_price, x="Year", y=df_avg_price.columns[1],
         title="Average Price of Electricity (Cents per Kilowatthour)"
     )
-    fig3.update_traces(line_color="#0068c9")
+    fig3.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
     # st.plotly_chart(fig3)
 
     # Electricity Generation Map
-    # st.sidebar.header("Electricity Generation")
+
     selected_year =(2023) #st.sidebar.slider("Select Year", 2000, 2023, 2023)
     df_selected_year = df_electricity_gen[df_electricity_gen["year"] == selected_year]
     fig4 = px.choropleth(
@@ -305,15 +314,14 @@ with st.expander("", expanded=True):
         locations='country',
         locationmode='country names',
         color='electricity_generation',
-        title=f'Electricity Generation by Country ({selected_year})',
-        labels={'electricity_generation': 'Electricity Generation (GWh)'},
-        color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
+        title='Electricity Generation, 2023',
+        labels={'electricity_generation': 'in (Twh)'},
+        color_continuous_scale="Blues" 
     )
 
-    # Optional: Update layout to fine-tune the color bar
     fig4.update_layout(
         coloraxis_colorbar=dict(
-            title="Electricity Generation (GWh)",
+            title=" ",
             tickvals=[df_selected_year['electricity_generation'].min(), df_selected_year['electricity_generation'].max()],
             ticks="outside"
         )
@@ -322,7 +330,6 @@ with st.expander("", expanded=True):
     # st.plotly_chart(fig4)
 
     # Renewable Share of Electricity
-    # st.sidebar.header("Renewable Share Selection")
     selected_countries = ["World"]
     # st.sidebar.multiselect('Select Countries', df_renew_share['country'].unique(), default=["World"] )
     if selected_countries:
@@ -332,7 +339,7 @@ with st.expander("", expanded=True):
             x="year", y="renewables_share_elec", color="country",
             title="Renewable Share of Electricity"
         )
-        fig5.update_traces(line_color="#0068c9")
+        fig5.update_traces(line_color=PRIMARY_COLORS['dark_blue'])
         # st.plotly_chart(fig5)
 
     # Solar Projects Coming Up Next 12 Months
@@ -348,12 +355,12 @@ with st.expander("", expanded=True):
         y='country',
         color='Energy Source',
         orientation='h',  # Horizontal orientation
-        title='Electricity Generation per Capita by Energy Source (Major Countries in 2023)',
-        labels={'country': 'Country', 'Per Capita Generation': 'Percentage of Total Generation'},
-        color_discrete_map={
-            'Fossil': '#0068c9',        
-            'Nuclear': '#FFA500',      
-            'Renewables': '#1C798A'     
+        title='Per Capita Electricity Generation from sources, 2023(kWh)',
+        labels={'country': 'Country', 'Per Capita Generation': '% Total Generation'},
+        color_discrete_map = {
+            'Fossil': PRIMARY_COLORS['dark_blue'],
+            'Nuclear': PRIMARY_COLORS['orange'],
+            'Renewables': PRIMARY_COLORS['turquoise_blue']
         }
     )
     fig6.update_layout(barmode='stack')
@@ -361,18 +368,32 @@ with st.expander("", expanded=True):
     # st.plotly_chart(fig6)
 
     df_ene_cons_2023 = df_ene_cons[df_ene_cons['Year'] == '2023']
-    fig7 = px.pie(df_ene_cons_2023, 
-              names='Description', 
-              values='Value', 
-              title='Energy Consumption by Source in 2023',
-              labels={'Value': 'Energy Value', 'Description': 'Energy Source'})
+    fig7 = px.pie(
+        df_ene_cons_2023, 
+        names='Description', 
+        values='Value', 
+        title='Energy Consumption by Source in 2023',
+        labels={'Value': 'Energy Value', 'Description': 'Energy Source'},
+        color='Description',
+        color_discrete_map={
+            'Solar': PRIMARY_COLORS['dark_blue'], 
+            'Wind': ["#0068c9"], 
+            'Coal': PRIMARY_COLORS['turquoise_blue'],
+            'Natural Gas': PRIMARY_COLORS['dark grey'],
+            'Hydro': PRIMARY_COLORS['Light grey'],  
+            'Other':PRIMARY_COLORS['orange']  
+        }
+    )
 
- 
     fig8 = px.bar(
         df_ene_cons,
         x='Year', y='Value', color='Description',
         title='Energy Source Distribution Over Years',
-        labels={'Value': 'Energy Value', 'Year': 'Year'}
+        labels={'Value': 'Energy Value', 'Year': 'Year'},
+        color_discrete_map={'Residential': PRIMARY_COLORS['dark_blue'],
+                            'Transportation': ["#0068c9"],
+                            'Industrial': PRIMARY_COLORS['turquoise_blue'],
+                            'Commercial':PRIMARY_COLORS['orange'] }
     )
 
     fig9 = px.line(
@@ -385,7 +406,8 @@ with st.expander("", expanded=True):
             'Year': 'Year',
             'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
             'Countries': 'Countries'
-        }
+        },
+        color_discrete_map=PRIMARY_COLORS
     )
     fig9.update_yaxes(tickformat=".1%")
 
@@ -395,7 +417,9 @@ with st.expander("", expanded=True):
              color='Description',
              title="Electricity Generation (2023)",
              labels={'Category': 'Energy Source'},
-             height=600)
+             height=600,
+             color_discrete_map=PRIMARY_COLORS
+    )
     
     fig11 = px.bar(df_pt_grouped, 
               x='Year', 
@@ -410,7 +434,8 @@ with st.expander("", expanded=True):
               y='EV/EBITDA', 
               title="Recent Deals - EV/EBITDA",
               labels={'EV/EBITDA': 'EV/EBITDA'},
-              height=400)
+              height=400,
+              color_discrete_sequence=['dark_blue'])
     # fig12.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
     fig13 = px.bar(
@@ -419,7 +444,8 @@ with st.expander("", expanded=True):
         y='Value',
         title="RMA - Income Statement",
         labels={'Value': 'Value ($)', 'LineItems': ' '},
-        text_auto=True
+        text_auto=True,
+        color_discrete_sequence=['dark_blue']
     )
 
     fig14 = px.bar(
@@ -477,7 +503,7 @@ with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path):
 
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data","energy_template.pptx")
     prs = Presentation(template_path)
@@ -503,7 +529,8 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     chart_configurations = [
         (4, fig1, Inches(6.85), Inches(1.30), Inches(2.5), Inches(6.25)),  # Slide 1: Market Size
         (1, fig2, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 2: Electricity End Use
-        (2, value_chain_image_path, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 3: Value Chain
+        (4, value_chain_image_path, Inches(0.3), Inches(4.1), Inches(5.5), Inches(3)),  # Slide 3: Value Chain
+        (5, solar_image_path, Inches(3.3), Inches(5.9), Inches(0.2), Inches(1.6)),  # Slide 3: Value Chain
         (3, fig3, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 4: Average Price
         (4, fig4, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 5: Electricity Generation
         (5, fig5, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 6: Renewable Share
@@ -530,10 +557,10 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path):
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -544,4 +571,5 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, f
             st.error(f"Error: {e}")
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
+solar_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/solar.png"
 export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path)
