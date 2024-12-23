@@ -46,19 +46,9 @@ except Exception as e:
     st.error(f"Error loading data from MySQL: {e}")
     st.stop()
 
-# Fetch Public Listed Companies data
-query2 = """
-SELECT `Name`, `Country`, `Enterprise Value (in $)`, `Revenue (in $)`, `EBITDA (in $)`, `Business Description`, `Industry`
-FROM public_comp_table
-"""
-try:
-    df_public = pd.read_sql(query2, conn)
-except Exception as e:
-    st.error(f"Error loading data from MySQL (Public Companies): {e}")
-    st.stop()
 
 query3 = """
-SELECT `NAICS`, `LineItems`, `Percent`, `ReportID`, `Industry`, `Value_in_$`
+SELECT `NAICS`, `LineItems`, `Percent`, `ReportID`, `Industry`, `Value`
 FROM rma_table
 """
 try:
@@ -83,7 +73,7 @@ df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean()
 
 # RMA Data
 df_rma_filtered = df_rma[df_rma['NAICS'].astype(str).str.startswith('2211')]
-df_rma_filtered = df_rma_filtered.groupby(['ReportID', 'LineItems'], as_index=False)['Value_in_$'].mean()
+df_rma_filtered = df_rma_filtered.groupby(['ReportID', 'LineItems'], as_index=False)['Value'].mean()
 df_rma_is = df_rma_filtered[df_rma_filtered['ReportID'] == 'Income Statement']
 df_rma_bs = df_rma_filtered[df_rma_filtered['ReportID'] == 'Balance Sheet']
 
