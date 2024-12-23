@@ -64,9 +64,9 @@ industries_pt = [
     'Natural Gas Extraction',
     'Petroleum and Petroleum Products Merchant Wholesalers (except Bulk Stations and Terminals)',
     'Crude Petroleum Extraction',
-    'Pipeline Transportation of Natural Gas',
+    # 'Pipeline Transportation of Natural Gas',
     'Natural Gas Distribution',
-    'Industrial Gas Manufacturing'
+    # 'Industrial Gas Manufacturing'
 ]
 df_pt_filter = df_pt[df_pt['Industry'].isin(industries_pt)]
 df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
@@ -501,7 +501,7 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
             raise FileNotFoundError(f"The image at {image_path} was not found. Please check the path.")
 
     chart_configurations = [
-        (0, fig1, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 1: Market Size
+        (4, fig1, Inches(6.85), Inches(1.30), Inches(2.5), Inches(6.25)),  # Slide 1: Market Size
         (1, fig2, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 2: Electricity End Use
         (2, value_chain_image_path, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 3: Value Chain
         (3, fig3, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 4: Average Price
