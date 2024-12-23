@@ -75,8 +75,9 @@ df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean()
 df_rma_filtered = df_rma[df_rma['NAICS'].astype(str).str.startswith('2211')]
 df_rma_filtered = df_rma_filtered.groupby(['ReportID', 'LineItems'], as_index=False)['Value'].mean()
 df_rma_is = df_rma_filtered[df_rma_filtered['ReportID'] == 'Income Statement']
-df_rma_bs = df_rma_filtered[df_rma_filtered['ReportID'] == 'Liabilities & Equity']
-
+df_rma_bs = df_rma_filtered[df_rma_filtered['ReportID'].isin(['Assets', 'Liabilities & Equity'])]
+df_rma_bs_grouped = (df_rma_bs.groupby(['ReportID', 'LineItems'], as_index=False)['Value'].mean())
+df_rma_bs_grouped['Grouped_LineItems'] = df_rma_bs_grouped['ReportID'] + ': ' + df_rma_bs_grouped['LineItems']
 
 # Selected Countries
 selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
@@ -412,18 +413,25 @@ with st.expander("", expanded=True):
         df_rma_is,
         x='LineItems',
         y='Value',
-        title="Average Value in $ for Income Statement",
-        labels={'Value': 'Average Value ($)', 'LineItems': 'Line Items'},
+        title="RMA - Income Statement",
+        labels={'Value': 'Value ($)', 'LineItems': ' '},
         text_auto=True
     )
 
     fig14 = px.bar(
-        df_rma_bs,
-        x='LineItems',
+        df_rma_bs_grouped,
+        x='Grouped_LineItems',
         y='Value',
-        title="Average Value in $ for Income Statement",
-        labels={'Value': 'Average Value ($)', 'LineItems': 'Line Items'},
+        color='ReportID',
+        title="RMA - Assets and Liabilities & Equity",
+        labels={'Value_in_$': 'Value ($)', 'Grouped_LineItems': ' '},
         text_auto=True
+    )
+
+    fig14.update_layout(
+        xaxis_title=" ",
+        yaxis_title="Value ($)",
+        xaxis_tickangle=45
     )
 
     col1, col2 = st.columns(2)
