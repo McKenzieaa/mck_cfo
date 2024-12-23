@@ -411,18 +411,18 @@ with st.expander("", expanded=True):
     fig13 = px.bar(
         df_rma_is,
         x='LineItems',
-        y='Value_in_$',
+        y='Value',
         title="Average Value in $ for Income Statement",
-        labels={'Value_in_$': 'Average Value ($)', 'LineItems': 'Line Items'},
+        labels={'Value': 'Average Value ($)', 'LineItems': 'Line Items'},
         text_auto=True
     )
 
     fig14 = px.bar(
         df_rma_bs,
         x='LineItems',
-        y='Value_in_$',
+        y='Value',
         title="Average Value in $ for Income Statement",
-        labels={'Value_in_$': 'Average Value ($)', 'LineItems': 'Line Items'},
+        labels={'Value': 'Average Value ($)', 'LineItems': 'Line Items'},
         text_auto=True
     )
 
