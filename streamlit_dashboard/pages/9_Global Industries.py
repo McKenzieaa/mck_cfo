@@ -512,8 +512,8 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
         (8, fig8, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 9: Energy Source Distribution
         (9, fig9, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 10: Renewables Percentage
         (10, fig10, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 11: Per Capita Generation
-        (11, fig11, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 12: Precedent Transaction - EV/Revenue
-        (12, fig12, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 13: Precedent Transaction - EV/EBITDA
+        (33, fig11, Inches(1.2), Inches(0.65), Inches(11), Inches(3.75)),  # Slide 12: Precedent Transaction - EV/Revenue
+        (33, fig12, Inches(1.2), Inches(3.5), Inches(11), Inches(3.75)),  # Slide 13: Precedent Transaction - EV/EBITDA
         (13, fig13, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 14: RMA - Income Statement
         (14, fig14, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 15: RMA - Balance Sheet
     ]
