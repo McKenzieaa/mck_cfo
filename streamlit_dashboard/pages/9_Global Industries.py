@@ -352,12 +352,20 @@ with st.expander("", expanded=True):
     # Renewable Share of Electricity
     if selected_countries:
         filtered_df = df_renew_share[df_renew_share["country"].isin(selected_countries)]
-        fig5 = px.line(
-            filtered_df,
-            x="year", y="renewables_share_elec", color="country",
-            title="Renewable Share of Electricity"
-        )
-        fig5.update_traces(line_color=PRIMARY_COLORS, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=10, r=10, t=10, b=10),width=625,height=250)
+
+    fig5 = px.line(
+        filtered_df,
+        x="year", y="renewables_share_elec", color="country",
+        title="Renewable Share of Electricity"
+    )
+    fig5.update_traces(line_color=PRIMARY_COLORS)
+    fig5.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=10, r=10, t=10, b=10),
+        width=625,
+        height=250
+    )
         # st.plotly_chart(fig5)
 
     # Solar Projects Coming Up Next 12 Months
@@ -545,8 +553,8 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
             raise FileNotFoundError(f"The image at {image_path} was not found. Please check the path.")
 
     chart_configurations = [
-        (4, fig1, Inches(1.35), Inches(6.75), Inches(2.5), Inches(6.20)),  # Slide 3: Market Size
-        (4, fig2, Inches(4), Inches(6.75), Inches(3), Inches(3.4)),  # Slide 3: Electricity End Use
+        (4, fig1, Inches(1.35), Inches(6.75), Inches(2.5), Inches(6.20)),  # Slide 1: Market Size
+        (4, fig2, Inches(4), Inches(6.75), Inches(3), Inches(3.4)),  # Slide 2: Electricity End Use
         (4, value_chain_image_path, Inches(0.3), Inches(4), Inches(2.5), Inches(6.20)),  # Slide 3: Value Chain
         (5, solar_image_path, Inches(1.3), Inches(0.3), Inches(2.5), Inches(6.25)),  # Slide 4: Solar
         (4, fig3, Inches(4), Inches(9.90), Inches(3), Inches(3.4)),  # Slide 4: Average Price
