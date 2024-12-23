@@ -335,17 +335,22 @@ with st.expander("", expanded=True):
             color='electricity_generation',
             title=f'Electricity Generation by Country ({selected_year})',
             labels={'electricity_generation': 'Electricity Generation (GWh)'},
-            color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
+            color_continuous_scale="Blues" 
         )
 
-        # Optional: Update layout to fine-tune the color bar
         fig4.update_layout(
-            coloraxis_colorbar=dict(
-                title="Electricity Generation (GWh)",
-                tickvals=[df_selected_year['electricity_generation'].min(), df_selected_year['electricity_generation'].max()],
-                ticks="outside"
-            )
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.1, 
+                xanchor="center",
+                x=0.5  
+            ),
+            margin=dict(l=10, r=10, t=50, b=50),
+            height=600,
+            title=dict(x=0.5, xanchor='center'),
         )
+
 
         # st.plotly_chart(fig4)
 
