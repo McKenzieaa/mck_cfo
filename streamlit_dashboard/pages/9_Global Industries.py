@@ -358,7 +358,9 @@ with st.expander("", expanded=True):
             x="year", y="renewables_share_elec", color="country",
             title="Renewable Share of Electricity"
         )
-        fig5.for_each_trace(lambda trace: trace.update(line=dict(color=PRIMARY_COLORS.get('turquoise_blue', '#000000'))))
+        colors_list = list(PRIMARY_COLORS.values())
+        for i, trace in enumerate(fig5.data):
+            trace.update(line=dict(color=colors_list[i % len(colors_list)])) 
         fig5.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
