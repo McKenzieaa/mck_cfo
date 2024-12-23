@@ -70,6 +70,8 @@ industries_pt = [
 ]
 df_pt_filter = df_pt[df_pt['Industry'].isin(industries_pt)]
 df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
+df_pt_grouped['EV/Revenue'] = df_pt_grouped['EV/Revenue'].round(2)
+df_pt_grouped['EV/EBITDA'] = df_pt_grouped['EV/EBITDA'].round(2)
 
 # RMA Data
 df_rma_filtered = df_rma[df_rma['NAICS'].astype(str).str.startswith('2211')]
