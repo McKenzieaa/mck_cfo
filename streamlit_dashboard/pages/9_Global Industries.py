@@ -74,7 +74,7 @@ df_pt_grouped = df_pt_filter.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean()
 # RMA Data
 df_rma_filtered = df_rma[df_rma['NAICS'].astype(str).str.startswith('2211')]
 df_rma_filtered = df_rma_filtered.groupby(['ReportID', 'LineItems'], as_index=False)['Value'].mean()
-df_rma_filtered['Value'] = (df_rma_filtered['Value'] / 1_000_000).round(1)
+df_rma_filtered['Value'] = (df_rma_filtered['Value'] / 1_000_000).round(2) + 'm'
 df_rma_is = df_rma_filtered[df_rma_filtered['ReportID'] == 'Income Statement']
 df_rma_bs = df_rma_filtered[df_rma_filtered['ReportID'].isin(['Assets', 'Liabilities & Equity'])]
 df_rma_bs_grouped = (df_rma_bs.groupby(['ReportID', 'LineItems'], as_index=False)['Value'].mean())
