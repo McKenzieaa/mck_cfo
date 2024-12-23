@@ -262,30 +262,30 @@ with st.expander("", expanded=True):
     if market_data is not None:
         yearly_data = market_data.groupby(['Year', 'Category'], as_index=False).agg({'Value': 'mean'})
 
-        PRIMARY_COLORS = {
-            'dark_blue': '#032649',
-            'orange': '#EB8928',
-            'dark_grey': '#595959',
-            'light_grey': '#A5A5A5',
-            'turquoise_blue': '#1C798A'
+    PRIMARY_COLORS = {
+        'dark_blue': '#032649',
+        'orange': '#EB8928',
+        'dark_grey': '#595959',
+        'light_grey': '#A5A5A5',
+        'turquoise_blue': '#1C798A'
         }
         
-        fig1 = px.bar(
-            yearly_data,
-            x='Year', y='Value', color='Category',
-            title="Market Size",
-            labels={'Value': 'Market-Size (in millions)', 'Year': ''},
-            color_discrete_sequence=['dark_blue']
+    fig1 = px.bar(
+        yearly_data,
+        x='Year', y='Value', color='Category',
+        title="Market Size",
+        labels={'Value': 'Market-Size (in millions)', 'Year': ''},
+        color_discrete_sequence=['dark_blue']
         )
 
-        fig1.update_layout(
-            legend=dict(
-                x=0,  # Position at the left
-                y=1,  # Position at the top
-                title="",
-                xanchor='left', 
-                yanchor='top',
-                font=dict(size=8)  # Set font size to 8
+    fig1.update_layout(
+        legend=dict(
+            x=0,  # Position at the left
+            y=1,  # Position at the top
+            title="",
+            xanchor='left', 
+            yanchor='top',
+            font=dict(size=8)  # Set font size to 8
             )
         )
         # st.plotly_chart(fig1)
