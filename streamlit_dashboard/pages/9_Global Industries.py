@@ -32,7 +32,6 @@ except mysql.connector.Error as e:
     st.error(f"Error connecting to MySQL: {e}")
     st.stop()
 
-# Precdent Transaction
 query = """
 SELECT 
     `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
@@ -59,6 +58,7 @@ except Exception as e:
 
 conn.close()
 
+# Precdent Transaction
 industries_pt = [
     'Hydroelectric Power Generation',
     'Natural Gas Extraction',
@@ -85,7 +85,8 @@ df_rma_bs_grouped['Grouped_LineItems'] =  df_rma_bs_grouped['LineItems']
 
 # Selected Countries
 selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
-    
+
+# Chart 1 = Market Size
 category_data = [
     ('22T', 'Utilities', 'QREV', 'QSS'),
     ('2211T', 'Electric Power Generation, Transmission and Distribution', 'QREV', 'QSS')
@@ -147,13 +148,14 @@ with zipfile.ZipFile(io.BytesIO(response.content)) as z:
     with z.open("Table 09.08.xlsx") as f2:
         df_avg_price = pd.read_excel(f2, sheet_name="Annual Data", skiprows=8)
 
+# Chart 2 = electricity_end_use & avg_price (chart pending)
 df_electricity_end_use.rename(columns={df_electricity_end_use.columns[0]: "Year"}, inplace=True)
 df_avg_price.rename(columns={df_avg_price.columns[0]: "Year"}, inplace=True)
 
 df_electricity_gen = pd.read_csv(url2)
 df_renew_share = df_electricity_gen.dropna(subset=['renewables_share_elec'])
 
-df_electricity_gen = pd.read_csv(url2)
+
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
 # df_per_cap_elec_gen['total_elec_per_capita'] = (
@@ -230,7 +232,7 @@ df_ene_cons['Value'] = df_ene_cons['Value'].round(1)
 
 # Share of electricity production from renewables
 share_elec_prod = "https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true"
-
+# Fetch the data.
 try:
     response = requests.get(share_elec_prod)
     response.raise_for_status() 
@@ -253,6 +255,23 @@ if 'Year' in filt_share_elec_prod.columns and 'renewable_share_of_electricity__p
     filt_share_elec_prod = filt_share_elec_prod.dropna(subset=['Year', 'renewable_share_of_electricity__pct'])
 else:
     raise ValueError("Required columns 'Year' or 'renewable_share_of_electricity__pct' are missing from the DataFrame.")
+
+per_cap_electricity = pd.read_csv("https://ourworldindata.org/grapher/per-capita-electricity-fossil-nuclear-renewables.csv?v=1&csvType=full&useColumnShortNames=true", 
+                                  storage_options={'User-Agent': 'Our World In Data data fetch/1.0'})
+per_cap_electricity = per_cap_electricity.rename(columns={
+    'Entity': 'country',     
+    per_cap_electricity.columns[3]: 'fossil',  
+    per_cap_electricity.columns[4]: 'nuclear', 
+    per_cap_electricity.columns[5]: 'renewable'
+})
+
+per_cap_electricity = per_cap_electricity.drop(columns=['Code'])
+filter_per_cap_electricity = per_cap_electricity[(per_cap_electricity['Year'] == 2023) & 
+                                    (per_cap_electricity['country'].isin(selected_countries))]
+
+filter_per_cap_electricity[['fossil', 'nuclear', 'renewable']] = filter_per_cap_electricity[['fossil', 'nuclear', 'renewable']].div(
+    filter_per_cap_electricity[['fossil', 'nuclear', 'renewable']].sum(axis=1), axis=0)
+
 
 # ENERGY
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Energy</h2>", unsafe_allow_html=True)
@@ -388,11 +407,11 @@ with st.expander("", expanded=True):
         x='Year',
         y='renewable_share_of_electricity__pct',
         color='Countries',
-        title='Renewables as a Percentage of Electricity Production',
+        title='Share of Renewable Electricity Contribution (%) In Various Countries',
         labels={
             'Year': 'Year',
             'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
-            'Countries': 'Countries'
+            'Countries': ''
         }
     )
     fig9.update_yaxes(tickformat=".1%")
@@ -446,6 +465,24 @@ with st.expander("", expanded=True):
         xaxis_tickangle=45
     )
 
+    fig15 = px.bar(filter_per_cap_electricity, 
+             y='country', 
+             x=['fossil', 'nuclear', 'renewable'], 
+             title="Energy Mix per Capita by Country in 2023",
+             labels={'value': 'Percentage', 'variable': 'Energy Source', 'country': 'Country'},
+             color_discrete_map={'fossil': PRIMARY_COLORS['dark_blue'], 'nuclear': PRIMARY_COLORS['orange'], 'renewable': PRIMARY_COLORS['turquoise_blue']},
+             orientation='h', 
+             text_auto='.1%')  
+
+    fig15.update_layout(
+        xaxis=dict(title='Percentage', tickformat='.0%', range=[0, 1]),
+        yaxis_title="Country",
+        barmode='stack',
+        legend_title="Energy Source",
+        height=500,
+        width=800
+    )
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -468,6 +505,7 @@ with st.expander("", expanded=True):
     st.plotly_chart(fig12, use_container_width=True)
     st.plotly_chart(fig13, use_container_width=True)
     st.plotly_chart(fig14, use_container_width=True)
+    st.plotly_chart(fig15, use_container_width=True)
 
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
@@ -485,7 +523,7 @@ with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
 
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data","energy_template.pptx")
     prs = Presentation(template_path)
@@ -514,17 +552,18 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
         (4, value_chain_image_path, Inches(0.3), Inches(4.1), Inches(5.5), Inches(3)),  # Slide 3: Value Chain
         (5, solar_image_path, Inches(3.3), Inches(5.9), Inches(0.2), Inches(1.6)),  # Slide 3: Value Chain
         (3, fig3, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 4: Average Price
-        (4, fig4, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 5: Electricity Generation
+        (4, fig4, Inches(6.40), Inches(2.65), Inches(0.25), Inches(1.3)),  # Slide 5: Electricity Generation
         (5, fig5, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 6: Renewable Share
         (6, fig6, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 7: Per Capita Electricity
         (7, fig7, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 8: Energy Source Consumption
         (8, fig8, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 9: Energy Source Distribution
-        (9, fig9, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 10: Renewables Percentage
-        (10, fig10, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 11: Per Capita Generation
+        (6, fig9, Inches(7), Inches(1.40), Inches(5.65), Inches(2.3)),  # Slide 6: Share Of Renewable Electricity Contribution (%) In Various Countries
+        (10, fig10, Inches(0.2), Inches(4.5), Inches(6.45), Inches(2.4)),  # Slide 11: Per Capita Generation
         (33, fig11, Inches(1.2), Inches(0.65), Inches(11), Inches(3.75)),  # Slide 12: Precedent Transaction - EV/Revenue
         (33, fig12, Inches(1.2), Inches(3.5), Inches(11), Inches(3.75)),  # Slide 13: Precedent Transaction - EV/EBITDA
         (13, fig13, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 14: RMA - Income Statement
         (14, fig14, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 15: RMA - Balance Sheet
+        (6, fig15, Inches(5.65), Inches(2.5), Inches(7), Inches(4.5)),  # Slide 6: Per Capita Electricity Generation From Various Sources By Countries (%) 
     ]
 
     for config in chart_configurations:
@@ -539,10 +578,10 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path):
+def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -554,4 +593,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, f
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
 solar_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/solar.png"
-export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, value_chain_image_path, solar_image_path)
+export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
