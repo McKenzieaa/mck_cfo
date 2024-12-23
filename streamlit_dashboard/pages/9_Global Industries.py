@@ -274,7 +274,7 @@ with st.expander("", expanded=True):
             x='Year', y='Value', color='Category',
             title="Market Size",
             labels={'Value': 'Market-Size (in millions)', 'Year': ''},
-            color_discrete_sequence=PRIMARY_COLORS["dark_blue"]
+            color_discrete_sequence=[PRIMARY_COLORS["dark_blue"]]
         )
 
         fig1.update_layout(
