@@ -335,13 +335,27 @@ with st.expander("", expanded=True):
             color='electricity_generation',
             title=f'Electricity Generation by Country ({selected_year})',
             labels={'electricity_generation': 'Electricity Generation (GWh)'},
-            color_continuous_scale="Blues",
-            autocolorscale=False,
-            reversescale=True,
-            marker_line_color='darkgray',
-            marker_line_width=0.5,
+            color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
         )
-        fig4.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+
+
+        # selected_year =(2023) #st.sidebar.slider("Select Year", 2000, 2023, 2023)
+        # df_selected_year = df_electricity_gen[df_electricity_gen["year"] == selected_year]
+        # fig4 = px.choropleth(
+        #     df_selected_year,
+        #     locations='country',
+        #     locationmode='country names',
+        #     color='electricity_generation',
+        #     title=f'Electricity Generation by Country ({selected_year})',
+        #     labels={'electricity_generation': 'Electricity Generation (GWh)'},
+        #     color_continuous_scale="Blues",
+        #     autocolorscale=False,
+        #     reversescale=True,
+        #     marker_line_color='darkgray',
+        #     marker_line_width=0.5,
+        # )
+        # fig4.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
         # st.plotly_chart(fig4)
 
