@@ -329,44 +329,15 @@ with st.expander("", expanded=True):
         # st.sidebar.header("Electricity Generation")
         selected_year =(2023) #st.sidebar.slider("Select Year", 2000, 2023, 2023)
         df_selected_year = df_electricity_gen[df_electricity_gen["year"] == selected_year]
-        # fig4 = px.choropleth(
-        #     df_selected_year,
-        #     locations='country',
-        #     locationmode='country names',
-        #     color='electricity_generation',
-        #     title=f'Electricity Generation by Country ({selected_year})',
-        #     labels={'electricity_generation': 'Electricity Generation (GWh)'},
-        #     color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
-        # )
-
-        fig4 = go.Figure(data=go.Choropleth(
-            locations = df_selected_year['country'],
-            z = df_selected_year['electricity_generation'],
-            colorscale = 'Blues',
-            autocolorscale=False,
-            reversescale=True,
-            marker_line_color='darkgray',
-            marker_line_width=0.5,
-            colorbar_tickprefix = '$',
-            colorbar_title = '(GWh)',
-        ))
-
-        fig4.update_layout(
-            title_text='Electricity Generation by Country',
-            geo=dict(
-                showframe=False,
-                showcoastlines=False,
-                projection_type='equirectangular'
-            ),
-            annotations = [dict(
-                x=0.55,
-                y=0.1,
-                xref='paper',
-                yref='paper',
-                showarrow = False
-            )]
+        fig4 = px.choropleth(
+            df_selected_year,
+            locations='country',
+            locationmode='country names',
+            color='electricity_generation',
+            title=f'Electricity Generation by Country ({selected_year})',
+            labels={'electricity_generation': 'Electricity Generation (GWh)'},
+            color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
         )
-
 
         # st.plotly_chart(fig4)
 
