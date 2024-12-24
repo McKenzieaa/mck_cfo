@@ -336,7 +336,6 @@ with st.expander("", expanded=True):
             title=f'Electricity Generation by Country ({selected_year})',
             labels={'electricity_generation': 'Electricity Generation (GWh)'},
             color_continuous_scale="Blues",  # Example color scale; you can choose others like "Plasma", "Blues", etc.
-            autocolorscale=False,
             reversescale=True,
             marker_line_color='darkgray'
         )
