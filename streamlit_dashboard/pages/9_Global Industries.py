@@ -393,13 +393,13 @@ with st.expander("", expanded=True):
                 values='Value', 
                 title='Energy Consumption by Source in 2023',
                 labels={'Value': 'Energy Value', 'Description': 'Energy Source'})
-
     
         fig8 = px.bar(
             df_ene_cons,
             x='Year', y='Value', color='Description',
             title='Energy Source Distribution Over Years',
-            labels={'Value': 'Energy Value', 'Year': 'Year'}
+            labels={'Value': 'Energy Value', 'Year': 'Year'},
+            color_discrete_map=PRIMARY_COLORS
         )
 
         fig9 = px.line(
