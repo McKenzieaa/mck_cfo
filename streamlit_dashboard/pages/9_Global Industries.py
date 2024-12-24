@@ -305,7 +305,7 @@ with st.expander("", expanded=True):
                 yanchor='top',
                 font=dict(size=8)  # Set font size to 8
             ),
-            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0),width=610,height=240
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=0, r=0, t=0) #,width=610,height=240
         )
         # st.plotly_chart(fig1)
 
@@ -314,7 +314,7 @@ with st.expander("", expanded=True):
             title="Electricity End Use (Billion Kilowatthours)"
         )
         fig2.update_traces(line_color="#032649")
-        st.plotly_chart(fig2)
+        # st.plotly_chart(fig2)
 
         # Average Price of Electricity Chart
         fig3 = px.line(
@@ -335,21 +335,13 @@ with st.expander("", expanded=True):
             color='electricity_generation',
             title=f'Electricity Generation by Country ({selected_year})',
             labels={'electricity_generation': 'Electricity Generation (GWh)'},
-            color_continuous_scale="Blues" 
+            color_continuous_scale="Blues",
+            autocolorscale=False,
+            reversescale=True,
+            marker_line_color='darkgray',
+            marker_line_width=0.5,
         )
-
-        fig4.update_layout(
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=-0.1, 
-                xanchor="center",
-                x=0.5  
-            ),
-            margin=dict(l=10, r=10, t=50, b=50),
-            height=600,
-            title=dict(x=0.5, xanchor='center'),
-        )
+        fig4.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
         # st.plotly_chart(fig4)
 
@@ -369,8 +361,8 @@ with st.expander("", expanded=True):
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
             margin=dict(l=10, r=10, t=10, b=10),
-            width=625,
-            height=250
+            # width=625,
+            # height=250
         )
             # st.plotly_chart(fig5)
 
@@ -440,16 +432,16 @@ with st.expander("", expanded=True):
                 x='Year', 
                 y='EV/Revenue', 
                 title="Recent Deals - EV/Revenue",
-                labels={'EV/Revenue': 'EV/Revenue'},
-                height=400)
+                labels={'EV/Revenue': 'EV/Revenue'},)
+                # height=400)
         # fig11.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
         fig12 = px.bar(df_pt_grouped, 
                 x='Year', 
                 y='EV/EBITDA', 
                 title="Recent Deals - EV/EBITDA",
-                labels={'EV/EBITDA': 'EV/EBITDA'},
-                height=400)
+                labels={'EV/EBITDA': 'EV/EBITDA'},)
+                # height=400)
         # fig12.update_traces(texttemplate='%{text:.1f}'+'x', textposition='auto',textfont=dict(size=10))
 
         fig13 = px.bar(
@@ -491,8 +483,8 @@ with st.expander("", expanded=True):
             yaxis_title="Country",
             barmode='stack',
             legend_title="Energy Source",
-            height=500,
-            width=800
+            # height=500,
+            # width=800
         )
 
     # col1, col2 = st.columns(2)
