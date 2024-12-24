@@ -342,7 +342,6 @@ with st.expander("", expanded=True):
             marker_line_width=0.5
         )
 
-        fig4.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
         # st.plotly_chart(fig4)
 
         # Renewable Share of Electricity
