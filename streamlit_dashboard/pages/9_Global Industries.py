@@ -492,6 +492,8 @@ with st.expander("", expanded=True):
     # with col1:
 
     st.plotly_chart(fig1, use_container_width=True)
+    st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
+    st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
     st.plotly_chart(fig2, use_container_width=True)
     st.plotly_chart(fig3, use_container_width=True)
     st.plotly_chart(fig7, use_container_width=True)
@@ -510,9 +512,6 @@ with st.expander("", expanded=True):
     st.plotly_chart(fig14, use_container_width=True)
     st.plotly_chart(fig15, use_container_width=True)
 
-    st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
-    st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
-
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
     st.write("Agriculture-related analysis and visualizations go here.")
@@ -524,7 +523,6 @@ with st.expander("", expanded=False):
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
-
 
 def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
 
