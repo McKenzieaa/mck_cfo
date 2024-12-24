@@ -338,8 +338,7 @@ with st.expander("", expanded=True):
             color_continuous_scale="Blues",  # Example color scale; you can choose others like "Plasma", "Blues", etc.
             autocolorscale=False,
             reversescale=True,
-            marker_line_color='darkgray',
-            marker_line_width=0.5
+            marker_line_color='darkgray'
         )
 
         # st.plotly_chart(fig4)
