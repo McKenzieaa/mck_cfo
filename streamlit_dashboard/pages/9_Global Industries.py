@@ -342,7 +342,6 @@ with st.expander("", expanded=True):
         fig4 = go.Figure(data=go.Choropleth(
             locations = df_selected_year['country'],
             z = df_selected_year['electricity_generation'],
-            text = df_selected_year['country names'],
             colorscale = 'Blues',
             autocolorscale=False,
             reversescale=True,
