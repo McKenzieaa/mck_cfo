@@ -335,9 +335,7 @@ with st.expander("", expanded=True):
             color='electricity_generation',
             title=f'Electricity Generation by Country ({selected_year})',
             labels={'electricity_generation': 'Electricity Generation (GWh)'},
-            color_continuous_scale="Blues",  # Example color scale; you can choose others like "Plasma", "Blues", etc.
-            reversescale=True,
-            marker_line_color='darkgray'
+            color_continuous_scale="Blues"  # Example color scale; you can choose others like "Plasma", "Blues", etc.
         )
 
         # st.plotly_chart(fig4)
