@@ -12,6 +12,7 @@ from io import StringIO
 import os
 import mysql.connector
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
@@ -310,19 +311,44 @@ with st.expander("", expanded=True):
         )
         # st.plotly_chart(fig1)
 
-        fig2 = px.line(
-            df_electricity_end_use, x="Year", y=df_electricity_end_use.columns[1],
-            title="Electricity End Use (Billion Kilowatthours)"
-        )
-        fig2.update_traces(line_color="#032649")
-        # st.plotly_chart(fig2)
+        fig2 = make_subplots(specs=[[{"secondary_y": True}]])
 
-        # Average Price of Electricity Chart
-        fig3 = px.line(
-            df_avg_price, x="Year", y=df_avg_price.columns[1],
-            title="Average Price of Electricity (Cents per Kilowatthour)"
+        # Add bar chart for Electricity End Use to the primary axis
+        fig2.add_trace(
+            go.Bar(
+                x=df_electricity_end_use["Year"],
+                y=df_electricity_end_use[df_electricity_end_use.columns[1]],
+                name="Electricity End Use (Billion Kilowatthours)",
+                marker_color="#032649"
+            ),
+            secondary_y=False,
         )
-        fig3.update_traces(line_color="#032649")
+
+        # Add line chart for Average Price of Electricity to the secondary axis
+        fig2.add_trace(
+            go.Scatter(
+                x=df_avg_price["Year"],
+                y=df_avg_price[df_avg_price.columns[1]],
+                name="Average Price of Electricity (Cents per Kilowatthour)",
+                mode="lines",
+                line=dict(color="#FF5733")
+            ),
+            secondary_y=True,
+        )
+
+        # Update layout for titles and axes
+        fig2.update_layout(
+            title_text="Electricity End Use and Average Price of Electricity",
+            xaxis_title="Year",
+            yaxis_title="Electricity End Use (Billion Kilowatthours)",
+            legend=dict(x=0.01, y=0.99),
+        )
+
+        # Set secondary y-axis title
+        fig2.update_yaxes(
+            title_text="Average Price of Electricity (Cents per Kilowatthour)", 
+            secondary_y=True
+        )
         # st.plotly_chart(fig3)
 
         # Electricity Generation Map
@@ -491,7 +517,7 @@ with st.expander("", expanded=True):
     st.write("<h3 style='font-weight: bold; font-size:24px;'>Value Chain</h3>", unsafe_allow_html=True)
     st.image("https://www.energy-uk.org.uk/wp-content/uploads/2023/04/EUK-Different-parts-of-energy-market-diagram.webp", use_container_width=False)
     st.plotly_chart(fig2, use_container_width=True)
-    st.plotly_chart(fig3, use_container_width=True)
+    # st.plotly_chart(fig3, use_container_width=True)
     st.plotly_chart(fig7, use_container_width=True)
         
     # with col2:
@@ -548,7 +574,7 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
         (4, fig2, Inches(4), Inches(6.75), Inches(3), Inches(3.4)),  # Slide 2: Electricity End Use
         (4, value_chain_image_path, Inches(0.3), Inches(4), Inches(2.5), Inches(6.20)),  # Slide 3: Value Chain
         (5, solar_image_path, Inches(1.3), Inches(0.3), Inches(2.5), Inches(6.25)),  # Slide 4: Solar
-        (4, fig3, Inches(4), Inches(9.90), Inches(3), Inches(3.4)),  # Slide 4: Average Price
+        # (4, fig3, Inches(4), Inches(9.90), Inches(3), Inches(3.4)),  # Slide 4: Average Price
         (4, fig4, Inches(6.40), Inches(2.65), Inches(0.25), Inches(1.3)),  # Slide 5: Electricity Generation
         (5, fig5, Inches(1.3), Inches(6.70), Inches(2.5), Inches(6.25)),  # Slide 6: Renewable Share
         (6, fig6, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 7: Per Capita Electricity
@@ -575,10 +601,10 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
+def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -590,4 +616,4 @@ def export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, f
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
 solar_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/solar.png"
-export_chart_options(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
+export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
