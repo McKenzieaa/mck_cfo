@@ -219,7 +219,7 @@ source_category_mapping = {
     'Wind': 'Wind'
 }
 df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
-df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year'] == '2023']
+df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year']]
 df_electricity_gen2['Value'] = pd.to_numeric(df_electricity_gen2['Value'], errors='coerce').mean()
 
 # Energy Consumption
@@ -433,7 +433,7 @@ with st.expander("", expanded=True):
                 x='Category', 
                 y='Value',
                 color='Description',
-                title="Electricity Generation (2023)",
+                title="Electricity Generation (2000-2023)",
                 labels={'Category': 'Energy Source'},
                 height=600)
         
