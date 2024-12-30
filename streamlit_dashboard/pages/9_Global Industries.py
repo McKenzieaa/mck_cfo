@@ -428,19 +428,6 @@ with st.expander("", expanded=True):
             color_discrete_map=PRIMARY_COLORS
         )
 
-        fig9 = px.line(
-            filt_share_elec_prod,
-            x='Year',
-            y='renewable_share_of_electricity__pct',
-            color='Countries',
-            title='Share of Renewable Electricity Contribution (%) In Various Countries',
-            labels={
-                'Year': 'Year',
-                'renewable_share_of_electricity__pct': 'Renewables - % Electricity',
-                'Countries': ''
-            }
-        )
-        fig9.update_yaxes(tickformat=".1%")
 
         fig10 = px.bar(df_electricity_gen2, 
                 x='Category', 
@@ -526,7 +513,6 @@ with st.expander("", expanded=True):
     st.plotly_chart(fig6, use_container_width=True)
     st.plotly_chart(fig8, use_container_width=True)
     
-    st.plotly_chart(fig9, use_container_width=True)
     st.plotly_chart(fig10, use_container_width=True)
     st.plotly_chart(fig11, use_container_width=True)
     st.plotly_chart(fig12, use_container_width=True)
@@ -546,7 +532,7 @@ st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", u
 with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
 
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data","energy_template.pptx")
     prs = Presentation(template_path)
@@ -580,7 +566,6 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
         (6, fig6, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 7: Per Capita Electricity
         (7, fig7, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 8: Energy Source Consumption
         (8, fig8, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 9: Energy Source Distribution
-        (6, fig9, Inches(7), Inches(1.40), Inches(5.65), Inches(2.3)),  # Slide 6: Share Of Renewable Electricity Contribution (%) In Various Countries
         (10, fig10, Inches(0.2), Inches(4.5), Inches(6.45), Inches(2.4)),  # Slide 11: Per Capita Generation
         (33, fig11, Inches(1.2), Inches(0.65), Inches(11), Inches(3.75)),  # Slide 12: Precedent Transaction - EV/Revenue
         (33, fig12, Inches(1.2), Inches(3.5), Inches(11), Inches(3.75)),  # Slide 13: Precedent Transaction - EV/EBITDA
@@ -601,10 +586,10 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
+def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -616,4 +601,4 @@ def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, 
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
 solar_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/solar.png"
-export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig9, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
+export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
