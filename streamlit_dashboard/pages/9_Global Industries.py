@@ -219,7 +219,7 @@ source_category_mapping = {
     'Wind': 'Wind'
 }
 df_electricity_gen2['Category'] = df_electricity_gen2['Description'].map(source_category_mapping)
-df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year']]
+# df_electricity_gen2 = df_electricity_gen2[df_electricity_gen2['Year']]
 df_electricity_gen2['Value'] = pd.to_numeric(df_electricity_gen2['Value'], errors='coerce').mean()
 
 # Energy Consumption
