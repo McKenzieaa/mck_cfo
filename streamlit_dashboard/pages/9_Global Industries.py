@@ -563,7 +563,7 @@ with st.expander("", expanded=True):
                 'Prices to Ultimate Customers': 'Prices to Ultimate Customers'
             },
             title='Energy Prices',
-            # color_discrete_sequence=PRIMARY_COLORS
+            color_discrete_map=PRIMARY_COLORS
         )
 
         # Update layout for better appearance
@@ -596,7 +596,7 @@ with st.expander("", expanded=True):
             },
             title='Energy Sales',
             barmode='stack',
-            color_discrete_sequence=PRIMARY_COLORS
+            color_discrete_map=PRIMARY_COLORS
         )
 
         # Update layout for better appearance
