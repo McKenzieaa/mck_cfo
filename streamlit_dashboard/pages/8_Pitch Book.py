@@ -791,7 +791,7 @@ def plot_labour_unemployment():
     paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
     height=300,  # Increased height for better spacing
     width=500,  # Adjusted width for better visualization
-    margin=dict(b=80, t=50,l=10, r=10)  # Add more bottom margin for x-axis labels
+    margin=dict(b=60, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -912,7 +912,7 @@ def plot_cpi_ppi(selected_series_id):
         paper_bgcolor='rgba(0,0,0,0)',
         height=300,
         width=500,
-        margin=dict(b=150, t=60),  # Increased bottom margin for space
+        margin=dict(b=60, t=20, r=10, l=10),  # Increased bottom margin for space
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -1164,7 +1164,7 @@ def plot_unemployment_labour_chart(state_name):
             ),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=10, r=10, t=30, b=120),  # Increased bottom margin for legend space
+            margin=dict(l=5, r=5, t=10, b=120),  # Increased bottom margin for legend space
             height=300,
             width=500,
             xaxis=dict(showgrid=False),
@@ -1203,7 +1203,7 @@ def plot_gdp_chart(state_name):
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
                 legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=400,width=600,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=300,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
 
             st.plotly_chart(fig, use_container_width=True)
             return fig
