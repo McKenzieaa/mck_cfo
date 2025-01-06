@@ -137,7 +137,7 @@ def export_all_to_pptx(
     labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us,
     fig1_precedent, fig2_precedent, fig1_public, fig2_public,
     labour_fig, gdp_fig, income_statement_df, 
-    balance_sheet_df, state_name
+    balance_sheet_df, state_name, fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis
 ):
     # Load the custom template
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
@@ -156,6 +156,13 @@ def export_all_to_pptx(
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
     # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
+
+    # Add IBIS charts
+    update_figure_slide(ppt, "Profit - IBIS", fig1_ibis, slide_number=8, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Revenue - IBIS", fig2_ibis, slide_number=8, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Business - IBIS", fig3_ibis, slide_number=8, width=9, height=3, left=0.45, top=0.90)
+    update_figure_slide(ppt, "Employees - IBIS", fig4_ibis, slide_number=8, width=9, height=3, left=0.45, top=3.60)
+
 
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
@@ -640,76 +647,75 @@ def get_data(industry):
         df = pd.read_sql(query, connection)
         connection.close()
         return df
-def create_category_charts(df):
-    category_charts = []
 
+def create_category_charts(df):
+    # Initialize charts
+    fig1, fig2, fig3, fig4 = None, None, None, None
+
+    # Define bar and line colors
     bar_color = '#032649'
     line_color = '#EB8928'
 
-    for category in df['Category'].unique():
-        category_data = df[df['Category'] == category]
-       
-        # Get the last value for each category
-        last_value = category_data['Value'].iloc[-1]
-        last_change = category_data['Change'].iloc[-1]
+    # Loop through the categories
+    for category in ['Profit', 'Revenue', 'Business', 'Employees']:
+        if category in df['Category'].unique():
+            category_data = df[df['Category'] == category]
 
-        # Create a subplot with secondary y-axis
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+            # Create a subplot with secondary y-axis
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-        # Add bar chart for 'Value' on the primary y-axis
-        fig.add_trace(
-            go.Bar(
-                x=category_data['Year'],
-                y=category_data['Value'],
-                name='Value',
-                marker_color=bar_color,
-                text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],  # Show text only for the last value
-                textposition="outside"  # Place text outside the bars
-            ),
-            secondary_y=False
-        )
+            # Add bar chart for 'Value' on the primary y-axis
+            fig.add_trace(
+                go.Bar(
+                    x=category_data['Year'],
+                    y=category_data['Value'],
+                    name='Value',
+                    marker_color=bar_color,
+                    text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],
+                    textposition="outside"
+                ),
+                secondary_y=False
+            )
 
-        # Add line chart for 'Change' on the secondary y-axis
-        fig.add_trace(
-            go.Scatter(
-                x=category_data['Year'],
-                y=category_data['Change'],
-                name='Change (%)',
-                mode='lines+markers',
-                line=dict(color=line_color),
-                text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],  # Show text only for the last value
-                textposition="top center"  # Place text above the last marker
-            ),
-            secondary_y=True
-        )
+            # Add line chart for 'Change' on the secondary y-axis
+            fig.add_trace(
+                go.Scatter(
+                    x=category_data['Year'],
+                    y=category_data['Change'],
+                    name='Change (%)',
+                    mode='lines+markers',
+                    line=dict(color=line_color),
+                    text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],
+                    textposition="top center"
+                ),
+                secondary_y=True
+            )
 
-        # Update axis titles
-        fig.update_layout(
-            xaxis_title="Year",
-            yaxis_title="Value",
-        )
+            # Update axis titles
+            fig.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Value",
+                title=f"{category} Trends",
+                legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
+                yaxis=dict(showgrid=False),
+                margin=dict(l=50, r=50, t=50, b=50),
+                height=400,
+                width=600
+            )
+            fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
+            fig.update_yaxes(title_text="Change (%)", secondary_y=True)
 
-        # Set secondary y-axis title
-        fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
-        fig.update_yaxes(title_text="Change (%)", secondary_y=True)
+            # Assign the chart to the appropriate figure variable
+            if category == 'Profit':
+                fig1_ibis = fig
+            elif category == 'Revenue':
+                fig2_ibis = fig
+            elif category == 'Business':
+                fig3_ibis = fig
+            elif category == 'Employees':
+                fig4_ibis = fig
 
-        # Update the legend position (upper-left)
-        fig.update_layout(
-            legend=dict(
-                x=0, 
-                y=1, 
-                xanchor='left', 
-                yanchor='top'
-            ),
-            yaxis=dict(showgrid=False),
-            margin=dict(l=50, r=50, t=50,b=50),
-            height=400,
-            width=600
-        )
-
-        category_charts.append(fig)
-
-    return category_charts
+    return fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis
 
 def fetch_cpi_data(series_id, df_cleaned):
     selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
@@ -1556,7 +1562,8 @@ with st.expander("Benchmarking"):
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
-    df_industries = get_industries() 
+
+    df_industries = get_industries()  
     industry_options = df_industries["Industry"].tolist()
     industry = st.selectbox("Select Industry", industry_options)
 
@@ -1564,12 +1571,21 @@ with st.expander("IBIS"):
         df_selected = get_data(industry)
 
         if not df_selected.empty:
-            ibischarts = create_category_charts(df_selected)
 
-            for i, chart in enumerate(ibischarts):
-                category_name = df_selected['Category'].unique()[i]
-                st.subheader(f"{category_name}")
-                st.plotly_chart(chart, use_container_width=True)
+            fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis = create_category_charts(df_selected)
+
+            if fig1_ibis:
+                st.subheader("Profit")
+                st.plotly_chart(fig1_ibis, use_container_width=True)
+            if fig2_ibis:
+                st.subheader("Revenue")
+                st.plotly_chart(fig2_ibis, use_container_width=True)
+            if fig3_ibis:
+                st.subheader("Business")
+                st.plotly_chart(fig3_ibis, use_container_width=True)
+            if fig4_ibis:
+                st.subheader("Employees")
+                st.plotly_chart(fig4_ibis, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
 
@@ -1580,7 +1596,7 @@ if st.button("Export Charts to PowerPoint", key="export_button"):
             labour_fig_us, external_fig, gdp_fig_us, cpi_ppi_fig_us, 
             fig1_precedent, fig2_precedent, fig1_public, fig2_public, 
             labour_fig, gdp_fig,
-            income_statement_df, balance_sheet_df, state_name
+            income_statement_df, balance_sheet_df, state_name,fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis
         )
 
         st.download_button(
