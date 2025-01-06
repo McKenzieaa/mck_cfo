@@ -551,12 +551,17 @@ with st.expander("", expanded=True):
             # width=800
         )
 
+        # Prices to Ultimate Customers
         fig16 = px.line(
             price_customers,
             x='Year',
             y='Value',
             color='Prices to Ultimate Customers',
-            labels={'Value': 'Value', 'Year': 'Year', 'Prices to Ultimate Customers': 'Prices to Ultimate Customers'},
+            labels={
+                'Value': 'Value',
+                'Year': 'Year',
+                'Prices to Ultimate Customers': 'Prices to Ultimate Customers'
+            },
             title='Energy Prices',
             color_discrete_sequence=PRIMARY_COLORS
         )
@@ -578,12 +583,17 @@ with st.expander("", expanded=True):
             )
         )
 
+        # Sales to Ultimate Customers
         fig17 = px.bar(
             sales_customers1,
             x='Year',
             y='Value',
             color='Sales to Ultimate Customers',
-            labels={'Value': 'Value', 'Year': 'Year', 'Sales to Ultimate Customers': 'Sales to Ultimate Customers'},
+            labels={
+                'Value': 'Value',
+                'Year': 'Year',
+                'Sales to Ultimate Customers': 'Sales to Ultimate Customers'
+            },
             title='Energy Sales',
             barmode='stack',
             color_discrete_sequence=PRIMARY_COLORS
@@ -605,7 +615,6 @@ with st.expander("", expanded=True):
                 x=0
             )
         )
-
 
     # col1, col2 = st.columns(2)
 
