@@ -13,6 +13,7 @@ import os
 import mysql.connector
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import boto3
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
@@ -21,6 +22,40 @@ host = st.secrets["mysql"]["host"]
 user = st.secrets["mysql"]["user"]
 password = st.secrets["mysql"]["password"]
 database = st.secrets["mysql"]["database"]
+
+# AWS S3 bucket details
+bucket_name = 'documentsapi'
+energy_prices_df = 'industry_data/energy_data/2._Energy_Prices.csv'
+sales_price_df = 'industry_data/energy_data/7a._U.S._Electricity_Industry_Overview.csv'
+
+def read_csv_from_s3(bucket, key):
+    s3 = boto3.client('s3')
+    response = s3.get_object(Bucket=bucket, Key=key)
+    content = response['Body'].read().decode('utf-8')
+    return StringIO(content)
+
+# Read the CSV file from S3
+csv_file1 = read_csv_from_s3(bucket_name, energy_prices_df)
+csv_file2 = read_csv_from_s3(bucket_name, sales_price_df)
+
+# Prices to ultimate Customer
+df1 = pd.read_csv(csv_file1, skiprows=4)
+columns_to_drop = ['map', 'linechart', 'source key', 'Unnamed: 1', '1960', '1960',	'1961',	'1962',	'1963',	'1964',	'1965',	'1966',	'1967',	'1968',	'1969',	'1970',	'1971',	'1972',	'1973',	'1974',	'1975',	'1976',	'1977',	'1978',	'1979',	'1980',	'1981',	'1982',	'1983',	'1984',	'1985',	'1986',	'1987',	'1988',	'1989']
+df1 = df1.drop(columns=columns_to_drop)
+df1 = df1.rename(columns={'remove': 'Prices to Ultimate Customers', 'units': 'Units'})
+df1['Prices to Ultimate Customers'] = df1['Prices to Ultimate Customers'].str.replace(' Sector', '', regex=False)
+price_customers = df1.tail(3)
+id_vars = ['Prices to Ultimate Customers', 'Units']
+price_customers = pd.melt(price_customers, id_vars=id_vars, var_name='Year', value_name='Value')
+
+# Sales to Ultimate Customers
+df2 = pd.read_csv(csv_file2, skiprows=4)
+df2 = df2.drop(columns=columns_to_drop)
+df2 = df2.rename(columns={'remove': 'Sales to Ultimate Customers', 'units': 'Units'})
+df2['Sales to Ultimate Customers'] = df2['Sales to Ultimate Customers'].str.replace(' Sector', '', regex=False)
+sales_customers = df2.iloc[16:-27].reset_index(drop=True)
+id_vars = ['Sales to Ultimate Customers', 'Units']
+sales_customers1 = pd.melt(sales_customers, id_vars=id_vars, var_name='Year', value_name='Value')
 
 # Connect to the MySQL database
 try:
@@ -160,23 +195,6 @@ df_renew_share = df_electricity_gen.dropna(subset=['renewables_share_elec'])
 
 df_per_cap_elec_gen = df_electricity_gen.dropna(subset=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'])
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['year'] == 2023]
-# df_per_cap_elec_gen['total_elec_per_capita'] = (
-#     df_per_cap_elec_gen['fossil_elec_per_capita'] + df_per_cap_elec_gen['nuclear_elec_per_capita'] + df_per_cap_elec_gen['renewables_elec_per_capita']
-# )
-# top_10_countries = df_per_cap_elec_gen.nlargest(10, 'total_elec_per_capita')
-# df_per_cap_elec_gen = top_10_countries.melt(
-#     id_vars=['country'],
-#     value_vars=['fossil_elec_per_capita', 'nuclear_elec_per_capita', 'renewables_elec_per_capita'],
-#     var_name='Energy Source',
-#     value_name='Per Capita Generation'
-# )
-
-# df_per_cap_elec_gen['Energy Source'] = df_per_cap_elec_gen['Energy Source'].replace({
-#     'fossil_elec_per_capita': 'Fossil',
-#     'nuclear_elec_per_capita': 'Nuclear',
-#     'renewables_elec_per_capita': 'Renewables'
-# })
-# df_per_cap_elec_gen_pivot = df_per_cap_elec_gen.pivot(index='country', columns='Energy Source', values='Per Capita Generation')
 
 selected_countries = ['China', 'India', 'World', 'Japan','Brazil','France', 'United States']
 df_per_cap_elec_gen = df_per_cap_elec_gen[df_per_cap_elec_gen['country'].isin(selected_countries)]
@@ -496,6 +514,62 @@ with st.expander("", expanded=True):
             # width=800
         )
 
+        fig16 = px.line(
+            price_customers,
+            x='Year',
+            y='Value',
+            color='Prices to Ultimate Customers',
+            labels={'Value': 'Value', 'Year': 'Year', 'Prices to Ultimate Customers': 'Prices to Ultimate Customers'},
+            title='Energy Prices',
+            color_discrete_sequence=PRIMARY_COLORS
+        )
+
+        # Update layout for better appearance
+        fig16.update_layout(
+            xaxis_title='',
+            yaxis_title='Value (cent per kilowatthour)',
+            legend_title='',
+            plot_bgcolor='rgba(0,0,0,0)',
+            bargap=0.15,
+            bargroupgap=0.1,
+            legend=dict(
+                orientation='h',
+                yanchor='top',
+                y=1.1,
+                xanchor='left',
+                x=0
+            )
+        )
+
+        fig17 = px.bar(
+            sales_customers1,
+            x='Year',
+            y='Value',
+            color='Sales to Ultimate Customers',
+            labels={'Value': 'Value', 'Year': 'Year', 'Sales to Ultimate Customers': 'Sales to Ultimate Customers'},
+            title='Energy Sales',
+            barmode='stack',
+            color_discrete_sequence=PRIMARY_COLORS
+        )
+
+        # Update layout for better appearance
+        fig17.update_layout(
+            xaxis_title='',
+            yaxis_title='Value (billion kilowatthours)',
+            legend_title='',
+            plot_bgcolor='rgba(0,0,0,0)',
+            bargap=0.15,
+            bargroupgap=0.1,
+            legend=dict(
+                orientation='h',
+                yanchor='top',
+                y=1.1,
+                xanchor='left',
+                x=0
+            )
+        )
+
+
     # col1, col2 = st.columns(2)
 
     # with col1:
@@ -519,6 +593,8 @@ with st.expander("", expanded=True):
     st.plotly_chart(fig13, use_container_width=True)
     st.plotly_chart(fig14, use_container_width=True)
     st.plotly_chart(fig15, use_container_width=True)
+    st.plotly_chart(fig16, use_container_width=True)
+    st.plotly_chart(fig17, use_container_width=True)
 
 st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Agriculture</h2>", unsafe_allow_html=True)
 with st.expander("", expanded=False): 
@@ -532,7 +608,7 @@ st.markdown("<h2 style='font-weight: bold; font-size:24px;'>Automobiles</h2>", u
 with st.expander("", expanded=False):
     st.write("Automobiles-related analysis and visualizations go here.")
 
-def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
+def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, fig16, fig17, value_chain_image_path, solar_image_path):
 
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data","energy_template.pptx")
     prs = Presentation(template_path)
@@ -560,7 +636,8 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig11,
         (4, fig2, Inches(4), Inches(6.75), Inches(3), Inches(3.4)),  # Slide 2: Electricity End Use
         (4, value_chain_image_path, Inches(0.3), Inches(4), Inches(2.5), Inches(6.20)),  # Slide 3: Value Chain
         (5, solar_image_path, Inches(1.3), Inches(0.3), Inches(2.5), Inches(6.25)),  # Slide 4: Solar
-        # (4, fig3, Inches(4), Inches(9.90), Inches(3), Inches(3.4)),  # Slide 4: Average Price
+        (26, fig16, Inches(5.65), Inches(2.5), Inches(7), Inches(4.5)),  # Slide 26: Prices to Ultimate Customers 
+        (26, fig17, Inches(5.65), Inches(2.5), Inches(7), Inches(4.5)),  # Slide 26: Sales to Ultimate Customers 
         (4, fig4, Inches(6.40), Inches(2.65), Inches(0.25), Inches(1.3)),  # Slide 5: Electricity Generation
         (5, fig5, Inches(1.3), Inches(6.70), Inches(2.5), Inches(6.25)),  # Slide 6: Renewable Share
         (6, fig6, Inches(1), Inches(1), Inches(8), Inches(5)),  # Slide 7: Per Capita Electricity
@@ -586,10 +663,10 @@ def export_to_pptx(fig1, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig11,
     pptx_stream.seek(0)
     return pptx_stream
 
-def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path):
+def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, fig16, fig17, value_chain_image_path, solar_image_path):
     if st.button("Export Charts to PowerPoint"):
         try:
-            pptx_file = export_to_pptx(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
+            pptx_file = export_to_pptx(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, fig16, fig17, value_chain_image_path, solar_image_path)
             st.download_button(
                 label="Download PowerPoint",
                 data=pptx_file,
@@ -601,4 +678,4 @@ def export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11,
 
 value_chain_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/value_chain.png"
 solar_image_path = r"/mount/src/mck_cfo/streamlit_dashboard/data/solar.png"
-export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, value_chain_image_path, solar_image_path)
+export_chart_options(fig1, fig2, fig4, fig5, fig6, fig7, fig8, fig10, fig11, fig12, fig13, fig14, fig15, fig16, fig17, value_chain_image_path, solar_image_path)
