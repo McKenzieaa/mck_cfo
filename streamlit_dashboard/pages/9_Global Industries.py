@@ -32,15 +32,15 @@ sales_price_df = 'industry_data/energy_data/7a._U.S._Electricity_Industry_Overvi
 def read_csv_from_s3(bucket, key):
     try:
         # Check if all AWS secrets are present
-        if not all(key in st.secrets["aws"] for key in ["access_key", "secret_key", "region"]):
+        if not all(key in st.secrets["aws"] for key in ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION"]):
             st.error("AWS credentials are missing or incomplete in secrets.toml.")
             return None
 
         s3 = boto3.client(
             's3',
-            aws_access_key_id=st.secrets["aws"]["access_key"],
-            aws_secret_access_key=st.secrets["aws"]["secret_key"],
-            region_name=st.secrets["aws"]["region"]
+            aws_access_key_id=st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=st.secrets["aws"]["AWS_SECRET_ACCESS_KEY"],
+            region_name=st.secrets["aws"]["AWS_DEFAULT_REGION"]
         )
         response = s3.get_object(Bucket=bucket, Key=key)
         content = response['Body'].read().decode('utf-8')
