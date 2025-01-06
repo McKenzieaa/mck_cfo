@@ -148,12 +148,12 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "Precedent - EV/EBITDA", fig2_precedent, slide_number=13, width=9, height=3, left=0.45, top=3.60)
     update_figure_slide(ppt, "Public Comps - EV/Revenue", fig1_public, slide_number=12, width=9, height=3, left=0.45, top=0.90)
     update_figure_slide(ppt, "Public Comps - EV/EBITDA", fig2_public, slide_number=12, width=9, height=3, left=0.45, top=3.60)
-    update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=4.5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=5, height=4, left=5, top=1.3)
-    update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=5, width=5, height=2.50, left=5.10, top=1.3)
-    update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=5, height=2.50, left=0.08, top=1.3)
-    update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=5, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=4.5, height=2.50, left=0.08, top=4.4)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=4.5, width=5, height=2.50, left=5.10, top=1.3)
+    update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=4.5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=4.5, height=2.50, left=0.08, top=4.4)
     # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
     # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
@@ -792,9 +792,9 @@ def plot_labour_unemployment():
     template='plotly_white',
     plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
     paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-    height=450,  # Increased height for better spacing
-    width=700,  # Adjusted width for better visualization
-    margin=dict(b=100, t=50,l=10, r=10)  # Add more bottom margin for x-axis labels
+    height=300,  # Increased height for better spacing
+    width=500,  # Adjusted width for better visualization
+    margin=dict(b=80, t=50,l=10, r=10)  # Add more bottom margin for x-axis labels
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -913,9 +913,9 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=450,
-        width=700,
-        margin=dict(b=150, t=80),  # Increased bottom margin for space
+        height=300,
+        width=500,
+        margin=dict(b=150, t=60),  # Increased bottom margin for space
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -1167,9 +1167,9 @@ def plot_unemployment_labour_chart(state_name):
             ),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=2, r=2, t=50, b=120),  # Increased bottom margin for legend space
-            height=400,
-            width=600,
+            margin=dict(l=10, r=10, t=30, b=120),  # Increased bottom margin for legend space
+            height=300,
+            width=500,
             xaxis=dict(showgrid=False),
             yaxis=dict(showgrid=False)
         )
@@ -1554,11 +1554,11 @@ with st.expander("Benchmarking"):
 
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
-        # st.plotly_chart(income_fig, use_container_width=True)
+        st.plotly_chart(income_fig, use_container_width=True)
 
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
-        # st.plotly_chart(balance_fig, use_container_width=True)
+        st.plotly_chart(balance_fig, use_container_width=True)
 
 with st.expander("IBIS"):
     st.subheader("IBIS - Industry Report")
