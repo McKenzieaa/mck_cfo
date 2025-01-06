@@ -158,10 +158,10 @@ def export_all_to_pptx(
     # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
     # Add IBIS charts
-    update_figure_slide(ppt, "Profit - IBIS", fig1_ibis, slide_number=8, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Revenue - IBIS", fig2_ibis, slide_number=8, width=9, height=3, left=0.45, top=3.60)
-    update_figure_slide(ppt, "Business - IBIS", fig3_ibis, slide_number=8, width=9, height=3, left=0.45, top=0.90)
-    update_figure_slide(ppt, "Employees - IBIS", fig4_ibis, slide_number=8, width=9, height=3, left=0.45, top=3.60)
+    update_figure_slide(ppt, "Profit - IBIS", fig1_ibis, slide_number=8, width=4.75, height=2.45, left=0.18, top=4.34)
+    update_figure_slide(ppt, "Revenue - IBIS", fig2_ibis, slide_number=8, width=4.75, height=2.45, left=0.18, top=1.3)
+    update_figure_slide(ppt, "Business - IBIS", fig3_ibis, slide_number=8, width=4.75, height=2.45, left=5.2, top=1.3)
+    update_figure_slide(ppt, "Employees - IBIS", fig4_ibis, slide_number=8, width=4.75, height=2.45, left=5.2, top=4.34)
 
 
     # Add Benchmarking Tables to Slide
