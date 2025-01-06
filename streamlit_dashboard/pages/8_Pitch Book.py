@@ -695,7 +695,7 @@ def create_category_charts(df):
             fig.update_layout(
                 xaxis_title="Year",
                 yaxis_title="Value",
-                title=f"{category} Trends",
+                title=f"{category}",
                 legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
                 yaxis=dict(showgrid=False),
                 margin=dict(l=50, r=50, t=50, b=50),
@@ -1575,16 +1575,16 @@ with st.expander("IBIS"):
             fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis = create_category_charts(df_selected)
 
             if fig1_ibis:
-                st.subheader("Profit")
+                # st.subheader("Profit")
                 st.plotly_chart(fig1_ibis, use_container_width=True)
             if fig2_ibis:
-                st.subheader("Revenue")
+                # st.subheader("Revenue")
                 st.plotly_chart(fig2_ibis, use_container_width=True)
             if fig3_ibis:
-                st.subheader("Business")
+                # st.subheader("Business")
                 st.plotly_chart(fig3_ibis, use_container_width=True)
             if fig4_ibis:
-                st.subheader("Employees")
+                # st.subheader("Employees")
                 st.plotly_chart(fig4_ibis, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
