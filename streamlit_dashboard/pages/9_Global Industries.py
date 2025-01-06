@@ -14,6 +14,7 @@ import mysql.connector
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import boto3
+from botocore.exceptions import NoCredentialsError
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
@@ -29,10 +30,20 @@ energy_prices_df = 'industry_data/energy_data/2._Energy_Prices.csv'
 sales_price_df = 'industry_data/energy_data/7a._U.S._Electricity_Industry_Overview.csv'
 
 def read_csv_from_s3(bucket, key):
-    s3 = boto3.client('s3')
-    response = s3.get_object(Bucket=bucket, Key=key)
-    content = response['Body'].read().decode('utf-8')
-    return StringIO(content)
+    try:
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=st.secrets["aws"]["access_key"],
+            aws_secret_access_key=st.secrets["aws"]["secret_key"],
+            region_name=st.secrets["aws"]["region"]
+        )
+        response = s3.get_object(Bucket=bucket, Key=key)
+        content = response['Body'].read().decode('utf-8')
+        return StringIO(content)
+    except NoCredentialsError:
+        st.error("AWS credentials not found. Please configure your credentials.")
+        return None
+
 
 # Read the CSV file from S3
 csv_file1 = read_csv_from_s3(bucket_name, energy_prices_df)
