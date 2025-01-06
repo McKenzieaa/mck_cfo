@@ -151,18 +151,15 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=4.5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=5, height=4, left=5, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=4.5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=4.5, width=5, height=2.50, left=5.10, top=1.3)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=4, width=5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=4.5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=4.5, height=2.50, left=0.08, top=4.4)
-    # update_figure_slide(ppt, "RMA-Income Statement", income_fig, slide_number=10, width=9, height=3, left=0.45, top=0.90)
-    # update_figure_slide(ppt, "RMA-Balance Sheet", balance_fig, slide_number=10, width=9, height=3, left=0.45, top=3.60)
 
     # Add IBIS charts
     update_figure_slide(ppt, "Profit - IBIS", fig1_ibis, slide_number=8, width=4.75, height=2.45, left=0.18, top=4.34)
     update_figure_slide(ppt, "Revenue - IBIS", fig2_ibis, slide_number=8, width=4.75, height=2.45, left=0.18, top=1.3)
     update_figure_slide(ppt, "Business - IBIS", fig3_ibis, slide_number=8, width=4.75, height=2.45, left=5.2, top=1.3)
     update_figure_slide(ppt, "Employees - IBIS", fig4_ibis, slide_number=8, width=4.75, height=2.45, left=5.2, top=4.34)
-
 
     # Add Benchmarking Tables to Slide
     slide = ppt.slides[9]
