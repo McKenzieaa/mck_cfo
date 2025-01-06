@@ -14,7 +14,7 @@ import mysql.connector
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import boto3
-from botocore.exceptions import NoCredentialsError
+from botocore.exceptions import NoCredentialsError, ClientError
 
 st.set_page_config(page_title="Global Industry Analysis", layout="wide")
 
@@ -30,6 +30,9 @@ energy_prices_df = 'industry_data/energy_data/2._Energy_Prices.csv'
 sales_price_df = 'industry_data/energy_data/7a._U.S._Electricity_Industry_Overview.csv'
 
 def read_csv_from_s3(bucket, key):
+    """
+    Read a CSV file from S3 and return its content as a StringIO object.
+    """
     try:
         s3 = boto3.client(
             's3',
@@ -43,30 +46,48 @@ def read_csv_from_s3(bucket, key):
     except NoCredentialsError:
         st.error("AWS credentials not found. Please configure your credentials.")
         return None
+    except ClientError as e:
+        st.error(f"Failed to retrieve object from S3. Error: {e}")
+        return None
 
-
-# Read the CSV file from S3
+# Read the CSV files from S3
 csv_file1 = read_csv_from_s3(bucket_name, energy_prices_df)
 csv_file2 = read_csv_from_s3(bucket_name, sales_price_df)
 
-# Prices to ultimate Customer
-df1 = pd.read_csv(csv_file1, skiprows=4)
-columns_to_drop = ['map', 'linechart', 'source key', 'Unnamed: 1', '1960', '1960',	'1961',	'1962',	'1963',	'1964',	'1965',	'1966',	'1967',	'1968',	'1969',	'1970',	'1971',	'1972',	'1973',	'1974',	'1975',	'1976',	'1977',	'1978',	'1979',	'1980',	'1981',	'1982',	'1983',	'1984',	'1985',	'1986',	'1987',	'1988',	'1989']
-df1 = df1.drop(columns=columns_to_drop)
-df1 = df1.rename(columns={'remove': 'Prices to Ultimate Customers', 'units': 'Units'})
-df1['Prices to Ultimate Customers'] = df1['Prices to Ultimate Customers'].str.replace(' Sector', '', regex=False)
-price_customers = df1.tail(3)
-id_vars = ['Prices to Ultimate Customers', 'Units']
-price_customers = pd.melt(price_customers, id_vars=id_vars, var_name='Year', value_name='Value')
+if csv_file1 is None or csv_file2 is None:
+    st.stop()  # Stop execution if CSVs couldn't be loaded
 
-# Sales to Ultimate Customers
-df2 = pd.read_csv(csv_file2, skiprows=4)
-df2 = df2.drop(columns=columns_to_drop)
-df2 = df2.rename(columns={'remove': 'Sales to Ultimate Customers', 'units': 'Units'})
-df2['Sales to Ultimate Customers'] = df2['Sales to Ultimate Customers'].str.replace(' Sector', '', regex=False)
-sales_customers = df2.iloc[16:-27].reset_index(drop=True)
-id_vars = ['Sales to Ultimate Customers', 'Units']
-sales_customers1 = pd.melt(sales_customers, id_vars=id_vars, var_name='Year', value_name='Value')
+# Process the first CSV (Energy Prices)
+try:
+    df1 = pd.read_csv(csv_file1, skiprows=4)
+    columns_to_drop = [
+        'map', 'linechart', 'source key', 'Unnamed: 1', '1960', '1961', '1962', 
+        '1963', '1964', '1965', '1966', '1967', '1968', '1969', '1970', '1971', 
+        '1972', '1973', '1974', '1975', '1976', '1977', '1978', '1979', '1980', 
+        '1981', '1982', '1983', '1984', '1985', '1986', '1987', '1988', '1989'
+    ]
+    df1 = df1.drop(columns=[col for col in columns_to_drop if col in df1.columns])
+    df1 = df1.rename(columns={'remove': 'Prices to Ultimate Customers', 'units': 'Units'})
+    df1['Prices to Ultimate Customers'] = df1['Prices to Ultimate Customers'].str.replace(' Sector', '', regex=False)
+    price_customers = df1.tail(3)
+    id_vars = ['Prices to Ultimate Customers', 'Units']
+    price_customers = pd.melt(price_customers, id_vars=id_vars, var_name='Year', value_name='Value')
+except Exception as e:
+    st.error(f"Error processing energy prices data: {e}")
+    st.stop()
+
+# Process the second CSV (Sales Prices)
+try:
+    df2 = pd.read_csv(csv_file2, skiprows=4)
+    df2 = df2.drop(columns=[col for col in columns_to_drop if col in df2.columns])
+    df2 = df2.rename(columns={'remove': 'Sales to Ultimate Customers', 'units': 'Units'})
+    df2['Sales to Ultimate Customers'] = df2['Sales to Ultimate Customers'].str.replace(' Sector', '', regex=False)
+    sales_customers = df2.iloc[16:-27].reset_index(drop=True)
+    id_vars = ['Sales to Ultimate Customers', 'Units']
+    sales_customers1 = pd.melt(sales_customers, id_vars=id_vars, var_name='Year', value_name='Value')
+except Exception as e:
+    st.error(f"Error processing sales prices data: {e}")
+    st.stop()
 
 # Connect to the MySQL database
 try:
