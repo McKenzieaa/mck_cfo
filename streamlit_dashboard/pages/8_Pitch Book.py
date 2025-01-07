@@ -932,9 +932,18 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False,color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959")),yaxis=dict(showgrid=False, color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959")),
+        xaxis=dict(
+            showgrid=False,
+            showticklabels=True,
+            color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959"),  # X-axis tick labels color
+        ),
+        yaxis=dict(
+            title='',
+            showgrid=False,
+            color="#595959",  # Y-axis label and line color
+            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+        ),
         height=300,
         width=500,
         margin=dict(b=60, t=20),  # Increased bottom margin for space
@@ -1012,10 +1021,18 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        xaxis=dict(showgrid=False,color="#595959",  
-            tickfont=dict(color="#595959")),
-        yaxis=dict(showgrid=False,color="#595959",  
-            tickfont=dict(color="#595959")),
+        xaxis=dict(
+            showgrid=False,
+            showticklabels=True,
+            color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959"),  # X-axis tick labels color
+        ),
+        yaxis=dict(
+            title='',
+            showgrid=False,
+            color="#595959",  # Y-axis label and line color
+            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+        ),
         legend=dict(
             orientation="h",
             x=0.01,  # Center the legend horizontally
