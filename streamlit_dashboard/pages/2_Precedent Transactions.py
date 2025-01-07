@@ -59,10 +59,6 @@ df['Business Description'] = df['Business Description'].fillna("").astype('strin
 df['Industry'] = df['Industry'].fillna("").astype('string')
 df['Location'] = df['Location'].fillna("").astype('string')
 
-# Debugging: Check if there are still problematic types
-st.write("Data Types after processing:")
-st.write(df.dtypes)
-
 # Convert the DataFrame to a TensorFlow Dataset
 try:
     dataset = tf.data.Dataset.from_tensor_slices(dict(df))
