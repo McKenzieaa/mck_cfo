@@ -46,17 +46,19 @@ except Exception as e:
 # Close the MySQL connection
 conn.close()
 
+# Ensure all columns are TensorFlow-compatible
+df = df.astype({
+    'Year': 'int32',
+    'EV/Revenue': 'float32',
+    'EV/EBITDA': 'float32',
+    'Target': 'string',
+    'Business Description': 'string',
+    'Industry': 'string',
+    'Location': 'string'
+}).fillna('')
+
 # Convert the DataFrame to a TensorFlow Dataset
 dataset = tf.data.Dataset.from_tensor_slices(dict(df))
-dataset = dataset.map(lambda x: {
-    'Industry': x['Industry'],
-    'Location': x['Location'],
-    'Year': tf.cast(x['Year'], tf.int32),
-    'Target': x['Target'],
-    'EV/Revenue': tf.cast(x['EV/Revenue'], tf.float32),
-    'EV/EBITDA': tf.cast(x['EV/EBITDA'], tf.float32),
-    'Business Description': x['Business Description']
-})
 dataset = dataset.batch(32).prefetch(tf.data.AUTOTUNE)
 
 # Extract unique industries and locations
