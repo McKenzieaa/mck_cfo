@@ -832,8 +832,18 @@ def plot_external_driver(selected_indicators):
 
     fig.update_layout(
         title=' ',
-        xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title=''),
+        xaxis=dict(
+            showgrid=False,
+            showticklabels=True,
+            color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959"),  # X-axis tick labels color
+        ),
+        yaxis=dict(
+            title='',
+            showgrid=False,
+            color="#595959",  # Y-axis label and line color
+            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+        ),
         hovermode='x',
         legend=dict(
             x=0.1,
@@ -842,14 +852,11 @@ def plot_external_driver(selected_indicators):
             xanchor='center',
             yanchor='top',
             traceorder='normal',
-            font=dict(size=10),
+            font=dict(size=10, color="#595959"),  # Legend text color
             bgcolor='rgba(255, 255, 255, 0)',
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False,color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959")),yaxis=dict(showgrid=False, color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959")),
         height=400,  # Chart height
         width=500,  # Chart width
         margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
