@@ -490,12 +490,16 @@ def plot_labour_unemployment():
     xaxis=dict(
         showgrid=False,
         showticklabels=True,
+        color="#595959",
+        tickfont=dict(color="#595959"),
         tickangle=0,  # Rotate x-axis labels to avoid overlap
         automargin=True  # Automatically adjust margins for better spacing
     ),
     yaxis=dict(
         showgrid=False,
         title='Population',
+        color="#595959",
+        tickfont=dict(color="#595959"),
         side='left',
         range=[merged['population'].min(), merged['population'].max() * 1.1]
     ),
@@ -515,7 +519,6 @@ def plot_labour_unemployment():
     template='plotly_white',
     plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
     paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-    xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
     height=300,  # Increased height for better spacing
     width=500,  # Adjusted width for better visualization
     margin=dict(b=60, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
@@ -567,7 +570,9 @@ def plot_external_driver(selected_indicators):
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
+        xaxis=dict(showgrid=False,color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959")),yaxis=dict(showgrid=False, color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959")),
         height=400,  # Chart height
         width=500,  # Chart width
         margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
@@ -643,7 +648,9 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
+        xaxis=dict(showgrid=False,color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959")),yaxis=dict(showgrid=False, color="#595959",  # X-axis label and line color
+            tickfont=dict(color="#595959")),
         height=300,
         width=500,
         margin=dict(b=60, t=20),  # Increased bottom margin for space
@@ -721,8 +728,10 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
-        xaxis=dict(showgrid=False),
-        yaxis=dict(showgrid=False),
+        xaxis=dict(showgrid=False,color="#595959",  
+            tickfont=dict(color="#595959")),
+        yaxis=dict(showgrid=False,color="#595959",  
+            tickfont=dict(color="#595959")),
         legend=dict(
             orientation="h",
             x=0.01,  # Center the legend horizontally
@@ -743,8 +752,8 @@ def plot_gdp_and_industry(selected_industry=None):
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
-# Function to export charts to PowerPoint
 
+# Function to export charts to PowerPoint
 def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top):
     if fig is None:
         print(f"Skipping slide '{title}' because the figure is None.")

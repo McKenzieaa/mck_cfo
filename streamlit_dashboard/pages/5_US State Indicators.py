@@ -192,7 +192,7 @@ def plot_unemployment_labour_chart(state_name):
     else:
         st.warning(f"No data available for {state_name}.")
         return None
-    
+
 def plot_gdp_chart(state_name):
     global state_gdp_data
 
@@ -219,7 +219,7 @@ def plot_gdp_chart(state_name):
                 yaxis_title="GDP (Millions of Dollars)",
                 template="plotly_white",
                 legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=300,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=300,width=500,xaxis=dict(showgrid=False, color="#595959",tickfont=dict(color="#595959")),yaxis=dict(showgrid=False, color="#595959",tickfont=dict(color="#595959")))
 
             st.plotly_chart(fig, use_container_width=True)
             return fig
