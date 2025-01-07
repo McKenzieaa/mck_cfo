@@ -521,7 +521,7 @@ def plot_labour_unemployment():
     paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
     height=300,  # Increased height for better spacing
     width=500,  # Adjusted width for better visualization
-    margin=dict(b=60, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
+    margin=dict(b=80, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
