@@ -829,7 +829,7 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title=''),
         hovermode='x',
         legend=dict(
-            x=0.5,
+            x=0.1,
             y=-0.3,  # Place legend below the x-axis
             orientation='h',  # Horizontal legend
             xanchor='center',
