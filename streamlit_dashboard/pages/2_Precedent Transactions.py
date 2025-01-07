@@ -46,20 +46,31 @@ except Exception as e:
 # Close the MySQL connection
 conn.close()
 
+# Debugging: Print column data types
+st.write("Data Types before processing:")
+st.write(df.dtypes)
+
 # Ensure all columns are TensorFlow-compatible
-df = df.astype({
-    'Year': 'int32',
-    'EV/Revenue': 'float32',
-    'EV/EBITDA': 'float32',
-    'Target': 'string',
-    'Business Description': 'string',
-    'Industry': 'string',
-    'Location': 'string'
-}).fillna('')
+df['Year'] = df['Year'].fillna(0).astype('int32')
+df['EV/Revenue'] = df['EV/Revenue'].fillna(0).astype('float32')
+df['EV/EBITDA'] = df['EV/EBITDA'].fillna(0).astype('float32')
+df['Target'] = df['Target'].fillna("").astype('string')
+df['Business Description'] = df['Business Description'].fillna("").astype('string')
+df['Industry'] = df['Industry'].fillna("").astype('string')
+df['Location'] = df['Location'].fillna("").astype('string')
+
+# Debugging: Check if there are still problematic types
+st.write("Data Types after processing:")
+st.write(df.dtypes)
 
 # Convert the DataFrame to a TensorFlow Dataset
-dataset = tf.data.Dataset.from_tensor_slices(dict(df))
-dataset = dataset.batch(32).prefetch(tf.data.AUTOTUNE)
+try:
+    dataset = tf.data.Dataset.from_tensor_slices(dict(df))
+    dataset = dataset.batch(32).prefetch(tf.data.AUTOTUNE)
+    st.success("TensorFlow Dataset created successfully!")
+except Exception as e:
+    st.error(f"Error creating TensorFlow Dataset: {e}")
+    st.stop()
 
 # Extract unique industries and locations
 industries = df['Industry'].unique()
