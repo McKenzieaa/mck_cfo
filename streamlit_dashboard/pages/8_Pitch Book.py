@@ -797,8 +797,7 @@ def plot_labour_unemployment():
     return fig
 
 def plot_external_driver(selected_indicators):
-
-    colors = ['#032649','#1C798A', '#EB8928', '#595959', '#A5A5A5']
+    colors = ['#032649', '#1C798A', '#EB8928', '#595959', '#A5A5A5']
 
     if not selected_indicators:
         selected_indicators = ["World GDP"]
@@ -814,34 +813,41 @@ def plot_external_driver(selected_indicators):
         color = colors[i % len(colors)]
 
         if isinstance(color, str) and color.startswith('#') and len(color) == 7:
-            fig.add_trace(go.Scatter(x=indicator_data['Year'],y=indicator_data['% Change'],mode='lines',name=indicator,line=dict(color=color),))
+            fig.add_trace(go.Scatter(
+                x=indicator_data['Year'],
+                y=indicator_data['% Change'],
+                mode='lines',
+                name=indicator,
+                line=dict(color=color),
+            ))
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
     fig.update_layout(
-        title=' ',  # No title specified
+        title=' ',
         xaxis=dict(showgrid=False, showticklabels=True),
         yaxis=dict(title=''),
         hovermode='x',
         legend=dict(
-            x=0.01,
-            y=-0.30,
-            orientation='h', 
+            x=1,  # Position the legend on the right
+            y=0.5,  # Center vertically
+            orientation='v',  # Vertical orientation
             xanchor='left',
-            yanchor='bottom',
+            yanchor='middle',
             traceorder='normal',
             font=dict(size=10),
             bgcolor='rgba(255, 255, 255, 0)',
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        height=375,
-        width=500,
+        height=500,  # Increased height
+        width=700,  # Increased width
         margin=dict(b=70, t=20, l=30, r=25),
     )
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
+
 
 def plot_cpi_ppi(selected_series_id):
     """
