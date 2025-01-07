@@ -829,20 +829,20 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title=''),
         hovermode='x',
         legend=dict(
-            x=0.01,
-            y=-0.30,
-            orientation='h', 
-            xanchor='left',
-            yanchor='bottom',
+            x=0.5,
+            y=-0.3,  # Place legend below the x-axis
+            orientation='h',  # Horizontal legend
+            xanchor='center',
+            yanchor='top',
             traceorder='normal',
             font=dict(size=10),
             bgcolor='rgba(255, 255, 255, 0)',
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,  # Increased height
-        width=500,  # Increased width
-        margin=dict(b=150, t=50, l=30, r=25),
+        height=400,  # Chart height
+        width=500,  # Chart width
+        margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
     )
 
     st.plotly_chart(fig, use_container_width=True)
