@@ -950,7 +950,6 @@ def plot_cpi_ppi(selected_series_id):
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
-
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -1533,14 +1532,18 @@ with st.expander("Benchmarking"):
     if selected_industry:
 
         income_statement_df['RMA Percent'] = pd.to_numeric(
-            income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
+            income_statement_df['RMA Percent'].astype(str).str.replace('%', '', regex=False), errors='coerce'
+        )
         income_statement_df['Public Comp Percent'] = pd.to_numeric(
-            income_statement_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce')
+            income_statement_df['Public Comp Percent'].astype(str).str.replace('%', '', regex=False), errors='coerce'
+        )
 
         balance_sheet_df['RMA Percent'] = pd.to_numeric(
-            balance_sheet_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
+            balance_sheet_df['RMA Percent'].astype(str).str.replace('%', '', regex=False), errors='coerce'
+        )
         balance_sheet_df['Public Comp Percent'] = pd.to_numeric(
-            balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce')
+            balance_sheet_df['Public Comp Percent'].astype(str).str.replace('%', '', regex=False), errors='coerce'
+        )
 
         # Income Statement Bar Chart
         income_fig = px.bar(
