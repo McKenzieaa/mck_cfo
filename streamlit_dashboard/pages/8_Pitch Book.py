@@ -840,6 +840,7 @@ def plot_external_driver(selected_indicators):
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
         height=400,  # Chart height
         width=500,  # Chart width
         margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
@@ -915,6 +916,7 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
         height=300,
         width=500,
         margin=dict(b=60, t=20),  # Increased bottom margin for space
@@ -1007,6 +1009,7 @@ def plot_gdp_and_industry(selected_industry=None):
         template='plotly_white',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
         height=450,
         width=700,
         margin=dict(b=120, t=80,l=10, r=10),  # Increased bottom margin for space
