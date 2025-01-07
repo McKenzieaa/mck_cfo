@@ -1045,7 +1045,6 @@ def plot_gdp_and_industry(selected_industry=None):
         template='plotly_white',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False),yaxis=dict(showgrid=False),
         height=450,
         width=700,
         margin=dict(b=120, t=80,l=10, r=10),  # Increased bottom margin for space
