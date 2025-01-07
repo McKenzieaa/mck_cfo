@@ -829,11 +829,11 @@ def plot_external_driver(selected_indicators):
         yaxis=dict(title=''),
         hovermode='x',
         legend=dict(
-            x=1,  # Position the legend on the right
-            y=0.5,  # Center vertically
-            orientation='v',  # Vertical orientation
+            x=0.01,
+            y=-0.30,
+            orientation='h', 
             xanchor='left',
-            yanchor='middle',
+            yanchor='bottom',
             traceorder='normal',
             font=dict(size=10),
             bgcolor='rgba(255, 255, 255, 0)',
