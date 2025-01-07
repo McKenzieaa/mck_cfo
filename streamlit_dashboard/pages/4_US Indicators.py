@@ -570,7 +570,7 @@ def plot_external_driver(selected_indicators):
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False,color="#595959", tickfont=dict(color="#595959")),
+        xaxis=dict(showgrid=False, color="#595959", tickfont=dict(color="#595959")),
         yaxis=dict(showgrid=False, color="#595959", tickfont=dict(color="#595959")),
         height=400,  # Chart height
         width=500,  # Chart width
