@@ -918,20 +918,6 @@ def plot_cpi_ppi(selected_series_id):
     # Configure the layout of the chart
     fig.update_layout(
         title='',
-        xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title='Value',showgrid=False),
-        legend=dict(
-            orientation="h", 
-            x=0.01,  # Center the legend horizontally
-            y=-0.2,  # Place it below the chart
-            xanchor='left',  # Center alignment
-            yanchor='top',  # Align the top of the legend to the y position
-            bgcolor='rgba(255, 255, 255, 0.6)',
-            font=dict(size=10)
-        ),
-        hovermode='x unified',
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
@@ -939,11 +925,23 @@ def plot_cpi_ppi(selected_series_id):
             tickfont=dict(color="#595959"),  # X-axis tick labels color
         ),
         yaxis=dict(
-            title='',
+            title='Value',
             showgrid=False,
             color="#595959",  # Y-axis label and line color
             tickfont=dict(color="#595959"),  # Y-axis tick labels color
         ),
+        legend=dict(
+            orientation="h",
+            x=0.01,  # Align the legend horizontally
+            y=-0.2,  # Place it below the chart
+            xanchor='left',
+            yanchor='top',
+            bgcolor='rgba(255, 255, 255, 0.6)',
+            font=dict(size=10, color="#595959"),  # Legend text color
+        ),
+        hovermode='x unified',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
         height=300,
         width=500,
         margin=dict(b=60, t=20),  # Increased bottom margin for space
@@ -951,6 +949,7 @@ def plot_cpi_ppi(selected_series_id):
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
+
 
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
