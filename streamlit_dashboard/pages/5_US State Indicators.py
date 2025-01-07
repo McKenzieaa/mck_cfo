@@ -145,13 +145,10 @@ def plot_unemployment_labour_chart(state_name):
     labour_data = download_csv(state_name, "labour")
 
     if unemployment_data is not None and labour_data is not None:
-        unemployment_data = unemployment_data.rename(columns={'observation_date': 'DATE'})
         unemployment_data = unemployment_data[unemployment_data['DATE'].dt.year >= 2000]
-        labour_data = labour_data.rename(columns={'observation_date': 'DATE'})
         labour_data = labour_data[labour_data['DATE'].dt.year >= 2000]
 
         merged_data = pd.merge(unemployment_data, labour_data, on='DATE')
-
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Unemployment'], mode='lines',line=dict(color=line_colors["unemployment"]), name="Unemployment"))
@@ -160,7 +157,7 @@ def plot_unemployment_labour_chart(state_name):
         last_row = merged_data.iloc[-1]
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Unemployment'],
-            text=f" {last_row['Unemployment']:.1f}"+"%", showarrow=True, arrowhead=1, ax=-40, ay=-40
+            text=f"{last_row['Unemployment']:.1f}"+"%", showarrow=True, arrowhead=1, ax=-40, ay=-40
         )
         fig.add_annotation(
             x=last_row['DATE'], y=last_row['Labour Force'],
@@ -168,15 +165,26 @@ def plot_unemployment_labour_chart(state_name):
         )
 
         fig.update_layout(
-            title=f"Labour Force & Unemployment Rate - {state_name}",
+            title="",
             xaxis_title=" ",
             yaxis_title="Rate",
             template="plotly_white",
             legend=dict(
-                x=0, y=1,  # Upper left corner
-                xanchor='left', yanchor='top',
-                title_text=None 
-            )
+                x=0.01,  # Center the legend horizontally
+                y=-0.2,  # Move the legend below the chart
+                xanchor='left',
+                yanchor='top',
+                title_text=None,
+                orientation='h',  # Horizontal legend
+                font=dict(size=10)
+            ),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=5, r=5, t=10, b=120),  # Increased bottom margin for legend space
+            height=300,
+            width=500,
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False)
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -184,7 +192,7 @@ def plot_unemployment_labour_chart(state_name):
     else:
         st.warning(f"No data available for {state_name}.")
         return None
-
+    
 def plot_gdp_chart(state_name):
     global state_gdp_data
 
@@ -197,17 +205,22 @@ def plot_gdp_chart(state_name):
             fig.add_trace(go.Scatter(x=gdp_data['Year'], y=gdp_data['Value'], mode='lines',line=dict(color=line_colors["gdp"]), name=f"{state_name} GDP"))
 
             last_row = gdp_data.iloc[-1]
+            value_in_millions = last_row['Value'] / 1_000_000
+            formatted_value = f"{value_in_millions:.1f}M"
+
             fig.add_annotation(
                 x=last_row['Year'], y=last_row['Value'],
-                text=f" {last_row['Value']:.0f}", showarrow=True, arrowhead=1, ax=-40, ay=-40
+                text=f" {formatted_value}", showarrow=True, arrowhead=1, ax=-40, ay=-40
             )
 
             fig.update_layout(
-                title=(f"GDP - {state_name}"),
+                title=(""),
                 xaxis_title=" ",
                 yaxis_title="GDP (Millions of Dollars)",
-                template="plotly_white"
-            )
+                template="plotly_white",
+                legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=300,width=500,xaxis=dict(showgrid=False),yaxis=dict(showgrid=False))
+
             st.plotly_chart(fig, use_container_width=True)
             return fig
         else:

@@ -486,30 +486,44 @@ def plot_labour_unemployment():
     ))
 
     fig.update_layout(
-        title='',
-        xaxis=dict(showgrid=False, showticklabels=True),  # No title
-        yaxis=dict(
-            title='Population',
-            side='left',
-            range=[merged['population'].min(), merged['population'].max() * 1.1]
-        ),
-        yaxis2=dict(
-            title='Rate (%)',
-            overlaying='y',  # Overlay on the primary y-axis
-            side='right'
-        ),
-        legend=dict(
-            orientation="h",x=0.01, y=0.99, bgcolor='rgba(255, 255, 255, 0.6)', font=dict(size=8)
-        ),
-        hovermode='x unified',  # Unified hover mode
-        template='plotly_white'
-    )
+    title='',  # No title
+    xaxis=dict(
+        showgrid=False,
+        showticklabels=True,
+        tickangle=0,  # Rotate x-axis labels to avoid overlap
+        automargin=True  # Automatically adjust margins for better spacing
+    ),
+    yaxis=dict(
+        showgrid=False,
+        title='Population',
+        side='left',
+        range=[merged['population'].min(), merged['population'].max() * 1.1]
+    ),
+    yaxis2=dict(
+        title='Rate (%)',
+        overlaying='y',
+        side='right'
+    ),
+    legend=dict(
+        orientation="h",
+        x=0.01,
+        y=-0.15,  # Move legend below the plot to avoid overlap
+        bgcolor='rgba(255, 255, 255, 0.6)',
+        font=dict(size=10)
+    ),
+    hovermode='x unified',
+    template='plotly_white',
+    plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
+    paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+    height=300,  # Increased height for better spacing
+    width=500,  # Adjusted width for better visualization
+    margin=dict(b=60, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
+)
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
 def plot_external_driver(selected_indicators):
-
-    colors = ['#032649', '#EB8928', '#595959', '#A5A5A5', '#1C798A']
+    colors = ['#032649', '#1C798A', '#EB8928', '#595959', '#A5A5A5']
 
     if not selected_indicators:
         selected_indicators = ["World GDP"]
@@ -522,37 +536,40 @@ def plot_external_driver(selected_indicators):
         if '% Change' not in indicator_data.columns:
             raise ValueError(f"Expected '% Change' column not found in {indicator}")
 
-        # Cycle through colors if there are more than 5 indicators
-        color = colors[i % len(colors)]  # Use modulus to cycle through the colors
+        color = colors[i % len(colors)]
 
-        # Ensure the color is a valid string (in case of any unexpected value)
         if isinstance(color, str) and color.startswith('#') and len(color) == 7:
-            fig.add_trace(
-                go.Scatter(
-                    x=indicator_data['Year'],
-                    y=indicator_data['% Change'],
-                    mode='lines',
-                    name=indicator,
-                    line=dict(color=color),  # Apply the color dynamically
-                )
-            )
+            fig.add_trace(go.Scatter(
+                x=indicator_data['Year'],
+                y=indicator_data['% Change'],
+                mode='lines',
+                name=indicator,
+                line=dict(color=color),
+            ))
         else:
             raise ValueError(f"Invalid color value: {color} for indicator: {indicator}")
 
-
     fig.update_layout(
-        title='',
+        title=' ',
         xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title='Percent Change'),
+        yaxis=dict(title=''),
         hovermode='x',
         legend=dict(
-            x=0, y=1, orientation='h',xanchor='left', yanchor='top', traceorder='normal',font=dict(size=10),
-            bgcolor='rgba(255, 255, 255, 0)', 
-            bordercolor='rgba(255, 255, 255, 0)', 
-            borderwidth=0 
-        )
+            x=0.1,
+            y=-0.3,  # Place legend below the x-axis
+            orientation='h',  # Horizontal legend
+            xanchor='center',
+            yanchor='top',
+            traceorder='normal',
+            font=dict(size=10),
+            bgcolor='rgba(255, 255, 255, 0)',
+        ),
+        plot_bgcolor='rgba(0,0,0,0)', 
+        paper_bgcolor='rgba(0,0,0,0)',
+        height=400,  # Chart height
+        width=500,  # Chart width
+        margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
     )
-    
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -611,17 +628,25 @@ def plot_cpi_ppi(selected_series_id):
     fig.update_layout(
         title='',
         xaxis=dict(showgrid=False, showticklabels=True),
-        yaxis=dict(title='Value'),
+        yaxis=dict(title='Value',showgrid=False),
         legend=dict(
-            orientation="h",  # Set legend to horizontal
-            x=0.01,  # Adjust x position (left margin)
-            y=0.99,  # Adjust y position (top margin)
-            bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
-            font=dict(size=8)
-    ),
-        hovermode='x unified'
+            orientation="h", 
+            x=0.01,  # Center the legend horizontally
+            y=-0.2,  # Place it below the chart
+            xanchor='left',  # Center alignment
+            yanchor='top',  # Align the top of the legend to the y position
+            bgcolor='rgba(255, 255, 255, 0.6)',
+            font=dict(size=10)
+        ),
+        hovermode='x unified',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        height=300,
+        width=500,
+        margin=dict(b=60, t=20),  # Increased bottom margin for space
     )
-    st.plotly_chart(fig, use_container_width=True)#, key=key)
+
+    st.plotly_chart(fig, use_container_width=True)
     return fig
 
 def plot_gdp_and_industry(selected_industry=None):
@@ -637,7 +662,7 @@ def plot_gdp_and_industry(selected_industry=None):
             fill='tozeroy',  # Create area chart by filling to the x-axis
             fillcolor='#032649', #'rgba(235, 137, 40, 0.6)', 
             line=dict(color='#032649', width=2),
-            marker=dict(size=6)
+            marker=dict(size=10)
         ),
         secondary_y=False
     )
@@ -650,7 +675,7 @@ def plot_gdp_and_industry(selected_industry=None):
             mode='lines',
             name='GDP - Percent Change',
             line=dict(color='#A5A5A5', width=2, dash='solid'),
-            marker=dict(size=6)
+            marker=dict(size=10)
         ),
         secondary_y=True
     )
@@ -669,7 +694,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 fill='tozeroy',  # Area chart
                 fillcolor='#EB8928', 
                 line=dict(color='#EB8928', width=2),
-                marker=dict(size=6)
+                marker=dict(size=10)
             ),
             secondary_y=False
         )
@@ -682,7 +707,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 mode='lines',
                 name=f'GDP Industry - % Change',
                 line=dict(color='#1C798A', width=2, dash='solid'),
-                marker=dict(size=6)
+                marker=dict(size=10)
             ),
             secondary_y=True
         )
@@ -693,19 +718,28 @@ def plot_gdp_and_industry(selected_industry=None):
         xaxis_title='',
         yaxis_title='Value',
         yaxis2_title='Percent Change',
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False),
         legend=dict(
             orientation="h",
-            x=0.01, y=0.99,  
-            bgcolor='rgba(255, 255, 255, 0.6)',  # Optional background color for legend
-            font=dict(size=8)
+            x=0.01,  # Center the legend horizontally
+            y=-0.15,  # Place it below the chart
+            xanchor='left',  # Center alignment
+            yanchor='top',  # Align to top of the legend box
+            bgcolor='rgba(255, 255, 255, 0.6)',
+            font=dict(size=10),
+            traceorder='normal'
         ),
-        template='plotly_white'
+        template='plotly_white',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        height=450,
+        width=700,
+        margin=dict(b=120, t=80,l=10, r=10),  # Increased bottom margin for space
     )
-
     st.plotly_chart(fig, use_container_width=True)
     return fig
-
-    # Function to export charts to PowerPoint
+# Function to export charts to PowerPoint
 
 def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top):
     if fig is None:
