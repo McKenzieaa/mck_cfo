@@ -90,7 +90,8 @@ def download_csv(state_name, data_type):
         csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
-        csv_data['observation_date'] = pd.to_datetime(csv_data['observation_date'])
+        csv_data = csv_data.rename(columns={'observation_date': 'DATE'})
+        csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
         return csv_data
     else:
         st.error(f"Error downloading {data_type} data for {state_name}.")
@@ -112,16 +113,8 @@ def load_state_gdp_data():
                 )
                 if csv_file_name:
                     with z.open(csv_file_name) as f:
-                        # Load the CSV and exclude unnecessary columns
-                        df = pd.read_csv(
-                            f, 
-                            usecols=lambda col: col not in [
-                                "GeoFIPS", "Region", "TableName", "LineCode", 
-                                "IndustryClassification", "Unit"
-                            ],
-                            dtype={"Description": str}
-                        )
-
+                        df = pd.read_csv( f, 
+                            usecols=lambda col: col not in [ "GeoFIPS", "Region", "TableName", "LineCode", "IndustryClassification", "Unit" ],dtype={"Description": str})
                     df = df[df["Description"] == "Current-dollar GDP (millions of current dollars) "]
                     df = df.melt(id_vars=["GeoName"], var_name="Year", value_name="Value")
                     df.rename(columns={"GeoName": "State"}, inplace=True)
