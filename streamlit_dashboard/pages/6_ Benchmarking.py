@@ -22,11 +22,11 @@ df = pd.read_csv(s3_path, storage_options=storage_options)
 # Filter columns
 df = df[["Industry", "LineItems", "public_comps", "rma", "ReportID"]]
 
-# Convert to Pandas DataFrame for Streamlit visualization
-pandas_df = df.compute()
+# # Convert to Pandas DataFrame for Streamlit visualization
+# pandas_df = df.compute()
 
 # Filter data for "Income Statement" and display table with bar chart
-income_statement_df = pandas_df[pandas_df["ReportID"] == "Income Statement"]
+income_statement_df = df[df["ReportID"] == "Income Statement"]
 
 st.header("Income Statement")
 st.write("Table:")
@@ -41,7 +41,7 @@ fig_income = px.bar(
 st.plotly_chart(fig_income)
 
 # Filter data for "Assets", "Liabilities & Equity" and display table with bar chart
-assets_liabilities_df = pandas_df[pandas_df["ReportID"].isin(["Assets", "Liabilities & Equity"])]
+assets_liabilities_df = df[df["ReportID"].isin(["Assets", "Liabilities & Equity"])]
 
 st.header("Assets & Liabilities")
 st.write("Table:")
