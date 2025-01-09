@@ -1505,7 +1505,7 @@ with st.expander("Benchmarking"):
     selected_industry = st.sidebar.selectbox("Select Industry", industries)
 
         # Filter the data based on the selected industry
-    filtered_df = df[df['Industry'] == selected_industry]
+    filtered_df = s3_benchmark_df[s3_benchmark_df['Industry'] == selected_industry]
 
     # Tables and Charts for ReportID = Income Statement
     income_statement_df = filtered_df[(filtered_df['File'].isin(['Public Comps', 'RMA'])) & 
