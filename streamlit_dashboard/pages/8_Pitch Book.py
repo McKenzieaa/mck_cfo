@@ -1495,17 +1495,18 @@ with st.expander("IBIS"):
 
 
 s3_benchmark_df = "s3://documentsapi/industry_data/benchmarking.csv"
+benchmark_df = s3_benchmark_df.compute
 
 with st.expander("Benchmarking"):
     st.subheader("Benchmarking")
    
     income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses", "Net Income"]
     balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
-    industries = s3_benchmark_df['Industry'].unique()
+    industries = benchmark_df['Industry'].unique()
     selected_industry = st.sidebar.selectbox("Select Industry", industries)
 
         # Filter the data based on the selected industry
-    filtered_df = s3_benchmark_df[s3_benchmark_df['Industry'] == selected_industry]
+    filtered_df = benchmark_df[benchmark_df['Industry'] == selected_industry]
 
     # Tables and Charts for ReportID = Income Statement
     income_statement_df = filtered_df[(filtered_df['File'].isin(['Public Comps', 'RMA'])) & 
