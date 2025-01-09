@@ -658,6 +658,23 @@ def create_category_charts(df):
         if category in df['Category'].unique():
             category_data = df[df['Category'] == category]
 
+            # Set legend labels based on the category
+            if category == 'Revenue':
+                bar_name = "Total Revenue"
+                line_name = "Change %"
+            elif category == 'Profit':
+                bar_name = "Total Profit margin"
+                line_name = "Change %"
+            elif category == 'Business':
+                bar_name = "Total number of businesses"
+                line_name = "Change %"
+            elif category == 'Employees':
+                bar_name = "Total number of employees"
+                line_name = "Change %"
+            else:
+                bar_name = "Value"
+                line_name = "Change (%)"
+
             # Create a subplot with secondary y-axis
             fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -666,7 +683,7 @@ def create_category_charts(df):
                 go.Bar(
                     x=category_data['Year'],
                     y=category_data['Value'],
-                    name='Value',
+                    name=bar_name,
                     marker_color=bar_color,
                     text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],
                     textposition="outside"
@@ -679,7 +696,7 @@ def create_category_charts(df):
                 go.Scatter(
                     x=category_data['Year'],
                     y=category_data['Change'],
-                    name='Change (%)',
+                    name=line_name,
                     mode='lines+markers',
                     line=dict(color=line_color),
                     text=[f"{change:.1f}%" if i == len(category_data) - 1 else "" for i, change in enumerate(category_data['Change'])],
@@ -688,17 +705,22 @@ def create_category_charts(df):
                 secondary_y=True
             )
 
-            # Update axis titles
+            # Update layout and axis titles
             fig.update_layout(
-                xaxis_title=" ",
+                title=dict(
+                    text=f"{category} Analysis",
+                    font=dict(size=16, color="#595959"),
+                    x=0.5,  # Center-align title
+                    xanchor='center'
+                ),
+                xaxis_title="Year",
                 yaxis_title="Value",
-                title='',
                 legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
-                xaxis=dict(showgrid=False,color="#595959",  
-                    tickfont=dict(color="#595959")),
+                xaxis=dict(showgrid=False, color="#595959",
+                           tickfont=dict(color="#595959")),
                 yaxis=dict(showgrid=False, color="#595959",
-                    tickfont=dict(color="#595959")),
-                margin=dict(l=20, r=20, t=20, b=50),
+                           tickfont=dict(color="#595959")),
+                margin=dict(l=20, r=20, t=50, b=50),
                 height=400,
                 width=600
             )
@@ -707,15 +729,15 @@ def create_category_charts(df):
 
             # Assign the chart to the appropriate figure variable
             if category == 'Profit':
-                fig1_ibis = fig
+                fig1 = fig
             elif category == 'Revenue':
-                fig2_ibis = fig
+                fig2 = fig
             elif category == 'Business':
-                fig3_ibis = fig
+                fig3 = fig
             elif category == 'Employees':
-                fig4_ibis = fig
+                fig4 = fig
 
-    return fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis
+    return fig1, fig2, fig3, fig4
 
 def fetch_cpi_data(series_id, df_cleaned):
     selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
@@ -835,30 +857,30 @@ def plot_external_driver(selected_indicators):
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
-            color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959"),  # X-axis tick labels color
+            color="#595959", 
+            tickfont=dict(color="#595959"), 
         ),
         yaxis=dict(
             title='',
             showgrid=False,
-            color="#595959",  # Y-axis label and line color
-            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+            color="#595959", 
+            tickfont=dict(color="#595959"), 
         ),
         hovermode='x',
         legend=dict(
-            x=1,                 # Position at the far right
-            y=0.5,               # Center vertically
-            xanchor='right',     # Anchor the legend's right edge
-            yanchor='middle',    # Anchor the legend's vertical center
+            x=1,     
+            y=0.5, 
+            xanchor='right', 
+            yanchor='middle', 
             traceorder='normal',
-            font=dict(size=10, color="#595959"),  # Legend text color
-            bgcolor='rgba(255, 255, 255, 0)',     # Transparent background
+            font=dict(size=10, color="#595959"),
+            bgcolor='rgba(255, 255, 255, 0)',  
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,  # Chart height
-        width=500,  # Chart width
-        margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
+        height=400, 
+        width=500, 
+        margin=dict(b=200, t=50, l=5, r=5),
     )
 
     st.plotly_chart(fig, use_container_width=True)

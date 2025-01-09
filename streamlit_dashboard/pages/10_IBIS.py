@@ -109,7 +109,7 @@ def create_category_charts(df):
                     tickfont=dict(color="#595959")),
                 yaxis=dict(showgrid=False, color="#595959",
                     tickfont=dict(color="#595959")),
-                margin=dict(l=20, r=20, t=50, b=50),
+                margin=dict(b=200, t=50, l=5, r=5),
                 height=400,
                 width=600
             )
