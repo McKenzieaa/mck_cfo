@@ -1562,24 +1562,24 @@ with st.expander("Benchmarking"):
             how='left'
         )
 
-        # Ensure numeric values in required columns
+        # Ensure numeric values in required columns by converting to float
         income_statement_df['RMA Percent'] = pd.to_numeric(
-            income_statement_df['RMA Percent'].fillna(0), errors='coerce'
+            income_statement_df['RMA Percent'].astype('float64', errors='ignore').fillna(0),
+            errors='coerce'
         )
         income_statement_df['Public Comp Percent'] = pd.to_numeric(
-            income_statement_df['Public Comp Percent'].fillna(0), errors='coerce'
+            income_statement_df['Public Comp Percent'].astype('float64', errors='ignore').fillna(0),
+            errors='coerce'
         )
 
         balance_sheet_df['RMA Percent'] = pd.to_numeric(
-            balance_sheet_df['RMA Percent'].fillna(0), errors='coerce'
+            balance_sheet_df['RMA Percent'].astype('float64', errors='ignore').fillna(0),
+            errors='coerce'
         )
         balance_sheet_df['Public Comp Percent'] = pd.to_numeric(
-            balance_sheet_df['Public Comp Percent'].fillna(0), errors='coerce'
+            balance_sheet_df['Public Comp Percent'].astype('float64', errors='ignore').fillna(0),
+            errors='coerce'
         )
-
-        # Debugging: Check DataFrames
-        st.write("Debugging Income Statement DataFrame", income_statement_df)
-        st.write("Debugging Balance Sheet DataFrame", balance_sheet_df)
 
         # Visualizations
         income_fig = px.bar(
