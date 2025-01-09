@@ -660,10 +660,10 @@ def create_category_charts(df):
 
             # Set legend labels based on the category
             if category == 'Revenue':
-                bar_name = "Total Revenue"
+                bar_name = "Total Revenue($)"
                 line_name = "Change %"
             elif category == 'Profit':
-                bar_name = "Total Profit margin"
+                bar_name = "Total Profit($)"
                 line_name = "Change %"
             elif category == 'Business':
                 bar_name = "Total number of businesses"
