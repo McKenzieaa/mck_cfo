@@ -97,7 +97,7 @@ def create_category_charts(df):
             # Update layout to include category name as title
             fig.update_layout(
                 title=dict(
-                    text=f"{category} Analysis",
+                    text=f"{category}",
                     font=dict(size=16, color="#595959"),
                     x=0.5,  # Center-align title
                     xanchor='center'
