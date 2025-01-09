@@ -53,7 +53,7 @@ def get_data(industry):
 
 def create_category_charts(df):
     # Initialize charts
-    fig1, fig2, fig3, fig4 = None, None, None, None
+    charts = []
 
     # Define bar and line colors
     bar_color = '#032649'
@@ -66,7 +66,7 @@ def create_category_charts(df):
 
             # Create a subplot with secondary y-axis
             fig = make_subplots(specs=[[{"secondary_y": True}]])
-
+            
             # Add bar chart for 'Value' on the primary y-axis
             fig.add_trace(
                 go.Bar(
@@ -94,34 +94,32 @@ def create_category_charts(df):
                 secondary_y=True
             )
 
-            # Update axis titles
+            # Update layout to include category name as title
             fig.update_layout(
-                xaxis_title=" ",
+                title=dict(
+                    text=f"{category} Analysis",
+                    font=dict(size=16, color="#595959"),
+                    x=0.5,  # Center-align title
+                    xanchor='center'
+                ),
+                xaxis_title="Year",
                 yaxis_title="Value",
-                title='',
                 legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
-                xaxis=dict(showgrid=False,color="#595959",  
+                xaxis=dict(showgrid=False, color="#595959",  
                     tickfont=dict(color="#595959")),
                 yaxis=dict(showgrid=False, color="#595959",
                     tickfont=dict(color="#595959")),
-                margin=dict(l=20, r=20, t=20, b=50),
+                margin=dict(l=20, r=20, t=50, b=50),
                 height=400,
                 width=600
             )
             fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
             fig.update_yaxes(title_text="Change (%)", secondary_y=True)
 
-            # Assign the chart to the appropriate figure variable
-            if category == 'Profit':
-                fig1_ibis = fig
-            elif category == 'Revenue':
-                fig2_ibis = fig
-            elif category == 'Business':
-                fig3_ibis = fig
-            elif category == 'Employees':
-                fig4_ibis = fig
+            # Append the figure to the list of charts
+            charts.append(fig)
 
-    return fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis
+    return charts
 
 # Function to export charts to PowerPoint
 def export_charts_to_ppt(charts, filename="charts.pptx"):

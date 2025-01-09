@@ -846,14 +846,13 @@ def plot_external_driver(selected_indicators):
         ),
         hovermode='x',
         legend=dict(
-            x=0.1,
-            y=-0.3,  # Place legend below the x-axis
-            orientation='h',  # Horizontal legend
-            xanchor='center',
-            yanchor='top',
+            x=1,                 # Position at the far right
+            y=0.5,               # Center vertically
+            xanchor='right',     # Anchor the legend's right edge
+            yanchor='middle',    # Anchor the legend's vertical center
             traceorder='normal',
             font=dict(size=10, color="#595959"),  # Legend text color
-            bgcolor='rgba(255, 255, 255, 0)',
+            bgcolor='rgba(255, 255, 255, 0)',     # Transparent background
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
