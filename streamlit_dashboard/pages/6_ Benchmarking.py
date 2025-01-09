@@ -18,12 +18,11 @@ s3_path = "s3://documentsapi/industry_data/benchmarking.csv"
 # st.write("Loading data from:", s3_path)
 
 df = pd.read_csv(s3_path, storage_options=storage_options)
+df["Public Comps"] = df["File"] == "Public comps"
+df["RMA"] = df["File"] == "RMA"
 
 # Filter columns
 df = df[["Industry", "LineItems", "File", "ReportID"]]
-
-# # Convert to Pandas DataFrame for Streamlit visualization
-# pandas_df = df.compute()
 
 # Filter data for "Income Statement" and display table with bar chart
 income_statement_df = df[df["ReportID"] == "Income Statement"]
@@ -34,7 +33,7 @@ st.dataframe(income_statement_df)
 
 st.write("Bar Chart:")
 fig_income = px.bar(
-    income_statement_df, x="LineItems", y=["public_comps", "rma"],
+    income_statement_df, x="LineItems", y=["Public Comps", "RMA"],
     title="Income Statement: Public Comps vs RMA",
     barmode="group"
 )
@@ -49,7 +48,7 @@ st.dataframe(assets_liabilities_df)
 
 st.write("Bar Chart:")
 fig_assets_liabilities = px.bar(
-    assets_liabilities_df, x="LineItems", y=["public_comps", "rma"],
+    assets_liabilities_df, x="LineItems", y=["Public Comps", "RMA"],
     color="ReportID",
     title="Assets & Liabilities: Public Comps vs RMA",
     barmode="group"
