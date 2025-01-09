@@ -684,7 +684,8 @@ def create_category_charts(df):
                     name=bar_name,
                     marker_color=bar_color,
                     text=[f"{value}" if i == len(category_data) - 1 else "" for i, value in enumerate(category_data['Value'])],
-                    textposition="outside"
+                    textposition="outside",
+                    textfont=dict(size=12)
                 ),
                 secondary_y=False
             )
