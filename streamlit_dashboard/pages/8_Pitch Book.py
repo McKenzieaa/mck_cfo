@@ -1505,10 +1505,6 @@ with st.expander("Benchmarking"):
         filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry]
         filtered_df_public = df_public_comp[df_public_comp['Industry'] == selected_industry]
 
-        # Debug: Check if filtered dataframes are empty
-        st.write("Filtered RMA Data:", filtered_df_rma.head())
-        st.write("Filtered Public Data:", filtered_df_public.head())
-
         # Handle cases where dataframes are empty
         if filtered_df_rma.empty or filtered_df_public.empty:
             st.warning("No data available for the selected industry.")
