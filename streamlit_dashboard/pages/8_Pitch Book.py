@@ -1561,11 +1561,11 @@ with st.expander("Benchmarking"):
             )
 
             # Convert percentages to numeric for charts
-            income_statement_df['RMA Percent'] = pd.to_numeric(income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
-            income_statement_df['Public Comp Percent'] = pd.to_numeric(income_statement_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce')
+            income_statement_df['RMA Percent'] = pd.to_numeric(income_statement_df['RMA Percent'], errors='coerce')
+            income_statement_df['Public Comp Percent'] = pd.to_numeric(income_statement_df['Public Comp Percent'], errors='coerce')
 
-            balance_sheet_df['RMA Percent'] = pd.to_numeric(balance_sheet_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
-            balance_sheet_df['Public Comp Percent'] = pd.to_numeric(balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce')
+            balance_sheet_df['RMA Percent'] = pd.to_numeric(balance_sheet_df['RMA Percent'], errors='coerce')
+            balance_sheet_df['Public Comp Percent'] = pd.to_numeric(balance_sheet_df['Public Comp Percent'], errors='coerce')
 
             # Plot charts
             st.write("Income Statement")
