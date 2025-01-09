@@ -1562,6 +1562,13 @@ with st.expander("Benchmarking"):
             how='left'
         )
 
+        income_statement_df['RMA Percent'] = pd.to_numeric(
+            income_statement_df['RMA Percent'].fillna(0), errors='coerce'
+        )
+        income_statement_df['Public Comp Percent'] = pd.to_numeric(
+            income_statement_df['Public Comp Percent'].fillna(0), errors='coerce'
+        )
+
         # Visualizations
         income_fig = px.bar(
             income_statement_df,
