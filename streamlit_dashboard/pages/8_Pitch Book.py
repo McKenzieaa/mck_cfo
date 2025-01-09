@@ -708,7 +708,7 @@ def create_category_charts(df):
                     text=f"{category}",
                     font=dict(size=16, color="#595959"),
                     x=0, 
-                    xanchor='center'
+                    xanchor='left'
                 ),
                 xaxis_title=" ",
                 yaxis_title=" ",
@@ -717,7 +717,7 @@ def create_category_charts(df):
                            tickfont=dict(color="#595959")),
                 yaxis=dict(showgrid=False, color="#595959",
                            tickfont=dict(color="#595959")),
-                margin=dict(l=30, r=30, t=30, b=30),
+                margin=dict(l=30, r=50, t=30, b=30),
                 height=400,
                 width=600
             )

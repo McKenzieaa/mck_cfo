@@ -15,7 +15,7 @@ storage_options = {
 
 # Load the data from S3
 s3_path = "s3://documentsapi/industry_data/benchmarking.csv"
-st.write("Loading data from:", s3_path)
+# st.write("Loading data from:", s3_path)
 
 df = pd.read_csv(s3_path, storage_options=storage_options)
 
