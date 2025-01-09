@@ -1494,47 +1494,134 @@ with st.expander("IBIS"):
             st.warning(f"No data available for the selected industry: {industry}")
 
 
-s3_benchmark_df = "s3://documentsapi/industry_data/benchmarking.csv"
-benchmark_df = s3_benchmark_df.compute
+s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
+
+# RMA data pre-processing
+df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)
+df_rma = df_rma.rename(columns={
+    'ReportID': 'Report_ID',
+    'Line Items': 'LineItems',
+    'Value': 'Value',
+    'Percent': 'Percent'
+})
+
+# Load Public Comps data
+usecols = [
+    "Name", "Industry", "Revenue (in %)", "COGS (in %)", "Gross Profit (in %)", "EBITDA (in %)",
+    "Operating Profit (in %)", "Other Expenses (in %)", "Operating Expenses (in %)", "Net Income (in %)",
+    "Cash (in %)", "Accounts Receivables (in %)", "Inventories (in %)", "Other Current Assets (in %)",
+    "Total Current Assets (in %)", "Fixed Assets (in %)", "PPE (in %)", "Total Assets (in %)",
+    "Accounts Payable (in %)", "Short Term Debt (in %)", "Long Term Debt (in %)", "Other Current Liabilities (in %)",
+    "Total Current Liabilities (in %)", "Other Liabilities (in %)", "Total Liabilities (in %)",
+    "Net Worth (in %)", "Total Liabilities & Equity (in %)"
+]
+
+df_public_comp = pd.read_excel(
+    s3_path_public_comp,
+    sheet_name="FY 2023",
+    storage_options=storage_options,
+    usecols=usecols,
+    engine='openpyxl'
+)
+df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
+
+# Unique industries from both sources
+industries_rma = df_rma[
+    df_rma['Industry'].notnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))
+]['Industry'].compute().unique()
+
+industries_public = df_public_comp[
+    df_public_comp['Industry'].notnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))
+]['Industry'].unique()
+
+industries = sorted(set(industries_rma).union(set(industries_public)))
 
 with st.expander("Benchmarking"):
     st.subheader("Benchmarking")
    
     income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses", "Net Income"]
     balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
-    industries = benchmark_df['Industry'].unique()
-    selected_industry = st.sidebar.selectbox("Select Industry", industries)
+    
+    selected_industry = st.selectbox("Select Industry", industries)
 
-        # Filter the data based on the selected industry
-    filtered_df = benchmark_df[benchmark_df['Industry'] == selected_industry]
+    if selected_industry:
+        # Filter RMA data
+        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
 
-    # Tables and Charts for ReportID = Income Statement
-    income_statement_df = filtered_df[(filtered_df['File'].isin(['Public Comps', 'RMA'])) & 
-                                    (filtered_df['ReportID'] == 'Income Statement')]
+        if 'Report_ID' in filtered_df_rma.columns:
+            filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
 
-    if not income_statement_df.empty:
-        st.subheader("Income Statement")
-        st.write(income_statement_df[['LineItems', 'File', 'ReportID', 'Value']])
+        income_statement_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Income Statement'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
+        balance_sheet_df_rma = filtered_df_rma[filtered_df_rma['Report_ID'] == 'Balance Sheet'][['LineItems', 'Percent']].rename(columns={'Percent': 'RMA Percent'})
 
-        # Bar chart for Income Statement
-        fig_income = px.bar(income_statement_df, x='LineItems', y='Value', title="Income Statement Values")
-        st.plotly_chart(fig_income)
-    else:
-        st.write("No data available for Income Statement")
+        # Filter Public Comps data
+        filtered_df_public = df_public_comp[df_public_comp['Industry'] == selected_industry]
+        df_unpivoted = pd.melt(
+            filtered_df_public,
+            id_vars=["Name", "Industry"],
+            var_name="LineItems",
+            value_name="Value"
+        )
+        df_unpivoted['LineItems'] = df_unpivoted['LineItems'].str.replace(" (in %)", "", regex=False)
+        df_unpivoted['Value'] = pd.to_numeric(df_unpivoted['Value'].replace("-", 0), errors='coerce').fillna(0)
+        df_unpivoted = df_unpivoted.groupby('LineItems')['Value'].mean().reset_index().rename(columns={'Value': 'Public Comp Percent'})
 
-    # Tables and Charts for ReportID = Assets, Liabilities & Equity
-    balance_sheet_df = filtered_df[filtered_df['ReportID'].isin(['Assets', 'Liabilities & Equity'])]
+        # Merge data
+        income_statement_df = pd.merge(
+            pd.DataFrame({'LineItems': income_statement_items}),
+            income_statement_df_rma,
+            on='LineItems',
+            how='left'
+        ).merge(
+            df_unpivoted[df_unpivoted['LineItems'].isin(income_statement_items)],
+            on='LineItems',
+            how='left'
+        )
 
-    if not balance_sheet_df.empty:
-        st.subheader("Assets, Liabilities & Equity")
-        st.write(balance_sheet_df[['LineItems', 'File', 'ReportID', 'Value']])
+        balance_sheet_df = pd.merge(
+            pd.DataFrame({'LineItems': balance_sheet_items}),
+            balance_sheet_df_rma,
+            on='LineItems',
+            how='left'
+        ).merge(
+            df_unpivoted[df_unpivoted['LineItems'].isin(balance_sheet_items)],
+            on='LineItems',
+            how='left'
+        )
 
-        # Bar chart for Balance Sheet
-        fig_balance = px.bar(balance_sheet_df, x='LineItems', y='Value', title="Assets, Liabilities & Equity Values")
-        st.plotly_chart(fig_balance)
-    else:
-        st.write("No data available for Assets, Liabilities & Equity")
+        # Ensure numeric values in required columns by converting to float
+        income_statement_df['RMA Percent'] = pd.to_numeric(income_statement_df['RMA Percent'], errors='coerce')
+        income_statement_df['Public Comp Percent'] = pd.to_numeric(income_statement_df['Public Comp Percent'], errors='coerce')
 
+        balance_sheet_df['RMA Percent'] = pd.to_numeric(balance_sheet_df['RMA Percent'], errors='coerce')
+        balance_sheet_df['Public Comp Percent'] = pd.to_numeric(balance_sheet_df['Public Comp Percent'], errors='coerce')
+
+        # Visualizations
+        income_fig = px.bar(
+            income_statement_df,
+            x="LineItems",
+            y=["RMA Percent", "Public Comp Percent"],
+            barmode="group",
+            text_auto=True
+        )
+        income_fig.update_layout(xaxis_tickangle=45, height=400)
+
+        balance_fig = px.bar(
+            balance_sheet_df,
+            x="LineItems",
+            y=["RMA Percent", "Public Comp Percent"],
+            barmode="group",
+            text_auto=True
+        )
+        balance_fig.update_layout(xaxis_tickangle=45, height=400)
+
+        st.write("Income Statement")
+        st.dataframe(income_statement_df, hide_index=True)
+        st.plotly_chart(income_fig)
+
+        st.write("Balance Sheet")
+        st.dataframe(balance_sheet_df, hide_index=True)
+        st.plotly_chart(balance_fig)
 
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
