@@ -712,7 +712,7 @@ def create_category_charts(df):
                 ),
                 xaxis_title=" ",
                 yaxis_title=" ",
-                legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
+                legend=dict(x=0, y=1, xanchor='left', yanchor='top', orientation='h'),
                 xaxis=dict(showgrid=False, color="#595959",
                            tickfont=dict(color="#595959")),
                 yaxis=dict(showgrid=False, color="#595959",
@@ -721,8 +721,8 @@ def create_category_charts(df):
                 height=400,
                 width=600
             )
-            fig.update_yaxes(title_text="Value (in bn$)", secondary_y=False)
-            fig.update_yaxes(title_text="Change (%)", secondary_y=True)
+            fig.update_yaxes(title_text=" ", secondary_y=False)
+            fig.update_yaxes(title_text=" ", secondary_y=True)
 
             # Assign the chart to the appropriate figure variable
             if category == 'Profit':
