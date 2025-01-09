@@ -18,7 +18,7 @@ storage_options = {
 s3_path = "s3://documentsapi/industry_data/benchmarking.csv"
 st.write("Loading data from:", s3_path)
 
-df = dd.read_csv(s3_path, storage_options={"anon": True})
+df = dd.read_csv(s3_path, storage_options=storage_options)
 
 # Filter columns
 df = df[["Industry", "LineItems", "public_comps", "rma", "File", "ReportID"]]
