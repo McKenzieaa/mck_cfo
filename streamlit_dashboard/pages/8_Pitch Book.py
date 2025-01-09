@@ -1466,6 +1466,35 @@ with st.expander("State Indicators"):
     st.subheader(f"{state_name} - GDP Over Time")
     gdp_fig = plot_gdp_chart(state_name)
 
+with st.expander("IBIS"):
+    st.subheader("IBIS - Industry Report")
+
+    df_industries = get_industries()  
+    industry_options = df_industries["Industry"].tolist()
+    industry = st.selectbox("Select Industry", industry_options)
+
+    if industry:
+        df_selected = get_data(industry)
+
+        if not df_selected.empty:
+
+            fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis = create_category_charts(df_selected)
+
+            if fig1_ibis:
+                # st.subheader("Profit")
+                st.plotly_chart(fig1_ibis, use_container_width=True)
+            if fig2_ibis:
+                # st.subheader("Revenue")
+                st.plotly_chart(fig2_ibis, use_container_width=True)
+            if fig3_ibis:
+                # st.subheader("Business")
+                st.plotly_chart(fig3_ibis, use_container_width=True)
+            if fig4_ibis:
+                # st.subheader("Employees")
+                st.plotly_chart(fig4_ibis, use_container_width=True)
+        else:
+            st.warning(f"No data available for the selected industry: {industry}")
+
 s3_path_rma = "s3://documentsapi/industry_data/rma_data.parquet"
 s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
 
@@ -1563,23 +1592,13 @@ with st.expander("Benchmarking"):
         )
 
         # Ensure numeric values in required columns by converting to float
-        income_statement_df['RMA Percent'] = pd.to_numeric(
-            income_statement_df['RMA Percent'].astype('float64', errors='ignore').fillna(0),
-            errors='coerce'
-        )
-        income_statement_df['Public Comp Percent'] = pd.to_numeric(
-            income_statement_df['Public Comp Percent'].astype('float64', errors='ignore').fillna(0),
-            errors='coerce'
-        )
+        income_statement_df['RMA Percent'] = pd.to_numeric(income_statement_df['RMA Percent'].fillna(0), errors='coerce')
+        income_statement_df['Public Comp Percent'] = pd.to_numeric(income_statement_df['Public Comp Percent'].fillna(0), errors='coerce')
 
-        balance_sheet_df['RMA Percent'] = pd.to_numeric(
-            balance_sheet_df['RMA Percent'].astype('float64', errors='ignore').fillna(0),
-            errors='coerce'
-        )
+        balance_sheet_df['RMA Percent'] = pd.to_numeric(balance_sheet_df['RMA Percent'].fillna(0), errors='coerce')
+        
         balance_sheet_df['Public Comp Percent'] = pd.to_numeric(
-            balance_sheet_df['Public Comp Percent'].astype('float64', errors='ignore').fillna(0),
-            errors='coerce'
-        )
+            balance_sheet_df['Public Comp Percent'].fillna(0), errors='coerce')
 
         # Visualizations
         income_fig = px.bar(
@@ -1607,35 +1626,6 @@ with st.expander("Benchmarking"):
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df, hide_index=True)
         st.plotly_chart(balance_fig)
-
-with st.expander("IBIS"):
-    st.subheader("IBIS - Industry Report")
-
-    df_industries = get_industries()  
-    industry_options = df_industries["Industry"].tolist()
-    industry = st.selectbox("Select Industry", industry_options)
-
-    if industry:
-        df_selected = get_data(industry)
-
-        if not df_selected.empty:
-
-            fig1_ibis, fig2_ibis, fig3_ibis, fig4_ibis = create_category_charts(df_selected)
-
-            if fig1_ibis:
-                # st.subheader("Profit")
-                st.plotly_chart(fig1_ibis, use_container_width=True)
-            if fig2_ibis:
-                # st.subheader("Revenue")
-                st.plotly_chart(fig2_ibis, use_container_width=True)
-            if fig3_ibis:
-                # st.subheader("Business")
-                st.plotly_chart(fig3_ibis, use_container_width=True)
-            if fig4_ibis:
-                # st.subheader("Employees")
-                st.plotly_chart(fig4_ibis, use_container_width=True)
-        else:
-            st.warning(f"No data available for the selected industry: {industry}")
 
 if st.button("Export Charts to PowerPoint", key="export_button"):
     try:
