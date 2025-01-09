@@ -1284,6 +1284,7 @@ s3_path_rma = "s3://documentsapi/industry_data/rma_data.parquet"
 s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
 
 # RMA data pre-processing
+df_rma = dd.read_parquet(s3_path_rma, storage_options=storage_options)
 df_rma = df_rma.rename(columns={
     'ReportID': 'Report_ID',      
     'Line Items': 'LineItems',    
@@ -1302,6 +1303,10 @@ usecols = [
 # Load the public company data
 df_public_comp = pd.read_excel(s3_path_public_comp, sheet_name="FY 2023", storage_options=storage_options,usecols=usecols, engine='openpyxl')
 df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""))
+
+industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
+industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
+industries = sorted(set(industries_rma).union(set(industries_public)))
 
 df_public = df_public.rename(columns={
     'Name': 'Company',
@@ -1490,18 +1495,15 @@ with st.expander("State Indicators"):
 
 with st.expander("Benchmarking"):
     st.subheader("Benchmarking")
-
-    industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
-    industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
-    industries = sorted(set(industries_rma).union(set(industries_public)))
-    
+   
     income_statement_items = ["Revenue", "COGS", "Gross Profit", "EBITDA", "Operating Profit", "Other Expenses", "Operating Expenses","Profit Before Taxes", "Net Income"]
     balance_sheet_items = ["Cash", "Accounts Receivables", "Inventories", "Other Current Assets", "Total Current Assets", "Fixed Assets","Intangibles", "PPE", "Total Assets", "Accounts Payable", "Short Term Debt", "Long Term Debt", "Other Current Liabilities", "Total Current Liabilities", "Other Liabilities", "Total Liabilities", "Net Worth", "Total Liabilities & Equity"]
     
     selected_industry = st.selectbox("Select Industry", industries)
+
     if selected_industry:
 
-        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry]
+        filtered_df_rma = df_rma[df_rma['Industry'] == selected_industry].compute()
 
         if 'Report_ID' in filtered_df_rma.columns:
             filtered_df_rma['Report_ID'] = filtered_df_rma['Report_ID'].replace({"Assets": "Balance Sheet", "Liabilities & Equity": "Balance Sheet"})
@@ -1547,22 +1549,23 @@ with st.expander("Benchmarking"):
             on='LineItems',
             how='left'
         )
-
-        income_statement_df['RMA Percent'] = income_statement_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
-        balance_sheet_df['RMA Percent'] = balance_sheet_df['RMA Percent'].apply(lambda x: f"{int(round(x))}%" if pd.notnull(x) else x)
+        
     if selected_industry:
 
         income_statement_df['RMA Percent'] = pd.to_numeric(
-            income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
+            income_statement_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
+        )
         income_statement_df['Public Comp Percent'] = pd.to_numeric(
-            income_statement_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce')
+            income_statement_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
+        )
 
         balance_sheet_df['RMA Percent'] = pd.to_numeric(
-            balance_sheet_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce')
+            balance_sheet_df['RMA Percent'].str.replace('%', '', regex=False), errors='coerce'
+        )
         balance_sheet_df['Public Comp Percent'] = pd.to_numeric(
-            balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce')
+            balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
+        )
 
-        # Income Statement Bar Chart
         income_fig = px.bar(
             income_statement_df,
             x="LineItems",
@@ -1583,11 +1586,9 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='',tickfont=dict(size=10)),
-            yaxis=dict(title='')
+            xaxis=dict(title='',tickfont=dict(size=10))
         )
 
-        # Balance Sheet Bar Chart
         balance_fig = px.bar(
             balance_sheet_df,
             x="LineItems",
@@ -1608,16 +1609,19 @@ with st.expander("Benchmarking"):
                 traceorder='normal',
                 orientation='h'
             ),
-            xaxis=dict(title='',tickfont=dict(size=10)),
-            yaxis=dict(title='')
+            xaxis=dict(title='',tickfont=dict(size=10))
         )
 
         st.write("Income Statement")
         st.dataframe(income_statement_df.fillna(np.nan), hide_index=True, use_container_width=True)
+
+        # st.write("Income Statement Bar Chart")
         st.plotly_chart(income_fig, use_container_width=True)
 
         st.write("Balance Sheet")
         st.dataframe(balance_sheet_df.fillna(np.nan), hide_index=True, use_container_width=True)
+
+        # st.write("Balance Sheet Bar Chart")
         st.plotly_chart(balance_fig, use_container_width=True)
 
 with st.expander("IBIS"):
