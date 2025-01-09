@@ -39,7 +39,7 @@ df_public_comp = df_public_comp.rename(columns=lambda x: x.replace(" (in %)", ""
 
 industries_rma = df_rma[~df_rma['Industry'].isnull() & df_rma['Industry'].map(lambda x: isinstance(x, str))]['Industry'].compute().unique()
 industries_public = df_public_comp[~df_public_comp['Industry'].isnull() & df_public_comp['Industry'].map(lambda x: isinstance(x, str))]['Industry'].unique()
-industries = sorted(set(industries_rma).union(set(industries_public))).unique()
+industries = sorted(set(industries_rma).union(set(industries_public)))
 
 st.title("Benchmarking")
 
