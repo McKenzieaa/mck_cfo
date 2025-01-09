@@ -20,7 +20,7 @@ s3_path = "s3://documentsapi/industry_data/benchmarking.csv"
 df = pd.read_csv(s3_path, storage_options=storage_options)
 
 # Filter columns
-df = df[["Industry", "LineItems", "public_comps", "rma", "ReportID"]]
+df = df[["Industry", "LineItems", "File", "ReportID"]]
 
 # # Convert to Pandas DataFrame for Streamlit visualization
 # pandas_df = df.compute()
