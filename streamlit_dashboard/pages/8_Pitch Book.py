@@ -675,10 +675,8 @@ def create_category_charts(df):
                 bar_name = "Value"
                 line_name = "Change (%)"
 
-            # Create a subplot with secondary y-axis
             fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-            # Add bar chart for 'Value' on the primary y-axis
             fig.add_trace(
                 go.Bar(
                     x=category_data['Year'],
@@ -691,7 +689,6 @@ def create_category_charts(df):
                 secondary_y=False
             )
 
-            # Add line chart for 'Change' on the secondary y-axis
             fig.add_trace(
                 go.Scatter(
                     x=category_data['Year'],
@@ -713,14 +710,14 @@ def create_category_charts(df):
                     x=0.5,  # Center-align title
                     xanchor='center'
                 ),
-                xaxis_title="Year",
-                yaxis_title="Value",
+                xaxis_title=" ",
+                yaxis_title=" ",
                 legend=dict(x=0, y=1, xanchor='left', yanchor='top'),
                 xaxis=dict(showgrid=False, color="#595959",
                            tickfont=dict(color="#595959")),
                 yaxis=dict(showgrid=False, color="#595959",
                            tickfont=dict(color="#595959")),
-                margin=dict(l=20, r=20, t=50, b=50),
+                margin=dict(l=30, r=30, t=30, b=30),
                 height=400,
                 width=600
             )
