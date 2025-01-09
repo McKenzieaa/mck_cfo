@@ -705,9 +705,9 @@ def create_category_charts(df):
             # Update layout and axis titles
             fig.update_layout(
                 title=dict(
-                    text=f"{category} Analysis",
+                    text=f"{category}",
                     font=dict(size=16, color="#595959"),
-                    x=0.5,  # Center-align title
+                    x=0,  # Center-align title
                     xanchor='center'
                 ),
                 xaxis_title=" ",
