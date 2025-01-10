@@ -1261,7 +1261,7 @@ def plot_gdp_chart(state_name):
             fig.update_layout(
                 title=(""),
                 xaxis_title=" ",
-                yaxis_title="GDP (Millions of Dollars)",
+                yaxis_title="GDP ($ mn)",
                 template="plotly_white",
                 legend=dict( x=0.01, y=0.01, xanchor='left', yanchor='bottom',title_text=None ),
                 plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',margin=dict(l=2, r=2, t=30,b=50),height=300,width=500,xaxis=dict(showgrid=False, color="#595959",tickfont=dict(color="#595959")),yaxis=dict(showgrid=False, color="#595959",tickfont=dict(color="#595959")))

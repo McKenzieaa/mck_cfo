@@ -409,7 +409,7 @@ df_gdp_us["Industry"] = df_gdp_us["Industry"].str.replace("  ", "")
 df_gdp_unpivoted = df_gdp_us.melt(id_vars=["Industry"], var_name="Year", value_name="Value")
 df_gdp_unpivoted["Year"] = df_gdp_unpivoted["Year"].astype(int)
 df_gdp_unpivoted["Value"] = pd.to_numeric(df_gdp_unpivoted["Value"], errors='coerce')
-df_gdp_unpivoted = df_gdp_unpivoted.dropna(subset=["Value"])
+df_gdp_unpivoted = df_gdp_unpivoted.dropna(subset=["Value"])/1000
 
     # Clean and reshape GDP Percent Change data
 df_pct_change = pd.read_excel(xls, sheet_name="TGO101-A")
@@ -672,7 +672,6 @@ def plot_cpi_ppi(selected_series_id):
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
-
 
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
