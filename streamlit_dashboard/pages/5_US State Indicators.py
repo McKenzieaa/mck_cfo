@@ -198,7 +198,7 @@ def plot_gdp_chart(state_name):
             fig.add_trace(go.Scatter(x=gdp_data['Year'], y=gdp_data['Value'], mode='lines',line=dict(color=line_colors["gdp"]), name=f"{state_name} GDP"))
 
             last_row = gdp_data.iloc[-1]
-            value_in_millions = last_row['Value'] / 1_000_000
+            value_in_millions = last_row['Value'] 
             formatted_value = f"{value_in_millions:.1f}"
 
             fig.add_annotation(
