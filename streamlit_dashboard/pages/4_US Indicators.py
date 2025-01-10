@@ -755,7 +755,7 @@ def plot_gdp_and_industry(selected_industry=None):
             showgrid=False,
             color="#595959",  # Y-axis label and line color
             tickfont=dict(color="#595959"),  # Y-axis tick labels color
-            tickformat=','+'M',
+            tickformat=',',
         ),
         legend=dict(
             orientation="h",
