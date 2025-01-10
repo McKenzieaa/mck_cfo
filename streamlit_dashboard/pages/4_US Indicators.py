@@ -408,7 +408,7 @@ df_gdp_us["Industry"] = df_gdp_us["Industry"].replace("    All industries", "GDP
 df_gdp_us["Industry"] = df_gdp_us["Industry"].str.replace("  ", "")
 df_gdp_unpivoted = df_gdp_us.melt(id_vars=["Industry"], var_name="Year", value_name="Value")
 df_gdp_unpivoted["Year"] = df_gdp_unpivoted["Year"].astype(int)
-df_gdp_unpivoted["Value"] = pd.to_numeric(df_gdp_unpivoted["Value"], errors='coerce')/1000
+df_gdp_unpivoted["Value"] = pd.to_numeric(df_gdp_unpivoted["Value"], errors='coerce')*1000
 df_gdp_unpivoted = df_gdp_unpivoted.dropna(subset=["Value"])
 
     # Clean and reshape GDP Percent Change data
