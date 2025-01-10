@@ -199,7 +199,7 @@ def plot_gdp_chart(state_name):
 
             last_row = gdp_data.iloc[-1]
             value_in_millions = last_row['Value'] / 1_000_000
-            formatted_value = f"{value_in_millions:.1f}M"
+            formatted_value = f"{value_in_millions:.1f}"
 
             fig.add_annotation(
                 x=last_row['Year'], y=last_row['Value'],
