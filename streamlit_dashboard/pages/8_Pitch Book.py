@@ -798,7 +798,8 @@ def plot_labour_unemployment():
         color="#595959",
         tickfont=dict(color="#595959"),
         side='left',
-        range=[merged['population'].min(), merged['population'].max() * 1.1]
+        range=[merged['population'].min(), merged['population'].max() * 1.1],
+        tickformat=',',
     ),
     yaxis2=dict(
         title='Rate (%)',
