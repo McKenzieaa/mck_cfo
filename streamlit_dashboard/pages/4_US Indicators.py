@@ -772,7 +772,7 @@ def plot_gdp_and_industry(selected_industry=None):
         paper_bgcolor='rgba(0,0,0,0)',
         height=450,
         width=700,
-        margin=dict(b=60, t=20, r=15, l=15),  # Increased bottom margin for space
+        margin=dict(b=10, t=20, r=15, l=15),  # Increased bottom margin for space
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
