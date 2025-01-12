@@ -870,7 +870,7 @@ def plot_external_driver(selected_indicators):
         legend=dict(
             orientation="h",
             x=0.01,     
-            y=-0.3, 
+            y=-0.35, 
             xanchor='left', 
             yanchor='bottom', 
             traceorder='normal',
