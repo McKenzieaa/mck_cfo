@@ -880,7 +880,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',
         height=400,
         width=925, 
-        margin=dict(b=80, t=30, l=10, r=10),
+        margin=dict(b=60, t=30, l=10, r=10),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -1128,7 +1128,7 @@ states_data_id = {
 line_colors = {
     "unemployment": "#032649",  # Dark blue
     "labour_force": "#EB8928",  # Orange
-    "gdp": "#032649",  # Dark blue
+    "gdp": "#032649", 
 }
 
 def download_csv(state_name, data_type):
