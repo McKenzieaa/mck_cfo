@@ -663,7 +663,7 @@ def plot_cpi_ppi(selected_series_id):
         legend=dict(
             orientation="h",
             x=0.01,  # Align the legend horizontally
-            y=-0.2,  # Place it below the chart
+            y=-0.3,  # Place it below the chart
             xanchor='left',
             yanchor='bottom',
             bgcolor='rgba(255, 255, 255, 0.6)',
