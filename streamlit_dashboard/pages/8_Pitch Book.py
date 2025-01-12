@@ -625,6 +625,7 @@ def get_industries():
     return df_ibis
 
     # Function to get data for the selected industry
+
 def get_data(industry):
         host = st.secrets["mysql"]["host"]
         user = st.secrets["mysql"]["user"]
