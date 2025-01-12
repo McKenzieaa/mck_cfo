@@ -1000,7 +1000,7 @@ def plot_gdp_and_industry(selected_industry=None):
             x=df_gdp_filtered['Year'],
             y=df_gdp_filtered['Percent Change'],
             mode='lines',
-            name='GDP - Percent Change',
+            name='GDP-% Change',
             line=dict(color='#A5A5A5', width=2, dash='solid'),
             marker=dict(size=10)
         ),
