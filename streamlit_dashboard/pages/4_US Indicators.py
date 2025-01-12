@@ -491,16 +491,16 @@ def plot_labour_unemployment():
     xaxis=dict(
         showgrid=False,
         showticklabels=True,
-        color="#595959",
-        tickfont=dict(color="#595959"),
+        color="#474747",
+        tickfont=dict(color="#474747"),
         tickangle=0,  # Rotate x-axis labels to avoid overlap
         automargin=True  # Automatically adjust margins for better spacing
     ),
     yaxis=dict(
         showgrid=False,
         title='Population',
-        color="#595959",
-        tickfont=dict(color="#595959"),
+        color="#474747",
+        tickfont=dict(color="#474747"),
         side='left',
         range=[merged['population'].min(), merged['population'].max() * 1.1],
         tickformat=',',
@@ -523,7 +523,7 @@ def plot_labour_unemployment():
     paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
     height=300,  # Increased height for better spacing
     width=500,  # Adjusted width for better visualization
-    margin=dict(b=80, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
+    margin=dict(b=50, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -560,14 +560,14 @@ def plot_external_driver(selected_indicators):
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
-            color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959"),  # X-axis tick labels color
+            color="#474747",  # X-axis label and line color
+            tickfont=dict(color="#474747"),  # X-axis tick labels color
         ),
         yaxis=dict(
             title='',
             showgrid=False,
-            color="#595959",  # Y-axis label and line color
-            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+            color="#474747",  # Y-axis label and line color
+            tickfont=dict(color="#474747"),  # Y-axis tick labels color
         ),
         hovermode='x',
         legend=dict(
@@ -577,13 +577,13 @@ def plot_external_driver(selected_indicators):
             xanchor='center',
             yanchor='top',
             traceorder='normal',
-            font=dict(size=10, color="#595959"),  # Legend text color
+            font=dict(size=10, color="#474747"),  # Legend text color
             bgcolor='rgba(255, 255, 255, 0)',
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,  # Chart height
-        width=500,  # Chart width
+        height=255,  # Chart height
+        width=925,  # Chart width
         margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
     )
 
@@ -646,14 +646,14 @@ def plot_cpi_ppi(selected_series_id):
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
-            color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959"),  # X-axis tick labels color
+            color="#474747",  # X-axis label and line color
+            tickfont=dict(color="#474747"),  # X-axis tick labels color
         ),
         yaxis=dict(
-            title='Value',
+            title='Index Value',
             showgrid=False,
-            color="#595959",  # Y-axis label and line color
-            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+            color="#474747",  # Y-axis label and line color
+            tickfont=dict(color="#474747"),  # Y-axis tick labels color
         ),
         legend=dict(
             orientation="h",
@@ -662,7 +662,7 @@ def plot_cpi_ppi(selected_series_id):
             xanchor='left',
             yanchor='top',
             bgcolor='rgba(255, 255, 255, 0.6)',
-            font=dict(size=10, color="#595959"),  # Legend text color
+            font=dict(size=10, color="#474747"),  # Legend text color
         ),
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -716,7 +716,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Value'],
                 mode='none',
-                name=f'GDP Industry - Value',
+                name=f'GDP-{selected_industry} Value',
                 fill='tozeroy',  # Area chart
                 fillcolor='#EB8928', 
                 line=dict(color='#EB8928', width=2),
@@ -731,7 +731,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
-                name=f'GDP Industry - % Change',
+                name=f'GDP-{selected_industry}(% Change)',
                 line=dict(color='#1C798A', width=2, dash='solid'),
                 marker=dict(size=10)
             ),
@@ -743,18 +743,18 @@ def plot_gdp_and_industry(selected_industry=None):
         title='',
         xaxis_title='',
         yaxis_title='Value',
-        yaxis2_title='Percent Change',
+        yaxis2_title='% Change',
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
-            color="#595959",  # X-axis label and line color
-            tickfont=dict(color="#595959"),  # X-axis tick labels color
+            color="#474747",  # X-axis label and line color
+            tickfont=dict(color="#474747"),  # X-axis tick labels color
         ),
         yaxis=dict(
             title='',
             showgrid=False,
-            color="#595959",  # Y-axis label and line color
-            tickfont=dict(color="#595959"),  # Y-axis tick labels color
+            color="#474747",  # Y-axis label and line color
+            tickfont=dict(color="#474747"),  # Y-axis tick labels color
             tickformat=',',
         ),
         legend=dict(
@@ -772,7 +772,7 @@ def plot_gdp_and_industry(selected_industry=None):
         paper_bgcolor='rgba(0,0,0,0)',
         height=450,
         width=700,
-        margin=dict(b=120, t=80,l=10, r=10),  # Increased bottom margin for space
+        margin=dict(b=60, t=20, r=15, l=15),  # Increased bottom margin for space
     )
     st.plotly_chart(fig, use_container_width=True)
     return fig
