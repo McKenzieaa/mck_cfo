@@ -646,10 +646,9 @@ def get_data(industry):
         return df
 
 def create_category_charts(df):
-    # Initialize charts
+
     fig1, fig2, fig3, fig4 = None, None, None, None
 
-    # Define bar and line colors
     bar_color = '#032649'
     line_color = '#EB8928'
 
@@ -705,12 +704,12 @@ def create_category_charts(df):
 
             # Update layout and axis titles
             fig.update_layout(
-                title=dict(
-                    text=f"{category}",
-                    font=dict(size=16, color="#474747"),
-                    x=0, 
-                    xanchor='left'
-                ),
+                # title=dict(
+                #     text=f"{category}",
+                #     font=dict(size=16, color="#474747"),
+                #     x=0, 
+                #     xanchor='left'
+                # ),
                 xaxis_title=" ",
                 yaxis_title=" ",
                 legend=dict(x=0, y=1, xanchor='left', yanchor='top', orientation='h'),
@@ -724,6 +723,10 @@ def create_category_charts(df):
             )
             fig.update_yaxes(title_text=" ", secondary_y=False)
             fig.update_yaxes(title_text=" ", secondary_y=True)
+
+            # Display the chart with a header
+            st.header(category)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Assign the chart to the appropriate figure variable
             if category == 'Profit':
