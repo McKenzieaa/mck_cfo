@@ -513,7 +513,7 @@ def plot_labour_unemployment():
     legend=dict(
         orientation="h",
         x=0.01,
-        y=-0.15,  # Move legend below the plot to avoid overlap
+        y=-0.15, 
         bgcolor='rgba(255, 255, 255, 0.6)',
         font=dict(size=10)
     ),
@@ -573,7 +573,7 @@ def plot_external_driver(selected_indicators):
         legend=dict(
             orientation="h",
             x=0.01,     
-            y=-0.5, 
+            y=-0.3, 
             xanchor='left', 
             yanchor='bottom', 
             traceorder='normal',

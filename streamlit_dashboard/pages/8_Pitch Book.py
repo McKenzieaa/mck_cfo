@@ -869,7 +869,7 @@ def plot_external_driver(selected_indicators):
         legend=dict(
             orientation="h",
             x=0.01,     
-            y=-0.5, 
+            y=-0.3, 
             xanchor='left', 
             yanchor='bottom', 
             traceorder='normal',
@@ -892,6 +892,11 @@ def plot_cpi_ppi(selected_series_id):
     """
     fig = go.Figure()
 
+    selected_industry = next(
+        (industry for industry, sid in industry_mapping.items() if sid == selected_series_id), 
+        "Unknown Industry"
+    )
+
     # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
     if not cpi_data.empty:
@@ -900,7 +905,7 @@ def plot_cpi_ppi(selected_series_id):
                 x=cpi_data['date'],
                 y=cpi_data['value'],
                 mode='lines',
-                name='CPI by Industry',
+                name=f'CPI-{selected_industry}',
                 line=dict(color='#032649')
             )
         )
@@ -954,9 +959,9 @@ def plot_cpi_ppi(selected_series_id):
         legend=dict(
             orientation="h",
             x=0.01,  # Align the legend horizontally
-            y=-0.2,  # Place it below the chart
+            y=-0.3,  # Place it below the chart
             xanchor='left',
-            yanchor='top',
+            yanchor='bottom',
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10, color="#474747"),  # Legend text color
         ),
@@ -1055,9 +1060,9 @@ def plot_gdp_and_industry(selected_industry=None):
         legend=dict(
             orientation="h",
             x=0.01,  # Center the legend horizontally
-            y=-0.15,  # Place it below the chart
+            y=-0.3,  # Place it below the chart
             xanchor='left',  # Center alignment
-            yanchor='top',  # Align to top of the legend box
+            yanchor='bottom',  # Align to top of the legend box
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10),
             traceorder='normal'
