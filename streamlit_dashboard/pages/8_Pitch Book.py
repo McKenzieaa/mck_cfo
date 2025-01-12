@@ -782,14 +782,14 @@ def plot_labour_unemployment():
     ))
 
     fig.update_layout(
-    title='',  # No title
+    title='', 
     xaxis=dict(
         showgrid=False,
         showticklabels=True,
         color="#474747",
         tickfont=dict(color="#474747"),
-        tickangle=0,  # Rotate x-axis labels to avoid overlap
-        automargin=True  # Automatically adjust margins for better spacing
+        tickangle=0, 
+        automargin=True 
     ),
     yaxis=dict(
         showgrid=False,
@@ -808,7 +808,7 @@ def plot_labour_unemployment():
     legend=dict(
         orientation="h",
         x=0.01,
-        y=-0.3,
+        y=-0.5,
         xanchor='left', 
         yanchor='bottom',  
         bgcolor='rgba(255, 255, 255, 0.6)',
@@ -970,7 +970,7 @@ def plot_cpi_ppi(selected_series_id):
         paper_bgcolor='rgba(0,0,0,0)',
         height=300,
         width=500,
-        margin=dict(b=60, t=20, r=15, l=20),
+        margin=dict(b=60, t=20, r=15),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -986,8 +986,8 @@ def plot_gdp_and_industry(selected_industry=None):
             y=df_gdp_filtered['Value'],
             mode='lines',
             name='GDP - Value',
-            fill='tozeroy',  # Create area chart by filling to the x-axis
-            fillcolor='#032649', #'rgba(235, 137, 40, 0.6)', 
+            fill='tozeroy', 
+            fillcolor='#032649', 
             line=dict(color='#032649', width=2),
             marker=dict(size=10)
         ),
@@ -1039,43 +1039,43 @@ def plot_gdp_and_industry(selected_industry=None):
             secondary_y=True
         )
 
-    # Update layout
-    fig.update_layout(
-        title='',
-        xaxis_title='',
-        yaxis_title='Value',
-        yaxis2_title='% Change',
-        xaxis=dict(
-            showgrid=False,
-            showticklabels=True,
-            color="#474747",  # X-axis label and line color
-            tickfont=dict(color="#474747"),  # X-axis tick labels color
-        ),
-        yaxis=dict(
+        # Update layout
+        fig.update_layout(
             title='',
-            showgrid=False,
-            color="#474747",  # Y-axis label and line color
-            tickfont=dict(color="#474747"),  # Y-axis tick labels color
-        ),
-        legend=dict(
-            orientation="h",
-            x=0.01,  # Center the legend horizontally
-            y=-0.3,  # Place it below the chart
-            xanchor='left',  # Center alignment
-            yanchor='bottom',  # Align to top of the legend box
-            bgcolor='rgba(255, 255, 255, 0.6)',
-            font=dict(size=10),
-            traceorder='normal'
-        ),
-        template='plotly_white',
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        height=450,
-        width=700,
-        margin=dict(b=120, t=80,l=10, r=10),  # Increased bottom margin for space
-    )
-    st.plotly_chart(fig, use_container_width=True)
-    return fig
+            xaxis_title='',
+            yaxis_title='Value',
+            yaxis2_title='% Change',
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=True,
+                color="#474747",  
+                tickfont=dict(color="#474747"),
+            ),
+            yaxis=dict(
+                title='',
+                showgrid=False,
+                color="#474747", 
+                tickfont=dict(color="#474747"), 
+            ),
+            legend=dict(
+                orientation="h",
+                x=0.01, 
+                y=-0.5, 
+                xanchor='left', 
+                yanchor='bottom', 
+                bgcolor='rgba(255, 255, 255, 0.6)',
+                font=dict(size=10),
+                traceorder='normal'
+            ),
+            template='plotly_white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            height=450,
+            width=700,
+            margin=dict(b=120, t=80,l=10, r=10), 
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        return fig
 
 states_data_id = {
     "Alabama": {"ur_id": "ALUR", "labour_id": "LBSSA01"},
