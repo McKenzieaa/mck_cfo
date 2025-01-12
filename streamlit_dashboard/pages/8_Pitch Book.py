@@ -954,9 +954,9 @@ def plot_cpi_ppi(selected_series_id):
         legend=dict(
             orientation="h",
             x=0.01,  # Align the legend horizontally
-            y=-0.5,  # Place it below the chart
+            y=-0.2,  # Place it below the chart
             xanchor='left',
-            yanchor='top',
+            yanchor='bottom',
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10, color="#474747"),  # Legend text color
         ),
