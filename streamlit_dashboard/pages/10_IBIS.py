@@ -112,6 +112,8 @@ def create_category_charts(df):
 
             # Append the figure to the list of charts
             charts.append(fig)
+            st.subheader(category)
+            st.plotly_chart(fig, use_container_width=True)
 
     return charts
 
