@@ -660,7 +660,7 @@ def plot_cpi_ppi(selected_series_id):
             x=0.01,  # Align the legend horizontally
             y=-0.2,  # Place it below the chart
             xanchor='left',
-            yanchor='top',
+            yanchor='bottom',
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10, color="#474747"),  # Legend text color
         ),
@@ -671,6 +671,8 @@ def plot_cpi_ppi(selected_series_id):
         width=500,
         margin=dict(b=60, t=20, r=15, l=15),  # Increased bottom margin for space
     )
+    st.plotly_chart(fig, use_container_width=True)
+    return fig
 
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
