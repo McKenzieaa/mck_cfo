@@ -595,6 +595,11 @@ def plot_cpi_ppi(selected_series_id):
     Plot CPI and PPI data on a single chart for comparison.
     """
     fig = go.Figure()
+        # Get the selected industry name based on the series_id
+    selected_industry = next(
+        (industry for industry, sid in industry_mapping.items() if sid == selected_series_id), 
+        "Unknown Industry"
+    )
 
     # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
@@ -604,7 +609,7 @@ def plot_cpi_ppi(selected_series_id):
                 x=cpi_data['date'],
                 y=cpi_data['value'],
                 mode='lines',
-                name='CPI by Industry',
+                name=f'CPI-{selected_industry}',
                 line=dict(color='#032649')
             )
         )
@@ -715,7 +720,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Value'],
                 mode='none',
-                name=f'GDP-{selected_industry} Value',
+                name=f'{selected_industry}-Value',
                 fill='tozeroy',  # Area chart
                 fillcolor='#EB8928', 
                 line=dict(color='#EB8928', width=2),
@@ -730,7 +735,7 @@ def plot_gdp_and_industry(selected_industry=None):
                 x=df_industry_filtered['Year'],
                 y=df_industry_filtered['Percent Change'],
                 mode='lines',
-                name=f'GDP-{selected_industry}(% Change)',
+                name=f'{selected_industry}-(% Change)',
                 line=dict(color='#1C798A', width=2, dash='solid'),
                 marker=dict(size=10)
             ),
