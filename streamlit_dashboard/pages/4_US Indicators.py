@@ -573,7 +573,7 @@ def plot_external_driver(selected_indicators):
         legend=dict(
             orientation="h",
             x=0.01,     
-            y=-0.3, 
+            y=-0.35, 
             xanchor='left', 
             yanchor='bottom', 
             traceorder='normal',
@@ -582,9 +582,9 @@ def plot_external_driver(selected_indicators):
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,
-        width=925, 
-        margin=dict(b=60, t=30, l=10, r=10),
+        height=250,
+        width=850, 
+        margin=dict(b=60, t=20, l=2, r=10),
     )
 
     st.plotly_chart(fig, use_container_width=True)
