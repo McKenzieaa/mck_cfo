@@ -808,7 +808,7 @@ def plot_labour_unemployment():
     legend=dict(
         orientation="h",
         x=0.01,
-        y=-0.15,
+        y=-0.3,
         xanchor='left', 
         yanchor='bottom',  
         bgcolor='rgba(255, 255, 255, 0.6)',
@@ -820,7 +820,7 @@ def plot_labour_unemployment():
     paper_bgcolor='rgba(0,0,0,0)', 
     height=300,  
     width=500, 
-    margin=dict(b=60, t=20,l=10, r=10) 
+    margin=dict(b=80, t=20,l=10, r=10) 
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
