@@ -724,11 +724,8 @@ def create_category_charts(df):
             fig.update_yaxes(title_text=" ", secondary_y=False)
             fig.update_yaxes(title_text=" ", secondary_y=True)
 
-            # Display the chart with a header
             st.header(category)
-            st.plotly_chart(fig, use_container_width=True)
 
-            # Assign the chart to the appropriate figure variable
             if category == 'Profit':
                 fig1 = fig
             elif category == 'Revenue':
