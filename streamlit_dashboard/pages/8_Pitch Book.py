@@ -1427,7 +1427,7 @@ with st.expander("Public Comps"):
             st.plotly_chart(fig2_public)
 
 with st.expander("US Indicators"):
-    st.subheader("US Indicators")
+    # st.subheader("US Indicators")
 
     # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment")
