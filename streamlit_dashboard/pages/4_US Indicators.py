@@ -759,8 +759,8 @@ def plot_gdp_and_industry(selected_industry=None):
         ),
         legend=dict(
             orientation="h",
-            x=0.01,  # Center the legend horizontally
-            y=-0.15,  # Place it below the chart
+            x=0.01,  # Align the legend horizontally
+            y=-0.2,
             xanchor='left',  # Center alignment
             yanchor='top',  # Align to top of the legend box
             bgcolor='rgba(255, 255, 255, 0.6)',
