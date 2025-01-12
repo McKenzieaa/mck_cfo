@@ -571,21 +571,24 @@ def plot_external_driver(selected_indicators):
         ),
         hovermode='x',
         legend=dict(
-            x=0.1,
-            y=-0.3,  # Place legend below the x-axis
-            orientation='h',  # Horizontal legend
-            xanchor='center',
-            yanchor='top',
+            orientation="h",
+            x=1,     
+            y=0.5, 
+            xanchor='right', 
+            yanchor='middle', 
             traceorder='normal',
-            font=dict(size=10, color="#474747"),  # Legend text color
-            bgcolor='rgba(255, 255, 255, 0)',
+            font=dict(size=10, color="#474747"),
+            bgcolor='rgba(255, 255, 255, 0)',  
         ),
         plot_bgcolor='rgba(0,0,0,0)', 
         paper_bgcolor='rgba(0,0,0,0)',
-        height=255,  # Chart height
-        width=925,  # Chart width
-        margin=dict(b=200, t=50, l=30, r=25),  # Increased bottom margin
+        height=400,
+        width=925, 
+        margin=dict(b=100, t=50, l=5, r=5),
     )
+
+    st.plotly_chart(fig, use_container_width=True)
+    return fig
 
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -667,13 +670,10 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=400,
-        width=925,
-        margin=dict(b=100, t=50, l=5, r=5),
+        height=300,
+        width=500,
+        margin=dict(b=60, t=20, r=15, l=15),  # Increased bottom margin for space
     )
-
-    st.plotly_chart(fig, use_container_width=True)
-    return fig
 
 def plot_gdp_and_industry(selected_industry=None):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -819,7 +819,6 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
 def get_us_indicators_layout():
     """Render the full dashboard layout and export data directly without session state."""
     st.set_page_config(page_title="US Indicators", layout="wide")
-
     # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment")
     labour_fig = plot_labour_unemployment()

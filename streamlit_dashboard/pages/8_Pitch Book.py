@@ -867,6 +867,7 @@ def plot_external_driver(selected_indicators):
         ),
         hovermode='x',
         legend=dict(
+            orientation="h",
             x=1,     
             y=0.5, 
             xanchor='right', 
