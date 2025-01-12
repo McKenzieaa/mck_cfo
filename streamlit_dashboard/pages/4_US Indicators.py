@@ -763,10 +763,10 @@ def plot_gdp_and_industry(selected_industry=None):
         ),
         legend=dict(
             orientation="h",
-            x=0.01,  # Center the legend horizontally
-            y=-0.15,  # Place it below the chart
-            xanchor='left',  # Center alignment
-            yanchor='top',  # Align to top of the legend box
+            x=0.01,
+            y=-0.15,
+            xanchor='left', 
+            yanchor='bottom',
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10),
             traceorder='normal'

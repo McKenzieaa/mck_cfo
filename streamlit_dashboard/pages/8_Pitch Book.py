@@ -151,7 +151,7 @@ def export_all_to_pptx(
     update_figure_slide(ppt, "Labour Force & Unemployment", labour_fig_us, slide_number=5, width=4.5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=925, height=400, left=0.20, top=4.35)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig_us, slide_number=5, width=4.5, height=2.50, left=0.08, top=4.4)
-    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=4, width=5, height=2.50, left=5.10, top=1.3)
+    update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig_us, slide_number=4, width=4.5, height=2.50, left=5.10, top=1.3)
     update_figure_slide(ppt, f"Labour force Statistics {state_name}", labour_fig, slide_number=4, width=4.5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, f"GDP - {state_name}", gdp_fig, slide_number=4, width=4.5, height=2.50, left=0.08, top=4.4)
 
@@ -809,17 +809,19 @@ def plot_labour_unemployment():
     legend=dict(
         orientation="h",
         x=0.01,
-        y=-0.15,  # Move legend below the plot to avoid overlap
+        y=-0.15,
+        xanchor='left', 
+        yanchor='bottom',  
         bgcolor='rgba(255, 255, 255, 0.6)',
         font=dict(size=10)
     ),
     hovermode='x unified',
     template='plotly_white',
-    plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
-    paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-    height=300,  # Increased height for better spacing
-    width=500,  # Adjusted width for better visualization
-    margin=dict(b=80, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
+    plot_bgcolor='rgba(0,0,0,0)', 
+    paper_bgcolor='rgba(0,0,0,0)', 
+    height=300,  
+    width=500, 
+    margin=dict(b=60, t=20,l=10, r=10) 
 )
     st.plotly_chart(fig, use_container_width=True)
     return fig
@@ -1222,17 +1224,17 @@ def plot_unemployment_labour_chart(state_name):
             yaxis_title="Rate",
             template="plotly_white",
             legend=dict(
-                x=0.01,  # Center the legend horizontally
-                y=-0.2,  # Move the legend below the chart
+                x=0.01,  
+                y=-0.3,  
                 xanchor='left',
-                yanchor='top',
+                yanchor='bottom',
                 title_text=None,
-                orientation='h',  # Horizontal legend
+                orientation='h', 
                 font=dict(size=10)
             ),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=5, r=5, t=10, b=120),  # Increased bottom margin for legend space
+            margin=dict(l=15, r=15, t=10, b=80), 
             height=300,
             width=500,
             xaxis=dict(showgrid=False),
