@@ -667,8 +667,8 @@ def plot_cpi_ppi(selected_series_id):
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=300,
-        width=500,
+        height=400,
+        width=925,
         margin=dict(b=60, t=20),  # Increased bottom margin for space
     )
 
