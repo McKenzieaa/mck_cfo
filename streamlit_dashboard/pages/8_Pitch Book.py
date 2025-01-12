@@ -970,7 +970,7 @@ def plot_cpi_ppi(selected_series_id):
         paper_bgcolor='rgba(0,0,0,0)',
         height=300,
         width=500,
-        margin=dict(b=60, t=20, r=15),
+        margin=dict(b=60, t=20, r=15, l=5),
     )
 
     st.plotly_chart(fig, use_container_width=True)
