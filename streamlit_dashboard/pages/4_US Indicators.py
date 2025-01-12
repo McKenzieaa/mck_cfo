@@ -669,7 +669,7 @@ def plot_cpi_ppi(selected_series_id):
         paper_bgcolor='rgba(0,0,0,0)',
         height=400,
         width=925,
-        margin=dict(b=60, t=20),  # Increased bottom margin for space
+        margin=dict(b=100, t=50, l=5, r=5),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -818,7 +818,7 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
 
 def get_us_indicators_layout():
     """Render the full dashboard layout and export data directly without session state."""
-    st.title("US Indicators Dashboard")
+    st.set_page_config(page_title="US Indicators", layout="wide")
 
     # Labour Force & Unemployment Data
     st.subheader("Labour Force & Unemployment")
