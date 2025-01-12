@@ -868,10 +868,10 @@ def plot_external_driver(selected_indicators):
         hovermode='x',
         legend=dict(
             orientation="h",
-            x=1,     
-            y=0.5, 
-            xanchor='right', 
-            yanchor='middle', 
+            x=0.01,     
+            y=-0.5, 
+            xanchor='left', 
+            yanchor='bottom', 
             traceorder='normal',
             font=dict(size=10, color="#474747"),
             bgcolor='rgba(255, 255, 255, 0)',  
@@ -880,7 +880,7 @@ def plot_external_driver(selected_indicators):
         paper_bgcolor='rgba(0,0,0,0)',
         height=400,
         width=925, 
-        margin=dict(b=100, t=50, l=5, r=5),
+        margin=dict(b=80, t=30, l=10, r=10),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -956,7 +956,7 @@ def plot_cpi_ppi(selected_series_id):
             x=0.01,  # Align the legend horizontally
             y=-0.2,  # Place it below the chart
             xanchor='left',
-            yanchor='bottom',
+            yanchor='top',
             bgcolor='rgba(255, 255, 255, 0.6)',
             font=dict(size=10, color="#474747"),  # Legend text color
         ),
