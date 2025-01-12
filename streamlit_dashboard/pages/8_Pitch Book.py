@@ -897,7 +897,6 @@ def plot_cpi_ppi(selected_series_id):
         "Unknown Industry"
     )
 
-    # Fetch and plot the selected CPI industry data
     cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
     if not cpi_data.empty:
         fig.add_trace(
@@ -947,30 +946,30 @@ def plot_cpi_ppi(selected_series_id):
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
-            color="#474747",  # X-axis label and line color
-            tickfont=dict(color="#474747"),  # X-axis tick labels color
+            color="#474747", 
+            tickfont=dict(color="#474747"), 
         ),
         yaxis=dict(
             title='Value',
             showgrid=False,
-            color="#474747",  # Y-axis label and line color
-            tickfont=dict(color="#474747"),  # Y-axis tick labels color
+            color="#474747",  
+            tickfont=dict(color="#474747"), 
         ),
         legend=dict(
             orientation="h",
-            x=0.01,  # Align the legend horizontally
-            y=-0.3,  # Place it below the chart
+            x=0.01, 
+            y=-0.3, 
             xanchor='left',
             yanchor='bottom',
             bgcolor='rgba(255, 255, 255, 0.6)',
-            font=dict(size=10, color="#474747"),  # Legend text color
+            font=dict(size=10, color="#474747"),
         ),
         hovermode='x unified',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         height=300,
         width=500,
-        margin=dict(b=60, t=20, r=15, l=15),  # Increased bottom margin for space
+        margin=dict(b=60, t=20, r=15, l=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -1500,7 +1499,6 @@ with st.expander("IBIS"):
                 st.plotly_chart(fig4_ibis, use_container_width=True)
         else:
             st.warning(f"No data available for the selected industry: {industry}")
-
 
 s3_path_public_comp = "s3://documentsapi/industry_data/Public Listed Companies US.xlsx"
 
