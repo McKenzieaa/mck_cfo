@@ -487,7 +487,7 @@ def plot_labour_unemployment():
     ))
 
     fig.update_layout(
-    title='',  # No title
+    title='',  
     xaxis=dict(
         showgrid=False,
         showticklabels=True,
