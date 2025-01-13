@@ -8,23 +8,24 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from PIL import Image
 import mysql.connector
+from sqlalchemy import create_engine
 
 # MySQL database connection details
 host = st.secrets["mysql"]["host"]
 user = st.secrets["mysql"]["user"]
 password = st.secrets["mysql"]["password"]
 database = st.secrets["mysql"]["database2"]
+engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{database}")
+
 
 def fetch_data(query):
-    connection = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
-    )
-    df = pd.read_sql(query, connection)
-    connection.close()
-    return df
+    try:
+        with engine.connect() as connection:
+            df = pd.read_sql(query, connection)
+        return df
+    except Exception as e:
+        st.error(f"Error fetching data: {e}")
+        return pd.DataFrame()
 
 GDP_QUERY = "SELECT * FROM gdp_industry"
 GDP_PCT_QUERY = "SELECT * FROM gdp_pct_ind"
