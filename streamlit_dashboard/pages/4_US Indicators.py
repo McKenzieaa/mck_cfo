@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 host = st.secrets["mysql"]["host"]
 user = st.secrets["mysql"]["user"]
 password = st.secrets["mysql"]["password"]
-database = st.secrets["mysql"]["database2"]
+database = st.secrets["mysql"]["database"]
 engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{database}")
 
 
