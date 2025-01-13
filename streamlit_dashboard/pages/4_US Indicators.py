@@ -437,7 +437,7 @@ df_combined = pd.merge(
     # Filter GDP data
 df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 
-    # Create a list of industries excluding GDP for the dropdown
+# Create a list of industries excluding GDP for the dropdown
 industry_options = df_combined['Industry'].unique().tolist()
 industry_options.remove('GDP')
 
