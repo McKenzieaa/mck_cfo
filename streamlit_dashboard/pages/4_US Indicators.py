@@ -435,7 +435,7 @@ df_gdp_filtered = df_combined[df_combined['Industry'] == 'Gross Domestic Product
 
 # Create a list of industries excluding GDP for the dropdown
 industry_options = df_combined['Industry'].unique().tolist()
-industry_options.remove('Gross Domestic Product')
+# industry_options.remove('Gross Domestic Product')
 
 def fetch_cpi_data(series_id, df_cleaned):
     selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
