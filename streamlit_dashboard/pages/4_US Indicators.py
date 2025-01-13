@@ -27,8 +27,8 @@ def fetch_data(query):
         st.error(f"Error fetching data: {e}")
         return pd.DataFrame()
 
-GDP_QUERY = "SELECT * FROM gdp_industry"
-GDP_PCT_QUERY = "SELECT * FROM gdp_pct_ind"
+GDP_QUERY = "SELECT * FROM industry_db.gdp_industry"
+GDP_PCT_QUERY = "SELECT * FROM industry_db.gdp_pct_ind"
 
 # Define URLs and Paths
 country = "USA"
