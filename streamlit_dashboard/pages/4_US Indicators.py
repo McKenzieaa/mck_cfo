@@ -493,8 +493,8 @@ def plot_labour_unemployment():
         showticklabels=True,
         color="#474747",
         tickfont=dict(color="#474747"),
-        tickangle=0,  # Rotate x-axis labels to avoid overlap
-        automargin=True  # Automatically adjust margins for better spacing
+        tickangle=0, 
+        automargin=True 
     ),
     yaxis=dict(
         showgrid=False,
@@ -504,6 +504,7 @@ def plot_labour_unemployment():
         side='left',
         range=[merged['population'].min(), merged['population'].max() * 1.1],
         tickformat=',',
+        ticksuffix='M'
     ),
     yaxis2=dict(
         title='Rate (%)',
