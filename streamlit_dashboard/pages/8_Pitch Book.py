@@ -206,7 +206,7 @@ df_pop = df_pop.rename(columns={'observation_date': 'date', 'POPTHM': 'populatio
 df_pop['date'] = pd.to_datetime(df_pop['date'])
 df_pop['year'] = df_pop['date'].dt.year
 df_pop['month'] = df_pop['date'].dt.month
-df_pop['population'] = df_pop['population']/1000
+df_pop['population'] = df_pop['population']/1000 + 'M'
 
 # External Driver Data
 external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles.csv"
