@@ -7,6 +7,27 @@ from io import BytesIO
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from PIL import Image
+import mysql.connector
+
+# MySQL database connection details
+host = st.secrets["mysql"]["host"]
+user = st.secrets["mysql"]["user"]
+password = st.secrets["mysql"]["password"]
+database = st.secrets["mysql"]["database"]
+
+def fetch_data(query):
+    connection = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+    )
+    df = pd.read_sql(query, connection)
+    connection.close()
+    return df
+
+GDP_QUERY = "SELECT * FROM gdp_industry"
+GDP_PCT_QUERY = "SELECT * FROM gdp_pct_ind"
 
 # Define URLs and Paths
 country = "USA"
@@ -15,7 +36,7 @@ url_lfs = f"https://rplumber.ilo.org/data/indicator/?id=EAP_DWAP_SEX_AGE_RT_M&re
 url_unemp = f"https://rplumber.ilo.org/data/indicator/?id=UNE_DEAP_SEX_AGE_RT_M&ref_area={country}&sex=SEX_T&classif1=AGE_AGGREGATE_TOTAL&timefrom={timefrom}&type=label&format=.csv"
 url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1140&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=POPTHM&scale=left&cosd=2009-12-29&coed=2024-08-01&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2024-10-09&revision_date=2024-10-09&nd=1959-01-01"
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
-xls = pd.ExcelFile(url_gdp_us)
+# xls = pd.ExcelFile(url_gdp_us)
 
     # Labour Force Participation Rate Data
 df_lfs = pd.read_csv(url_lfs)
@@ -397,44 +418,18 @@ df_ppi_unpivoted['Value'] = pd.to_numeric(df_ppi_unpivoted['Value'], errors='coe
 df_ppi_unpivoted = df_ppi_unpivoted.dropna(subset=['Month & Year', 'Value'])
 df_ppi_unpivoted = df_ppi_unpivoted[df_ppi_unpivoted["Month & Year"] >= '2010-01-01']
 
-    # Clean and reshape GDP data
-df_gdp_us = pd.read_excel(xls, sheet_name="TGO105-A")
-df_gdp_us = df_gdp_us.iloc[6:].reset_index(drop=True)
-df_gdp_us.columns = df_gdp_us.iloc[0]
-df_gdp_us = df_gdp_us.drop(0).reset_index(drop=True)
-df_gdp_us = df_gdp_us.drop(columns=["Line"])
-df_gdp_us = df_gdp_us.drop(df_gdp_us.columns[1], axis=1)
-df_gdp_us = df_gdp_us.rename(columns={df_gdp_us.columns[df_gdp_us.isna().any()].tolist()[0]: 'Industry'})
-df_gdp_us["Industry"] = df_gdp_us["Industry"].replace("    All industries", "GDP")
-df_gdp_us["Industry"] = df_gdp_us["Industry"].str.replace("  ", "")
-df_gdp_unpivoted = df_gdp_us.melt(id_vars=["Industry"], var_name="Year", value_name="Value")
-df_gdp_unpivoted["Year"] = df_gdp_unpivoted["Year"].astype(int)
-df_gdp_unpivoted["Value"] = pd.to_numeric(df_gdp_unpivoted["Value"], errors='coerce')*1000
-df_gdp_unpivoted = df_gdp_unpivoted.dropna(subset=["Value"])
+# Fetching and cleaning data
+df_gdp_us = fetch_data(GDP_QUERY)
+df_gdp_us = df_gdp_us.rename(columns={"industry": "Industry", "year": "Year", "value": "Value"})
+df_gdp_us["Value"] = df_gdp_us["Value"].astype(float)
 
-    # Clean and reshape GDP Percent Change data
-df_pct_change = pd.read_excel(xls, sheet_name="TGO101-A")
-df_pct_change = df_pct_change.iloc[6:].reset_index(drop=True)
-df_pct_change.columns = df_pct_change.iloc[0]
-df_pct_change = df_pct_change.drop(0).reset_index(drop=True)
-df_pct_change = df_pct_change.drop(columns=["Line"])
-df_pct_change = df_pct_change.drop(df_pct_change.columns[1], axis=1)
-df_pct_change = df_pct_change.rename(columns={df_pct_change.columns[df_pct_change.isna().any()].tolist()[0]: 'Industry'})
-df_pct_change["Industry"] = df_pct_change["Industry"].replace("    All industries", "GDP")
-df_pct_change["Industry"] = df_pct_change["Industry"].str.replace("  ", "")
-df_pct_unpivoted = df_pct_change.melt(id_vars=["Industry"], var_name="Year", value_name="Percent Change")
-df_pct_unpivoted["Year"] = df_pct_unpivoted["Year"].astype(int)
-df_pct_unpivoted["Percent Change"] = pd.to_numeric(df_pct_unpivoted["Percent Change"], errors='coerce')
-df_pct_unpivoted = df_pct_unpivoted.dropna(subset=["Percent Change"])
+df_pct_change = fetch_data(GDP_PCT_QUERY)
+df_pct_change = df_pct_change.rename(columns={"industry": "Industry", "year": "Year", "value": "Percent Change"})
+df_pct_change["Percent Change"] = df_pct_change["Percent Change"].astype(float)
 
-df_combined = pd.merge(
-    df_gdp_unpivoted,
-    df_pct_unpivoted,
-    on=["Industry", "Year"],
-    how="inner"
-   )
-
-    # Filter GDP data
+# Combine the two datasets
+df_combined = pd.merge(df_gdp_us, df_pct_change, on=["Industry", "Year"])
+# Filter GDP data
 df_gdp_filtered = df_combined[df_combined['Industry'] == 'GDP']
 
 # Create a list of industries excluding GDP for the dropdown
