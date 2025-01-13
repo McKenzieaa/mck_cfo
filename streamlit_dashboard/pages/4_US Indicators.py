@@ -13,7 +13,7 @@ import mysql.connector
 host = st.secrets["mysql"]["host"]
 user = st.secrets["mysql"]["user"]
 password = st.secrets["mysql"]["password"]
-database = st.secrets["mysql"]["database"]
+database = st.secrets["mysql"]["database2"]
 
 def fetch_data(query):
     connection = mysql.connector.connect(
