@@ -39,9 +39,9 @@ url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&cha
 url_gdp_us = "https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
 # xls = pd.ExcelFile(url_gdp_us)
 
-    # Labour Force Participation Rate Data
+    # labor Force Participation Rate Data
 df_lfs = pd.read_csv(url_lfs)
-df_lfs = df_lfs.rename(columns={'ref_area.label': 'country', 'obs_value': 'labour_force_rate'})
+df_lfs = df_lfs.rename(columns={'ref_area.label': 'country', 'obs_value': 'labor_force_rate'})
 df_lfs['time'] = df_lfs['time'].astype(str)
 time_split = df_lfs['time'].str.split('M', expand=True)
 df_lfs['year'] = pd.to_numeric(time_split[0], errors='coerce').astype('Int64')
@@ -442,8 +442,8 @@ def fetch_cpi_data(series_id, df_cleaned):
     selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-01']
     return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
 
-def plot_labour_unemployment():
-    # Merge unemployment and labour force data
+def plot_labor_unemployment():
+    # Merge unemployment and labor force data
     merged = pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner')
     merged = pd.merge(merged, df_pop, on=["year", "month"], how='inner')
 
@@ -472,11 +472,11 @@ def plot_labour_unemployment():
         yaxis='y2'
     ))
 
-    # Plot labour force participation rate on the secondary y-axis
+    # Plot labor force participation rate on the secondary y-axis
     fig.add_trace(go.Scatter(
         x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['labour_force_rate'],
-        name='Labour Force Participation Rate',
+        y=merged['labor_force_rate'],
+        name='Labor Force Participation Rate',
         mode='lines',
         line=dict(color='#595959'),
         yaxis='y2'
@@ -800,13 +800,13 @@ def update_figure_slide(ppt, title, fig, slide_number, width, height, left, top)
     slide.shapes.add_picture(fig_image, Inches(left), Inches(top), Inches(width), Inches(height))
     fig_image.close()
 
-def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
+def export_all_to_pptx(labor_fig, external_fig, gdp_fig, cpi_ppi_fig):
     # Load the custom template
     template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
     ppt = Presentation(template_path)  # Load the template
 
     # Use the existing slides (slide_number corresponds to the slide index)
-    update_figure_slide(ppt, "Labour Force & Unemployment Data", labour_fig, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
+    update_figure_slide(ppt, "labor Force & Unemployment Data", labor_fig, slide_number=5, width=5, height=2.50, left=0.08, top=1.3)
     update_figure_slide(ppt, "External Driver Indicators", external_fig, slide_number=7, width=4.50, height=3.75, left=5.20, top=1.3)
     update_figure_slide(ppt, "GDP by Industry", gdp_fig, slide_number=5, width=5.00, height=2.50, left=0.08, top=4.4)
     update_figure_slide(ppt, "CPI and PPI Comparison", cpi_ppi_fig, slide_number=5, width=4.55, height=2.50, left=5.10, top=1.3)
@@ -820,9 +820,9 @@ def export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig):
 def get_us_indicators_layout():
     """Render the full dashboard layout and export data directly without session state."""
     st.set_page_config(page_title="US Indicators", layout="wide")
-    # Labour Force & Unemployment Data
-    st.subheader("Labour Force & Unemployment")
-    labour_fig = plot_labour_unemployment()
+    # labor Force & Unemployment Data
+    st.subheader("labor Force & Unemployment")
+    labor_fig = plot_labor_unemployment()
 
     # External Driver Indicators
     st.subheader("External Driver Indicators")
@@ -857,7 +857,7 @@ def get_us_indicators_layout():
 
     if st.button("Export Charts to PowerPoint", key="export_button"):
         # Export the charts to PowerPoint using the export_all_to_pptx function
-        pptx_file = export_all_to_pptx(labour_fig, external_fig, gdp_fig, cpi_ppi_fig)
+        pptx_file = export_all_to_pptx(labor_fig, external_fig, gdp_fig, cpi_ppi_fig)
         
         # Create a download button for the user to download the PowerPoint file
         st.download_button(
