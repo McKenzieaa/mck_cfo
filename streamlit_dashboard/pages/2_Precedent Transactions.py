@@ -8,6 +8,7 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import os
+import threading
 
 st.set_page_config(page_title="Precedent Transactions", layout="wide")
 
@@ -29,22 +30,24 @@ except mysql.connector.Error as e:
     st.error(f"Error connecting to MySQL: {e}")
     st.stop()
 
-# Query to fetch the data from the MySQL table
-query = """
-SELECT 
-    `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
-FROM 
-    precedent_table
-"""
+@st.cache_data(ttl=600)  # Cache for 10 minutes
+def load_data():
+    conn = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
+    )
+    query = """
+    SELECT `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
+    FROM precedent_table
+    WHERE Industry IS NOT NULL AND Location IS NOT NULL
+    """
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    return df
 
-try:
-    df = pd.read_sql(query, conn)
-except Exception as e:
-    st.error(f"Error loading data from MySQL: {e}")
-    st.stop()
-
-# Close the MySQL connection
-conn.close()
+df = load_data()
 
 # Ensure all columns are TensorFlow-compatible
 df['Year'] = df['Year'].fillna(0).astype('int32')
@@ -54,15 +57,6 @@ df['Target'] = df['Target'].fillna("").astype('string')
 df['Business Description'] = df['Business Description'].fillna("").astype('string')
 df['Industry'] = df['Industry'].fillna("").astype('string')
 df['Location'] = df['Location'].fillna("").astype('string')
-
-# Convert the DataFrame to a TensorFlow Dataset
-try:
-    dataset = tf.data.Dataset.from_tensor_slices(dict(df))
-    dataset = dataset.batch(32).prefetch(tf.data.AUTOTUNE)
-    # st.success("TensorFlow Dataset created successfully!")
-except Exception as e:
-    st.error(f"Error creating TensorFlow Dataset: {e}")
-    st.stop()
 
 # List of unique industries and locations
 industries = df['Industry'].unique()
@@ -128,48 +122,43 @@ if selected_industries and selected_locations:
 
         export_ppt = st.button("Export Charts to PowerPoint")
 
-        if export_ppt:
-
+        def generate_ppt():
             template_path = os.path.join(os.getcwd(), "streamlit_dashboard", "data", "main_template_pitch.pptx")
-
             if not os.path.exists(template_path):
-                st.error(f"PowerPoint template not found at: {template_path}")
-                st.stop()
+                st.error("PowerPoint template not found!")
+                return None
 
             ppt = Presentation(template_path)
             slide1 = ppt.slides[10]
 
-            if slide1 is None:
-                slide_layout = ppt.slide_layouts[5]  
-                slide1 = ppt.slides.add_slide(slide_layout)
+            fig1_precedent_image = BytesIO()
+            fig1_precedent.write_image(fig1_precedent_image, format="png", width=900, height=300)
+            fig1_precedent_image.seek(0)
+            slide1.shapes.add_picture(fig1_precedent_image, Inches(0.11), Inches(0.90), width=Inches(9), height=Inches(2.8))
 
-            title1 = slide1.shapes.title
-            # title1.text = ""  # Remove chart title
-            
-            # Save EV/Revenue chart to an image
-            fig1_image = BytesIO()
-            fig1_precedent.write_image(fig1_image, format="png", width=900, height=300)
-            fig1_image.seek(0)
-            slide1.shapes.add_picture(fig1_image, Inches(0.11), Inches(0.90), width=Inches(9), height=Inches(2.8))
+            fig2_precedent_image = BytesIO()
+            fig2_precedent.write_image(fig2_precedent_image, format="png", width=900, height=300)
+            fig2_precedent_image.seek(0)
+            slide1.shapes.add_picture(fig2_precedent_image, Inches(0.11), Inches(3.70), width=Inches(9), height=Inches(2.8))
 
-            # Add EV/EBITDA chart to the same slide
-            fig2_image = BytesIO()
-            fig2_precedent.write_image(fig2_image, format="png", width=900, height=300)
-            fig2_image.seek(0)
-            slide1.shapes.add_picture(fig2_image, Inches(0.11), Inches(3.70), width=Inches(9), height=Inches(2.8))
-
-            # Save PowerPoint to BytesIO object for download
             ppt_bytes = BytesIO()
             ppt.save(ppt_bytes)
             ppt_bytes.seek(0)
 
-            # Provide download link for PowerPoint
-            st.download_button(
-                label="Download PowerPoint",
-                data=ppt_bytes,
-                file_name="precedent_transaction.pptx",
-                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-            )
+            return ppt_bytes
+
+        if export_ppt:
+            ppt_thread = threading.Thread(target=generate_ppt)
+            ppt_thread.start()
+
+            ppt_bytes = generate_ppt()
+            if ppt_bytes:
+                st.download_button(
+                    label="Download PowerPoint",
+                    data=ppt_bytes,
+                    file_name="precedent_transaction.pptx",
+                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                )
 
 else:
-    st.write("Please select at least one Industry and Location to view data.")
+    st.warning("Please select at least one Industry and Location to view data.")
