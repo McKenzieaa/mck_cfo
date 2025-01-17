@@ -7,6 +7,7 @@ from io import BytesIO
 from pptx import Presentation
 from pptx.util import Inches
 import plotly.express as px
+import plotly.graph_objs as go
 
 storage_options = {
         'key': st.secrets["aws"]["AWS_ACCESS_KEY_ID"],
@@ -113,15 +114,18 @@ if selected_industry:
         balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
     )
 
-    income_fig = px.bar(
-        income_statement_df,
-        x="LineItems",
-        y=["RMA Percent", "Public Comp Percent"],
-        barmode="group",
-        text_auto=True
-    )
+    income_fig = go.Figure(go.Waterfall(
+        name="Income Statement", orientation="v",
+        measure=["relative"] * (len(income_statement_df) - 1) + ["total"],
+        x=income_statement_df["LineItems"],
+        y=income_statement_df["RMA Percent"],
+        textposition="outside",
+        text=income_statement_df["RMA Percent"].astype(str),
+        connector={"line": {"color": "rgb(63, 63, 63)"}}
+    ))
 
     income_fig.update_layout(
+        title="Income Statement Waterfall Chart",
         xaxis_tickangle=45,
         height=400,
         margin=dict(t=50, b=50, l=50, r=50),
@@ -133,7 +137,7 @@ if selected_industry:
             traceorder='normal',
             orientation='h'
         ),
-        xaxis=dict(title='',tickfont=dict(size=10))
+        xaxis=dict(title='', tickfont=dict(size=10))
     )
 
     balance_fig = px.bar(
