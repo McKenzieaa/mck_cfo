@@ -113,7 +113,7 @@ if selected_industry:
         balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
     )
 
-    income_fig = px.waterfall(
+    income_fig = px.bar(
         income_statement_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
