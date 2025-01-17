@@ -68,7 +68,7 @@ selected_industries = col1.multiselect("Select Industry", industries)
 selected_locations = col2.multiselect("Select Location", locations)
 
 if selected_industries and selected_locations:
-    # Filter data based on selections
+
     filtered_precedent_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
     filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
