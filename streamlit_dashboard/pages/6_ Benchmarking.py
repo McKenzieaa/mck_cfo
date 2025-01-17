@@ -113,11 +113,10 @@ if selected_industry:
         balance_sheet_df['Public Comp Percent'].str.replace('%', '', regex=False), errors='coerce'
     )
 
-    income_fig = px.bar(
+    income_fig = px.waterfall(
         income_statement_df,
         x="LineItems",
         y=["RMA Percent", "Public Comp Percent"],
-        barmode="group",
         text_auto=True
     )
 
@@ -133,7 +132,7 @@ if selected_industry:
             traceorder='normal',
             orientation='h'
         ),
-        xaxis=dict(title='',tickfont=dict(size=10))
+        xaxis=dict(title='', tickfont=dict(size=10))
     )
 
     balance_fig = px.bar(
