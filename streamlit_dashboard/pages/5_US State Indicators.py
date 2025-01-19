@@ -144,8 +144,12 @@ def load_puerto_rico_gdp_data():
     except Exception as e:
         print(f"An error occurred while loading Puerto Rico GDP data: {e}")
         return None
-
+    
+puerto_rico_data = load_puerto_rico_gdp_data()
 load_state_gdp_data()
+state_gdp = pd.concat([state_gdp_data, puerto_rico_data], ignore_index=True)
+print(state_gdp.head())
+
 
 def plot_unemployment_labour_chart(state_name):
     unemployment_data = download_csv(state_name, "unemployment")
@@ -201,10 +205,10 @@ def plot_unemployment_labour_chart(state_name):
         return None
 
 def plot_gdp_chart(state_name):
-    global state_gdp_data
+    global state_gdp
 
-    if state_gdp_data is not None:
-        gdp_data = state_gdp_data[state_gdp_data["State"].str.lower() == state_name.lower()]
+    if state_gdp is not None:
+        gdp_data = state_gdp[state_gdp["State"].str.lower() == state_name.lower()]
         gdp_data = gdp_data[gdp_data["Year"] >= 2000]
 
         if not gdp_data.empty:
