@@ -95,7 +95,7 @@ def download_csv(state_name, data_type):
         response = requests.get(url)
         response.raise_for_status()  # Raise an error for HTTP issues
         
-        csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")), error_bad_lines=False, warn_bad_lines=False)
+        csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")), on_bad_lines='skip')  # Skip bad lines
 
         if csv_data.empty:
             st.warning(f"No {data_type} data available for {state_name}.")
