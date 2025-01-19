@@ -131,6 +131,20 @@ def load_state_gdp_data():
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
+def load_puerto_rico_gdp_data():
+    """Download and preprocess Puerto Rico GDP data."""
+    url = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=off&txtcolor=%23444444&ts=12&tts=12&width=1140&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=NYGDPMKTPCDPRI&scale=left&cosd=1960-01-01&coed=2023-01-01&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Annual&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-01-19&revision_date=2025-01-19&nd=1960-01-01"
+
+    try:
+        df = pd.read_csv(url)
+        df.rename(columns={"observation_date": "Year", "NYGDPMKTPCDPRI": "Value"}, inplace=True)
+        df["Year"] = pd.to_datetime(df["Year"]).dt.year
+        df["State"] = "Puerto Rico"
+        return df
+    except Exception as e:
+        print(f"An error occurred while loading Puerto Rico GDP data: {e}")
+        return None
+
 load_state_gdp_data()
 
 def plot_unemployment_labour_chart(state_name):
