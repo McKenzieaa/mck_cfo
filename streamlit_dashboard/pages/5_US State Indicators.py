@@ -186,7 +186,7 @@ def plot_unemployment_labor_chart(state_name):
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Unemployment'], mode='lines',line=dict(color=line_colors["unemployment"]), name="Unemployment"))
-        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Labor Force'], mode='lines',line=dict(color=line_colors["Labor_force"]), name="Labor Force"))
+        fig.add_trace(go.Scatter(x=merged_data['DATE'], y=merged_data['Labor Force'], mode='lines',line=dict(color=line_colors["Labor Force"]), name="Labor Force"))
 
         last_row = merged_data.iloc[-1]
         fig.add_annotation(
