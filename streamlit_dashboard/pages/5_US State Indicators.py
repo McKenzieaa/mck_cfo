@@ -80,46 +80,21 @@ line_colors = {
 def download_csv(state_name, data_type):
     data_ids = states_data_id.get(state_name)
     if not data_ids:
-        st.warning(f"No data available for {state_name}.")
         return None
 
-    data_id = data_ids.get("ur_id") if data_type == "unemployment" else data_ids.get("labour_id")
-    
-    if not data_id:
-        st.warning(f"No {data_type} ID available for {state_name}.")
-        return None
-
+    data_id = data_ids["ur_id"] if data_type == "unemployment" else data_ids["labour_id"]
     url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={data_id}&cosd=1976-01-01"
 
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an error for HTTP issues
-        
-        csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")), on_bad_lines='skip')  # Skip bad lines
-
-        if csv_data.empty:
-            st.warning(f"No {data_type} data available for {state_name}.")
-            return None
-
+    response = requests.get(url)
+    if response.status_code == 200:
+        csv_data = pd.read_csv(io.StringIO(response.content.decode("utf-8")))
         column_name = "Unemployment" if data_type == "unemployment" else "Labour Force"
         csv_data.rename(columns={csv_data.columns[1]: column_name}, inplace=True)
         csv_data = csv_data.rename(columns={'observation_date': 'DATE'})
-
-        # Handle date errors and missing values
-        csv_data['DATE'] = pd.to_datetime(csv_data['DATE'], errors='coerce')
-        csv_data[column_name] = pd.to_numeric(csv_data[column_name], errors='coerce')  # Convert to numeric safely
-
-        # Drop rows where DATE is NaT
-        csv_data.dropna(subset=['DATE'], inplace=True)
-        csv_data.fillna(0, inplace=True)  # Fill remaining NaNs with 0
-
+        csv_data['DATE'] = pd.to_datetime(csv_data['DATE'])
         return csv_data
-
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching data for {state_name}: {e}")
-        return None
-    except Exception as e:
-        st.error(f"Unexpected error processing {data_type} data for {state_name}: {e}")
+    else:
+        st.error(f"Error downloading {data_type} data for {state_name}.")
         return None
 
 def load_state_gdp_data():
