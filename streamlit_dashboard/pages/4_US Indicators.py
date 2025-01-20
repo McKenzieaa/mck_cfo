@@ -412,9 +412,9 @@ df_unpivoted["Month & Year"] = pd.to_datetime(df_unpivoted["Month & Year"], form
 df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
 all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
 all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
-    # Function to fetch CPI data for the selected industry
+# Function to fetch CPI data for the selected industry
 
-    # Load and clean PPI data
+# Load and clean PPI data
 df_ppi = pd.read_csv(ppi_file_path, delimiter=',').dropna().reset_index(drop=True)
 df_ppi_unpivoted = df_ppi.melt(id_vars=["Year"], var_name="Month", value_name="Value")
 df_ppi_unpivoted["Month & Year"] = pd.to_datetime(df_ppi_unpivoted["Month"] + " " + df_ppi_unpivoted["Year"].astype(str),format='%b %Y', errors='coerce')
@@ -433,10 +433,8 @@ df_pct_change["Percent Change"] = df_pct_change["Percent Change"].astype(float)
 
 # Combine the two datasets
 df_combined = pd.merge(df_gdp_us, df_pct_change, on=["Industry", "Year"])
-# Filter GDP data
 df_gdp_filtered = df_combined[df_combined['Industry'] == 'Gross Domestic Product']
 
-# Create a list of industries excluding GDP for the dropdown
 industry_options = df_combined['Industry'].unique().tolist()
 # industry_options.remove('Gross Domestic Product')
 
