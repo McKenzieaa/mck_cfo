@@ -180,17 +180,17 @@ def plot_unemployment_labour_chart(state_name):
             yaxis_title="Rate",
             template="plotly_white",
             legend=dict(
-                x=0.01,  # Center the legend horizontally
-                y=-0.2,  # Move the legend below the chart
+                x=0.01, 
+                y=-0.2,  
                 xanchor='left',
                 yanchor='top',
                 title_text=None,
-                orientation='h',  # Horizontal legend
+                orientation='h', 
                 font=dict(size=10)
             ),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=5, r=5, t=10, b=120),  # Increased bottom margin for legend space
+            margin=dict(l=5, r=5, t=10, b=120), 
             height=300,
             width=500,
             xaxis=dict(showgrid=False),
