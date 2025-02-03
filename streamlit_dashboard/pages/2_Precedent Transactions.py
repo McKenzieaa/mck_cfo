@@ -72,6 +72,8 @@ if selected_industries and selected_locations:
     filtered_precedent_df = df[df['Industry'].isin(selected_industries) & df['Location'].isin(selected_locations)]
     filtered_precedent_df = filtered_precedent_df[['Target', 'Year', 'EV/Revenue', 'EV/EBITDA', 'Business Description']]
     filtered_precedent_df['Year'] = filtered_precedent_df['Year'].astype(int)
+    filtered_precedent_df['EV/Revenue'] = filtered_precedent_df['EV/Revenue'].round(2)
+    filtered_precedent_df['EV/EBITDA'] = filtered_precedent_df['EV/EBITDA'].round(2)
 
     # Display filtered data in Ag-Grid table
     st.subheader("Precedent Transactions")
