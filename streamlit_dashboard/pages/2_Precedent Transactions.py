@@ -40,7 +40,7 @@ def load_data():
     )
     query = """
     SELECT `Year`, `Target`, `EV/Revenue`, `EV/EBITDA`, `Business Description`, `Industry`, `Location`
-    FROM precedent_table
+    FROM precedent_transaction
     WHERE Industry IS NOT NULL AND Location IS NOT NULL
     """
     df = pd.read_sql_query(query, conn)
