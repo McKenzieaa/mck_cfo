@@ -20,7 +20,6 @@ password = st.secrets["mysql"]["password"]
 database = st.secrets["mysql"]["database"]
 engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{database}")
 
-
 def fetch_data(query):
     try:
         with engine.connect() as connection:
@@ -33,394 +32,42 @@ def fetch_data(query):
 GDP_QUERY = "SELECT * FROM industry_db.gdp_industry"
 GDP_PCT_QUERY = "SELECT * FROM industry_db.gdp_pct_ind"
 
-# Define URLs and Paths
-country = "USA"
-timefrom = 2010
-url_lfs = f"https://rplumber.ilo.org/data/indicator/?id=EAP_DWAP_SEX_AGE_RT_M&ref_area={country}&sex=SEX_T&classif1=AGE_AGGREGATE_TOTAL&timefrom={timefrom}&type=label&format=.csv"
-url_unemp = f"https://rplumber.ilo.org/data/indicator/?id=UNE_DEAP_SEX_AGE_RT_M&ref_area={country}&sex=SEX_T&classif1=AGE_AGGREGATE_TOTAL&timefrom={timefrom}&type=label&format=.csv"
-url_pop = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1140&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=POPTHM&scale=left&cosd=2009-12-29&coed={today}&line_color=%234572a7&link_values=false&line_style=solid&mark_type=none&mw=3&lw=2&ost=-99999&oet=99999&mma=0&fml=a&fq=Monthly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date={today}&revision_date=2025-01-01&nd=1959-01-01"
-url_gdp_us = f"https://apps.bea.gov/industry/Release/XLS/GDPxInd/GrossOutput.xlsx"
-# xls = pd.ExcelFile(url_gdp_us)
 
-    # labor Force Participation Rate Data
-df_lfs = pd.read_csv(url_lfs)
-df_lfs = df_lfs.rename(columns={'ref_area.label': 'country', 'obs_value': 'labor_force_rate'})
-df_lfs['time'] = df_lfs['time'].astype(str)
-time_split = df_lfs['time'].str.split('M', expand=True)
-df_lfs['year'] = pd.to_numeric(time_split[0], errors='coerce').astype('Int64')
-df_lfs['month'] = pd.to_numeric(time_split[1], errors='coerce').astype('Int64')
-
-# Unemployment Rate Data
-df_unemp = pd.read_csv(url_unemp)
-df_unemp = df_unemp.rename(columns={'ref_area.label': 'country', 'obs_value': 'unemployment_rate'})
-df_unemp['time'] = df_unemp['time'].astype(str)
-time_split_unemp = df_unemp['time'].str.split('M', expand=True)
-df_unemp['year'] = pd.to_numeric(time_split_unemp[0], errors='coerce').astype('Int64')
-df_unemp['month'] = pd.to_numeric(time_split_unemp[1], errors='coerce').astype('Int64')
-
-# Population Data
-df_pop = pd.read_csv(url_pop)
-df_pop = df_pop.rename(columns={'observation_date': 'date', 'POPTHM': 'population'})
-df_pop['date'] = pd.to_datetime(df_pop['date'])
-df_pop['year'] = df_pop['date'].dt.year
-df_pop['month'] = df_pop['date'].dt.month
-df_pop['population'] = df_pop['population']/1000
+# labor Force Participation Rate Data
+LABOR_QUERY = "SELECT * FROM industry_db.labor_market_data"
+df_lfs = fetch_data(LABOR_QUERY)
+df_lfs = df_lfs.rename(columns={'labor_force_rate': 'labor_force_rate', 'unemployment_rate': 'unemployment_rate', 'population': 'population'})
+df_lfs['year'] = df_lfs['year'].astype('Int64')
+df_lfs['month'] = df_lfs['month'].astype('Int64')
+df_lfs['population'] = df_lfs['population'] / 1000
+df_lfs['population'] = df_lfs['population'].round(2)
+df_lfs['unemployment_rate'] = df_lfs['unemployment_rate'].round(2)
+df_lfs['labor_force_rate'] = df_lfs['labor_force_rate'].round(2)
 
 # External Driver Data
-external_driver_path = r"streamlit_dashboard/data/business_enviornmental_profiles.csv"
-external_driver_df = pd.read_csv(external_driver_path)
-external_driver_df['Year'] = pd.to_numeric(external_driver_df['Year'], errors='coerce')
-indicator_mapping = {indicator: {'label': indicator, 'value': indicator} for indicator in external_driver_df['Indicator'].unique()}
-external_driver_df['Indicator_Options'] = external_driver_df['Indicator'].map(indicator_mapping)
+ED_QUERY = "SELECT code, indicator, year, index_value, __change FROM industry_db.external_drivers"
+external_driver_df = fetch_data(ED_QUERY)
+external_driver_df = external_driver_df.rename(columns={'__change': '% Change', 'year': 'Year', 'indicator': 'Indicator'})
 
-# CPI Industry Mapping
-industry_mapping = {
-    'All items': 'CUSR0000SA0',
-    'Energy': 'CUSR0000SA0E',
-    'All items less food': 'CUSR0000SA0L1',
-    'All items less food and shelter': 'CUSR0000SA0L12',
-    'All items less food, shelter, and energy': 'CUSR0000SA0L12E',
-    'All items less food, shelter, energy, and used cars and trucks': 'CUSR0000SA0L12E4',
-    'All items less food and energy': 'CUSR0000SA0L1E',
-    'All items less shelter': 'CUSR0000SA0L2',
-    'All items less medical care': 'CUSR0000SA0L5',
-    'All items less energy': 'CUSR0000SA0LE',
-    'Apparel less footwear': 'CUSR0000SA311',
-    'Apparel': 'CUSR0000SAA',
-    'Mens and boys apparel': 'CUSR0000SAA1',
-    'Womens and girls apparel': 'CUSR0000SAA2',
-    'Commodities': 'CUSR0000SAC',
-    'Energy commodities': 'CUSR0000SACE',
-    'Commodities less food': 'CUSR0000SACL1',
-    'Commodities less food and beverages': 'CUSR0000SACL11',
-    'Commodities less food and energy commodities': 'CUSR0000SACL1E',
-    'Commodities less food, energy, and used cars and trucks': 'CUSR0000SACL1E4',
-    'Durables': 'CUSR0000SAD',
-    'Education and communication': 'CUSR0000SAE',
-    'Education': 'CUSR0000SAE1',
-    'Communication': 'CUSR0000SAE2',
-    'Information and information processing': 'CUSR0000SAE21',
-    'Education and communication commodities': 'CUSR0000SAEC',
-    'Education and communication services': 'CUSR0000SAES',
-    'Food and beverages': 'CUSR0000SAF',
-    'Food': 'CUSR0000SAF1',
-    'Food at home': 'CUSR0000SAF11',
-    'Cereals and bakery products': 'CUSR0000SAF111',
-    'Meats, poultry, fish, and eggs': 'CUSR0000SAF112',
-    'Meats, poultry, and fish': 'CUSR0000SAF1121',
-    'Meats': 'CUSR0000SAF11211',
-    'Fruits and vegetables': 'CUSR0000SAF113',
-    'Fresh fruits and vegetables': 'CUSR0000SAF1131',
-    'Nonalcoholic beverages and beverage materials': 'CUSR0000SAF114',
-    'Other food at home': 'CUSR0000SAF115',
-    'Alcoholic beverages': 'CUSR0000SAF116',
-    'Other goods and services': 'CUSR0000SAG',
-    'Personal care': 'CUSR0000SAG1',
-    'Other goods': 'CUSR0000SAGC',
-    'Housing': 'CUSR0000SAH',
-    'Shelter': 'CUSR0000SAH1',
-    'Fuels and utilities': 'CUSR0000SAH2',
-    'Household energy': 'CUSR0000SAH21',
-    'Household furnishings and operations': 'CUSR0000SAH3',
-    'Household furnishings and supplies': 'CUSR0000SAH31',
-    'Medical care': 'CUSR0000SAM',
-    'Medical care commodities': 'CUSR0000SAM1',
-    'Medical care services': 'CUSR0000SAM2',
-    'Nondurables': 'CUSR0000SAN',
-    'Domestically produced farm food': 'CUSR0000SAN1D',
-    'Nondurables less food': 'CUSR0000SANL1',
-    'Nondurables less food and beverages': 'CUSR0000SANL11',
-    'Nondurables less food, beverages, and apparel': 'CUSR0000SANL113',
-    'Nondurables less food and apparel': 'CUSR0000SANL13',
-    'Recreation': 'CUSR0000SAR',
-    'Recreation commodities': 'CUSR0000SARC',
-    'Recreation services': 'CUSR0000SARS',
-    'Services': 'CUSR0000SAS',
-    'Utilities and public transportation': 'CUSR0000SAS24',
-    'Rent of shelter': 'CUSR0000SAS2RS',
-    'Other services': 'CUSR0000SAS367',
-    'Transportation services': 'CUSR0000SAS4',
-    'Services less rent of shelter': 'CUSR0000SASL2RS',
-    'Services less medical care services': 'CUSR0000SASL5',
-    'Services less energy services': 'CUSR0000SASLE',
-    'Transportation': 'CUSR0000SAT',
-    'Private transportation': 'CUSR0000SAT1',
-    'Transportation commodities less motor fuel': 'CUSR0000SATCLTB',
-    'Mens apparel': 'CUSR0000SEAA',
-    'Mens suits, sport coats, and outerwear': 'CUSR0000SEAA01',
-    'Mens underwear, nightwear, swimwear and accessories': 'CUSR0000SEAA02',
-    'Mens shirts and sweaters': 'CUSR0000SEAA03',
-    'Mens pants and shorts': 'CUSR0000SEAA04',
-    'Boys apparel': 'CUSR0000SEAB',
-    'Womens apparel': 'CUSR0000SEAC',
-    'Womens outerwear': 'CUSR0000SEAC01',
-    'Womens dresses': 'CUSR0000SEAC02',
-    'Womens suits and separates': 'CUSR0000SEAC03',
-    'Womens underwear, nightwear, swimwear and accessories': 'CUSR0000SEAC04',
-    'Girls apparel': 'CUSR0000SEAD',
-    'Footwear': 'CUSR0000SEAE',
-    'Mens footwear': 'CUSR0000SEAE01',
-    'Boys and girls footwear': 'CUSR0000SEAE02',
-    'Womens footwear': 'CUSR0000SEAE03',
-    'Infants and toddlers apparel': 'CUSR0000SEAF',
-    'Jewelry and watches': 'CUSR0000SEAG',
-    'Watches': 'CUSR0000SEAG01',
-    'Jewelry': 'CUSR0000SEAG02',
-    'Educational books and supplies': 'CUSR0000SEEA',
-    'Tuition, other school fees, and childcare': 'CUSR0000SEEB',
-    'College tuition and fees': 'CUSR0000SEEB01',
-    'Elementary and high school tuition and fees': 'CUSR0000SEEB02',
-    'Day care and preschool': 'CUSR0000SEEB03',
-    'Technical and business school tuition and fees': 'CUSR0000SEEB04',
-    'Postage and delivery services': 'CUSR0000SEEC',
-    'Postage': 'CUSR0000SEEC01',
-    'Delivery services': 'CUSR0000SEEC02',
-    'Information technology, hardware and services': 'CUSR0000SEEE',
-    'Computers, peripherals, and smart home assistants': 'CUSR0000SEEE01',
-    'Internet services and electronic information providers': 'CUSR0000SEEE03',
-    'Telephone hardware, calculators, and other consumer information items': 'CUSR0000SEEE04',
-    'Information technology commodities': 'CUSR0000SEEEC',
-    'Cereals and cereal products': 'CUSR0000SEFA',
-    'Flour and prepared flour mixes': 'CUSR0000SEFA01',
-    'Breakfast cereal': 'CUSR0000SEFA02',
-    'Rice, pasta, cornmeal': 'CUSR0000SEFA03',
-    'Bakery products': 'CUSR0000SEFB',
-    'Bread': 'CUSR0000SEFB01',
-    'Fresh biscuits, rolls, muffins': 'CUSR0000SEFB02',
-    'Cakes, cupcakes, and cookies': 'CUSR0000SEFB03',
-    'Other bakery products': 'CUSR0000SEFB04',
-    'Beef and veal': 'CUSR0000SEFC',
-    'Uncooked ground beef': 'CUSR0000SEFC01',
-    'Uncooked beef roasts': 'CUSR0000SEFC02',
-    'Uncooked beef steaks': 'CUSR0000SEFC03',
-    'Pork': 'CUSR0000SEFD',
-    'Bacon, breakfast sausage, and related products': 'CUSR0000SEFD01',
-    'Ham': 'CUSR0000SEFD02',
-    'Pork chops': 'CUSR0000SEFD03',
-    'Other pork including roasts, steaks, and ribs': 'CUSR0000SEFD04',
-    'Other meats': 'CUSR0000SEFE',
-    'Poultry': 'CUSR0000SEFF',
-    'Chicken': 'CUSR0000SEFF01',
-    'Other uncooked poultry including turkey': 'CUSR0000SEFF02',
-    'Fish and seafood': 'CUSR0000SEFG',
-    'Fresh fish and seafood': 'CUSR0000SEFG01',
-    'Processed fish and seafood': 'CUSR0000SEFG02',
-    'Eggs': 'CUSR0000SEFH',
-    'Dairy and related products': 'CUSR0000SEFJ',
-    'Milk': 'CUSR0000SEFJ01',
-    'Cheese and related products': 'CUSR0000SEFJ02',
-    'Ice cream and related products': 'CUSR0000SEFJ03',
-    'Other dairy and related products': 'CUSR0000SEFJ04',
-    'Fresh fruits': 'CUSR0000SEFK',
-    'Apples': 'CUSR0000SEFK01',
-    'Bananas': 'CUSR0000SEFK02',
-    'Citrus fruits': 'CUSR0000SEFK03',
-    'Other fresh fruits': 'CUSR0000SEFK04',
-    'Fresh vegetables': 'CUSR0000SEFL',
-    'Potatoes': 'CUSR0000SEFL01',
-    'Lettuce': 'CUSR0000SEFL02',
-    'Tomatoes': 'CUSR0000SEFL03',
-    'Other fresh vegetables': 'CUSR0000SEFL04',
-    'Processed fruits and vegetables': 'CUSR0000SEFM',
-    'Canned fruits and vegetables': 'CUSR0000SEFM01',
-    'Frozen fruits and vegetables': 'CUSR0000SEFM02',
-    'Other processed fruits and vegetables including dried': 'CUSR0000SEFM03',
-    'Juices and nonalcoholic drinks': 'CUSR0000SEFN',
-    'Carbonated drinks': 'CUSR0000SEFN01',
-    'Nonfrozen noncarbonated juices and drinks': 'CUSR0000SEFN03',
-    'Beverage materials including coffee and tea': 'CUSR0000SEFP',
-    'Coffee': 'CUSR0000SEFP01',
-    'Other beverage materials including tea': 'CUSR0000SEFP02',
-    'Sugar and sweets': 'CUSR0000SEFR',
-    'Sugar and sugar substitutes': 'CUSR0000SEFR01',
-    'Candy and chewing gum': 'CUSR0000SEFR02',
-    'Other sweets': 'CUSR0000SEFR03',
-    'Fats and oils': 'CUSR0000SEFS',
-    'Butter and margarine': 'CUSR0000SEFS01',
-    'Salad dressing': 'CUSR0000SEFS02',
-    'Other fats and oils including peanut butter': 'CUSR0000SEFS03',
-    'Other foods': 'CUSR0000SEFT',
-    'Soups': 'CUSR0000SEFT01',
-    'Frozen and freeze dried prepared foods': 'CUSR0000SEFT02',
-    'Snacks': 'CUSR0000SEFT03',
-    'Spices, seasonings, condiments, sauces': 'CUSR0000SEFT04',
-    'Other miscellaneous foods': 'CUSR0000SEFT06',
-    'Food away from home': 'CUSR0000SEFV',
-    'Full service meals and snacks': 'CUSR0000SEFV01',
-    'Food at employee sites and schools': 'CUSR0000SEFV03',
-    'Other food away from home': 'CUSR0000SEFV05',
-    'Alcoholic beverages at home': 'CUSR0000SEFW',
-    'Beer, ale, and other malt beverages at home': 'CUSR0000SEFW01',
-    'Distilled spirits at home': 'CUSR0000SEFW02',
-    'Wine at home': 'CUSR0000SEFW03',
-    'Alcoholic beverages away from home': 'CUSR0000SEFX',
-    'Tobacco and smoking products': 'CUSR0000SEGA',
-    'Cigarettes': 'CUSR0000SEGA01',
-    'Miscellaneous personal services': 'CUSR0000SEGD',
-    'Legal services': 'CUSR0000SEGD01',
-    'Funeral expenses': 'CUSR0000SEGD02',
-    'Laundry and dry cleaning services': 'CUSR0000SEGD03',
-    'Financial services': 'CUSR0000SEGD05',
-    'Miscellaneous personal goods': 'CUSR0000SEGE',
-    'Rent of primary residence': 'CUSR0000SEHA',
-    'Lodging away from home': 'CUSR0000SEHB',
-    'Housing at school, excluding board': 'CUSR0000SEHB01',
-    'Other lodging away from home including hotels and motels': 'CUSR0000SEHB02',
-    'Owners equivalent rent of residences': 'CUSR0000SEHC',
-    'Owners  equivalent rent of primary residence': 'CUSR0000SEHC01',
-    'Fuel oil and other fuels': 'CUSR0000SEHE',
-    'Fuel oil': 'CUSR0000SEHE01',
-    'Propane, kerosene, and firewood': 'CUSR0000SEHE02',
-    'Energy services': 'CUSR0000SEHF',
-    'Electricity': 'CUSR0000SEHF01',
-    'Utility (piped) gas service': 'CUSR0000SEHF02',
-    'Water and sewer and trash collection services': 'CUSR0000SEHG',
-    'Water and sewerage maintenance': 'CUSR0000SEHG01',
-    'Garbage and trash collection': 'CUSR0000SEHG02',
-    'Window and floor coverings and other linens': 'CUSR0000SEHH',
-    'Window coverings': 'CUSR0000SEHH02',
-    'Other linens': 'CUSR0000SEHH03',
-    'Furniture and bedding': 'CUSR0000SEHJ',
-    'Other furniture': 'CUSR0000SEHJ03',
-    'Appliances': 'CUSR0000SEHK',
-    'Major appliances': 'CUSR0000SEHK01',
-    'Other appliances': 'CUSR0000SEHK02',
-    'Other household equipment and furnishings': 'CUSR0000SEHL',
-    'Indoor plants and flowers': 'CUSR0000SEHL02',
-    'Nonelectric cookware and tableware': 'CUSR0000SEHL04',
-    'Tools, hardware, outdoor equipment and supplies': 'CUSR0000SEHM',
-    'Tools, hardware and supplies': 'CUSR0000SEHM01',
-    'Outdoor equipment and supplies': 'CUSR0000SEHM02',
-    'Housekeeping supplies': 'CUSR0000SEHN',
-    'Household cleaning products': 'CUSR0000SEHN01',
-    'Miscellaneous household products': 'CUSR0000SEHN03',
-    'Moving, storage, freight expense': 'CUSR0000SEHP03',
-    'Professional services': 'CUSR0000SEMC',
-    'Physicians services': 'CUSR0000SEMC01',
-    'Dental services': 'CUSR0000SEMC02',
-    'Eyeglasses and eye care': 'CUSR0000SEMC03',
-    'Services by other medical professionals': 'CUSR0000SEMC04',
-    'Hospital and related services': 'CUSR0000SEMD',
-    'Hospital services': 'CUSR0000SEMD01',
-    'Nursing homes and adult day services': 'CUSR0000SEMD02',
-    'Medicinal drugs': 'CUSR0000SEMF',
-    'Prescription drugs': 'CUSR0000SEMF01',
-    'Nonprescription drugs': 'CUSR0000SEMF02',
-    'Video and audio': 'CUSR0000SERA',
-    'Televisions': 'CUSR0000SERA01',
-    'Cable, satellite, and live streaming television service': 'CUSR0000SERA02',
-    'Other video equipment': 'CUSR0000SERA03',
-    'Audio equipment': 'CUSR0000SERA05',
-    'Video and audio products': 'CUSR0000SERAC',
-    'Video and audio services': 'CUSR0000SERAS',
-    'Pets, pet products and services': 'CUSR0000SERB',
-    'Pets and pet products': 'CUSR0000SERB01',
-    'Pet services including veterinary': 'CUSR0000SERB02',
-    'Sporting goods': 'CUSR0000SERC',
-    'Sports vehicles including bicycles': 'CUSR0000SERC01',
-    'Sports equipment': 'CUSR0000SERC02',
-    'Photography': 'CUSR0000SERD',
-    'Photographic equipment and supplies': 'CUSR0000SERD01',
-    'Other recreational goods': 'CUSR0000SERE',
-    'Toys': 'CUSR0000SERE01',
-    'Sewing machines, fabric and supplies': 'CUSR0000SERE02',
-    'Music instruments and accessories': 'CUSR0000SERE03',
-    'Other recreation services': 'CUSR0000SERF',
-    'Club membership for shopping clubs, fraternal, or other organizations, or participant sports fees': 'CUSR0000SERF01',
-    'Admissions': 'CUSR0000SERF02',
-    'Fees for lessons or instructions': 'CUSR0000SERF03',
-    'Recreational reading materials': 'CUSR0000SERG',
-    'New and used motor vehicles': 'CUSR0000SETA',
-    'New vehicles': 'CUSR0000SETA01',
-    'Used cars and trucks': 'CUSR0000SETA02',
-    'Leased cars and trucks': 'CUSR0000SETA03',
-    'Car and truck rental': 'CUSR0000SETA04',
-    'Motor fuel': 'CUSR0000SETB',
-    'Gasoline (all types)': 'CUSR0000SETB01',
-    'Other motor fuels': 'CUSR0000SETB02',
-    'Motor vehicle parts and equipment': 'CUSR0000SETC',
-    'Tires': 'CUSR0000SETC01',
-    'Motor vehicle maintenance and repair': 'CUSR0000SETD',
-    'Motor vehicle repair': 'CUSR0000SETD03',
-    'Motor vehicle insurance': 'CUSR0000SETE',
-    'Parking and other fees': 'CUSR0000SETF03',
-    'Public transportation': 'CUSR0000SETG',
-    'Airline fares': 'CUSR0000SETG01',
-    'Other intercity transportation': 'CUSR0000SETG02',
-    'Cookies': 'CUSR0000SS02042',
-    'Crackers, bread, and cracker products': 'CUSR0000SS0206A',
-    'Frozen and refrigerated bakery products, pies, tarts, turnovers': 'CUSR0000SS0206B',
-    'Bacon and related products': 'CUSR0000SS04011',
-    'Breakfast sausage and related products': 'CUSR0000SS04012',
-    'Ham, excluding canned': 'CUSR0000SS04031',
-    'Frankfurters': 'CUSR0000SS05011',
-    'Lunchmeats': 'CUSR0000SS0501A',
-    'Fresh whole chicken': 'CUSR0000SS06011',
-    'Shelf stable fish and seafood': 'CUSR0000SS07011',
-    'Frozen fish and seafood': 'CUSR0000SS07021',
-    'Fresh whole milk': 'CUSR0000SS09011',
-    'Fresh milk other than whole': 'CUSR0000SS09021',
-    'Butter': 'CUSR0000SS10011',
-    'Oranges, including tangerines': 'CUSR0000SS11031',
-    'Canned fruits': 'CUSR0000SS13031',
-    'Frozen vegetables': 'CUSR0000SS14011',
-    'Canned vegetables': 'CUSR0000SS14021',
-    'Margarine': 'CUSR0000SS16011',
-    'Roasted coffee': 'CUSR0000SS17031',
-    'Salt and other seasonings and spices': 'CUSR0000SS18041',
-    'Sauces and gravies': 'CUSR0000SS18043',
-    'Other condiments': 'CUSR0000SS1804B',
-    'Prepared salads': 'CUSR0000SS18064',
-    'Whiskey at home': 'CUSR0000SS20021',
-    'Distilled spirits, excluding whiskey, at home': 'CUSR0000SS20022',
-    'Distilled spirits away from home': 'CUSR0000SS20053',
-    'Laundry equipment': 'CUSR0000SS30021',
-    'Stationery, stationery supplies, gift wrap': 'CUSR0000SS33032',
-    'New cars': 'CUSR0000SS45011',
-    'New cars and trucks': 'CUSR0000SS4501A',
-    'New trucks': 'CUSR0000SS45021',
-    'New motorcycles': 'CUSR0000SS45031',
-    'Gasoline, unleaded regular': 'CUSR0000SS47014',
-    'Gasoline, unleaded midgrade': 'CUSR0000SS47015',
-    'Gasoline, unleaded premium': 'CUSR0000SS47016',
-    'Parking fees and tolls': 'CUSR0000SS52051',
-    'Intercity train fare': 'CUSR0000SS53022',
-    'Ship fare': 'CUSR0000SS53023',
-    'Inpatient hospital services': 'CUSR0000SS5702',
-    'Outpatient hospital services': 'CUSR0000SS5703',
-    'Toys, games, hobbies and playground equipment': 'CUSR0000SS61011',
-    'Photographic equipment': 'CUSR0000SS61023',
-    'Pet food': 'CUSR0000SS61031',
-    'Purchase of pets, pet supplies, accessories': 'CUSR0000SS61032',
-    'Admission to movies, theaters, and concerts': 'CUSR0000SS62031',
-    'Admission to sporting events': 'CUSR0000SS62032',
-    'Pet services': 'CUSR0000SS62053',
-    'Veterinarian services': 'CUSR0000SS62054',
-    'Tax return preparation and other accounting fees': 'CUSR0000SS68023',
-    'Food at elementary and secondary schools': 'CUSR0000SSFV031A'
-    }
-
-file_path = r"streamlit_dashboard/data/CPI_industry.txt"
-ppi_file_path = r"streamlit_dashboard/data/PPI.txt"
 # Load CPI data
-df = pd.read_csv(file_path, delimiter=',').dropna().reset_index(drop=True)
-df_unpivoted = df.melt(id_vars=["Series ID"], var_name="Month & Year", value_name="Value")
-df_unpivoted = df_unpivoted[df_unpivoted["Value"].str.strip() != ""]
-df_unpivoted["Series ID"] = df_unpivoted["Series ID"].astype(str)
-df_unpivoted["Value"] = pd.to_numeric(df_unpivoted["Value"], errors='coerce')
-df_unpivoted["Month & Year"] = pd.to_datetime(df_unpivoted["Month & Year"], format='%b %Y', errors='coerce')
-df_cleaned = df_unpivoted.dropna(subset=["Series ID", "Month & Year", "Value"])
-all_items_data = df_cleaned[df_cleaned['Series ID'] == 'CUSR0000SA0']
-all_items_data = all_items_data[all_items_data['Month & Year'] >= '2010-01-01']
-# Function to fetch CPI data for the selected industry
+CPI_QUERY = "SELECT series_id, industry, year, month, cpi_value FROM industry_db.cpi_ind_db"
+df_cpi = fetch_data(CPI_QUERY)
+df_cpi = df_cpi.rename(columns={'cpi_value': 'CPI Value', 'year': 'Year', 'month': 'Month', 'industry': 'Industry'})
+df_cpi['Month'] = df_cpi['Month'].astype(str)
+df_cpi['Month & Year'] = df_cpi['Month'] + " " + df_cpi['Year'].astype(str)
+# df_cpi['Month & Year'] = pd.to_datetime(df_cpi['Month & Year'], format='%m %Y', errors='coerce')
+df_cpi = df_cpi.dropna(subset=['series_id', 'Month & Year', 'CPI Value'])
+all_items_data = df_cpi[df_cpi['Industry'] == 'All items']
+cpi_industry = df_cpi['Industry'].unique().tolist()
 
-# Load and clean PPI data
-df_ppi = pd.read_csv(ppi_file_path, delimiter=',').dropna().reset_index(drop=True)
-df_ppi_unpivoted = df_ppi.melt(id_vars=["Year"], var_name="Month", value_name="Value")
-df_ppi_unpivoted["Month & Year"] = pd.to_datetime(df_ppi_unpivoted["Month"] + " " + df_ppi_unpivoted["Year"].astype(str),format='%b %Y', errors='coerce')
-df_ppi_unpivoted['Value'] = pd.to_numeric(df_ppi_unpivoted['Value'], errors='coerce')
-df_ppi_unpivoted = df_ppi_unpivoted.dropna(subset=['Month & Year', 'Value'])
-df_ppi_unpivoted = df_ppi_unpivoted[df_ppi_unpivoted["Month & Year"] >= '2010-01-01']
+# Query to fetch PPI Data
+PPI_QUERY = "SELECT date, value FROM industry_db.ppi_us_m"
+df_ppi = fetch_data(PPI_QUERY)
+df_ppi = df_ppi.rename(columns={'date': 'Date', 'value': 'PPI Value'})
+df_ppi['Date'] = pd.to_datetime(df_ppi['Date'], errors='coerce')
+df_ppi = df_ppi[df_ppi['Date'] >= '2010-01-01']
+df_ppi['Month & Year'] = df_ppi['Date'].dt.strftime('%b %Y')
+df_ppi = df_ppi.dropna()
 
 # Fetching and cleaning data
 df_gdp_us = fetch_data(GDP_QUERY)
@@ -430,33 +77,20 @@ df_gdp_us["Value"] = df_gdp_us["Value"].astype(float)
 df_pct_change = fetch_data(GDP_PCT_QUERY)
 df_pct_change = df_pct_change.rename(columns={"industry": "Industry", "year": "Year", "value": "Percent Change"})
 df_pct_change["Percent Change"] = df_pct_change["Percent Change"].astype(float)
-
 # Combine the two datasets
 df_combined = pd.merge(df_gdp_us, df_pct_change, on=["Industry", "Year"])
 df_gdp_filtered = df_combined[df_combined['Industry'] == 'Gross Domestic Product']
-
-industry_options = df_combined['Industry'].unique().tolist()
-# industry_options.remove('Gross Domestic Product')
-
-def fetch_cpi_data(series_id, df_cleaned):
-    selected_data = df_cleaned[df_cleaned['Series ID'] == series_id]
-    selected_data = selected_data[selected_data['Month & Year'] >= '2010-01-01']
-    return selected_data[['Month & Year', 'Value']].rename(columns={'Month & Year': 'date', 'Value': 'value'})
+gdp_industry = df_combined['Industry'].unique().tolist()
 
 def plot_labor_unemployment():
-    # Merge unemployment and labor force data
-    merged = pd.merge(df_lfs, df_unemp, on=["year", "month", "country"], how='inner')
-    merged = pd.merge(merged, df_pop, on=["year", "month"], how='inner')
-
     fig = go.Figure()
 
     # Plot population as an area chart on the primary y-axis
-    min_population = merged['population'].min()
     fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['population'],
+        x=pd.to_datetime(df_lfs[['year', 'month']].assign(day=1)),
+        y=df_lfs['population'],
         fill='tozeroy',  # Area chart
-        fillcolor='#032649', 
+        fillcolor='#032649',
         name='Population',
         mode='none',
         line=dict(color='#032649'),
@@ -465,8 +99,8 @@ def plot_labor_unemployment():
 
     # Plot unemployment rate on the secondary y-axis
     fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['unemployment_rate'],
+        x=pd.to_datetime(df_lfs[['year', 'month']].assign(day=1)),
+        y=df_lfs['unemployment_rate'],
         name='Unemployment Rate',
         mode='lines',
         line=dict(color='#EB8928'),
@@ -475,8 +109,8 @@ def plot_labor_unemployment():
 
     # Plot labor force participation rate on the secondary y-axis
     fig.add_trace(go.Scatter(
-        x=pd.to_datetime(merged[['year', 'month']].assign(day=1)),
-        y=merged['labor_force_rate'],
+        x=pd.to_datetime(df_lfs[['year', 'month']].assign(day=1)),
+        y=df_lfs['labor_force_rate'],
         name='Labor Force Participation Rate',
         mode='lines',
         line=dict(color='#595959'),
@@ -484,45 +118,45 @@ def plot_labor_unemployment():
     ))
 
     fig.update_layout(
-    title='',  
-    xaxis=dict(
-        showgrid=False,
-        showticklabels=True,
-        color="#474747",
-        tickfont=dict(color="#474747"),
-        tickangle=0, 
-        automargin=True 
-    ),
-    yaxis=dict(
-        showgrid=False,
-        title='Population',
-        color="#474747",
-        tickfont=dict(color="#474747"),
-        side='left',
-        range=[merged['population'].min(), merged['population'].max() * 1.1],
-        tickformat=',',
-        ticksuffix='M'
-    ),
-    yaxis2=dict(
-        title='Rate (%)',
-        overlaying='y',
-        side='right'
-    ),
-    legend=dict(
-        orientation="h",
-        x=0.01,
-        y=-0.15, 
-        bgcolor='rgba(255, 255, 255, 0.6)',
-        font=dict(size=10)
-    ),
-    hovermode='x unified',
-    template='plotly_white',
-    plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
-    paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
-    height=300,  # Increased height for better spacing
-    width=500,  # Adjusted width for better visualization
-    margin=dict(b=50, t=30,l=10, r=10)  # Add more bottom margin for x-axis labels
-)
+        title='',
+        xaxis=dict(
+            showgrid=False,
+            showticklabels=True,
+            color="#474747",
+            tickfont=dict(color="#474747"),
+            tickangle=0,
+            automargin=True
+        ),
+        yaxis=dict(
+            showgrid=False,
+            title='Population',
+            color="#474747",
+            tickfont=dict(color="#474747"),
+            side='left',
+            range=[df_lfs['population'].min(), df_lfs['population'].max() * 1.1],
+            tickformat=',',
+            ticksuffix='M'
+        ),
+        yaxis2=dict(
+            title='Rate (%)',
+            overlaying='y',
+            side='right'
+        ),
+        legend=dict(
+            orientation="h",
+            x=0.01,
+            y=-0.15,
+            bgcolor='rgba(255, 255, 255, 0.6)',
+            font=dict(size=10)
+        ),
+        hovermode='x unified',
+        template='plotly_white',
+        plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
+        paper_bgcolor='rgba(0,0,0,0)',  # Transparent paper background
+        height=300,  # Increased height for better spacing
+        width=500,  # Adjusted width for better visualization
+        margin=dict(b=50, t=30, l=10, r=10)  # Add more bottom margin for x-axis labels
+    )
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
@@ -558,123 +192,114 @@ def plot_external_driver(selected_indicators):
         xaxis=dict(
             showgrid=False,
             showticklabels=True,
-            color="#474747",  # X-axis label and line color
-            tickfont=dict(color="#474747"),  # X-axis tick labels color
+            color="#474747",
+            tickfont=dict(color="#474747"),
         ),
         yaxis=dict(
             title='',
             showgrid=False,
-            color="#474747",  # Y-axis label and line color
-            tickfont=dict(color="#474747"),  # Y-axis tick labels color
+            color="#474747",
+            tickfont=dict(color="#474747"),
         ),
         hovermode='x',
         legend=dict(
             orientation="h",
-            x=0.01,     
-            y=-0.35, 
-            xanchor='left', 
-            yanchor='bottom', 
+            x=0.01,
+            y=-0.35,
+            xanchor='left',
+            yanchor='bottom',
             traceorder='normal',
             font=dict(size=10, color="#474747"),
-            bgcolor='rgba(255, 255, 255, 0)',  
+            bgcolor='rgba(255, 255, 255, 0)',
         ),
-        plot_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         height=250,
-        width=850, 
+        width=850,
         margin=dict(b=60, t=20, l=2, r=10),
     )
-
     st.plotly_chart(fig, use_container_width=True)
     return fig
 
-def plot_cpi_ppi(selected_series_id):
-    """
-    Plot CPI and PPI data on a single chart for comparison.
-    """
+def plot_cpi_ppi(selected_cpi_industry):
     fig = go.Figure()
-        # Get the selected industry name based on the series_id
-    selected_industry = next(
-        (industry for industry, sid in industry_mapping.items() if sid == selected_series_id), 
-        "Unknown Industry"
-    )
-
-    # Fetch and plot the selected CPI industry data
-    cpi_data = fetch_cpi_data(selected_series_id, df_cleaned)
+    
+        # Filter CPI data for the selected industry
+    cpi_data = df_cpi[df_cpi['Industry'] == selected_cpi_industry]
+    
     if not cpi_data.empty:
         fig.add_trace(
             go.Scatter(
-                x=cpi_data['date'],
-                y=cpi_data['value'],
+                x=cpi_data['Month & Year'],
+                y=cpi_data['CPI Value'],
                 mode='lines',
-                name=f'CPI-{selected_industry}',
+                name=f'CPI - {selected_cpi_industry}',
                 line=dict(color='#032649')
             )
         )
     else:
-        st.warning(f"No data available for the selected CPI series: {selected_series_id}")
-
-    # Plot CPI-US All Items data
+        st.warning(f"No data available for the selected industry: {selected_cpi_industry}")
+    
+        # Ensure CPI-US data is correctly formatted and available
     if not all_items_data.empty:
-        fig.add_trace(
-            go.Scatter(
-                x=all_items_data['Month & Year'],
-                y=all_items_data['Value'],
-                mode='lines',
-                name='CPI-US',
-                line=dict(color='#EB8928', dash='solid')
+            fig.add_trace(
+                go.Scatter(
+                    x=all_items_data['Month & Year'],
+                    y=all_items_data['CPI Value'],
+                    mode='lines',
+                    name='CPI-US',
+                    line=dict(color='#EB8928', dash='solid')
+                )
             )
-        )
     else:
-        st.warning("No CPI-US All Items data available to display.")
-
-    # Plot aggregated PPI data
-    if not df_ppi_unpivoted.empty:
-        df_ppi_aggregated = df_ppi_unpivoted.groupby('Month & Year', as_index=False).agg({'Value': 'mean'})
-        fig.add_trace(
-            go.Scatter(
-                x=df_ppi_aggregated['Month & Year'],
-                y=df_ppi_aggregated['Value'],
-                mode='lines',
-                name='PPI-US',
-                line=dict(color='#1C798A')
+            st.warning("No CPI-US All Items data available to display.")
+    
+        # Ensure PPI data exists and is formatted correctly
+    if not df_ppi.empty:
+            fig.add_trace(
+                go.Scatter(
+                    x=df_ppi['Month & Year'],
+                    y=df_ppi['PPI Value'],
+                    mode='lines',
+                    name='PPI-US',
+                    line=dict(color='#1C798A')
+                )
             )
-        )
     else:
-        st.warning("No PPI data available to display.")
-
-    # Configure the layout of the chart
+            st.warning("No PPI data available to display.")
+    
+        # Update Layout
     fig.update_layout(
-        title='',
-        xaxis=dict(
-            showgrid=False,
-            showticklabels=True,
-            color="#474747",  # X-axis label and line color
-            tickfont=dict(color="#474747"),  # X-axis tick labels color
-        ),
-        yaxis=dict(
-            title='Index Value',
-            showgrid=False,
-            color="#474747",  # Y-axis label and line color
-            tickfont=dict(color="#474747"),  # Y-axis tick labels color
-        ),
-        legend=dict(
-            orientation="h",
-            x=0.01,  # Align the legend horizontally
-            y=-0.3,  # Place it below the chart
-            xanchor='left',
-            yanchor='bottom',
-            bgcolor='rgba(255, 255, 255, 0.6)',
-            font=dict(size=10, color="#474747"),  # Legend text color
-        ),
-        hovermode='x unified',
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        height=300,
-        width=500,
-        margin=dict(b=60, t=20, r=15, l=15),  # Increased bottom margin for space
-    )
-    st.plotly_chart(fig, use_container_width=True)
+            title='CPI & PPI Comparison',
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=True,
+                color="#474747",
+                tickfont=dict(color="#474747"),
+            ),
+            yaxis=dict(
+                title='Index Value',
+                showgrid=False,
+                color="#474747",
+                tickfont=dict(color="#474747"),
+            ),
+            legend=dict(
+                orientation="h",
+                x=0.01,
+                y=-0.3,
+                xanchor='left',
+                yanchor='bottom',
+                bgcolor='rgba(255, 255, 255, 0.6)',
+                font=dict(size=10, color="#474747"),
+            ),
+            hovermode='x unified',
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            height=300,
+            width=600,
+            margin=dict(b=60, t=20, r=15, l=15),
+        )
+    
     return fig
 
 def plot_gdp_and_industry(selected_industry=None):
@@ -822,7 +447,7 @@ def get_us_indicators_layout():
     """Render the full dashboard layout and export data directly without session state."""
     st.set_page_config(page_title="US Indicators", layout="wide")
     # labor Force & Unemployment Data
-    st.subheader("labor Force & Unemployment")
+    st.subheader("Labor Force Partication & Unemployment Rate with Population")
     labor_fig = plot_labor_unemployment()
 
     # External Driver Indicators
@@ -839,7 +464,7 @@ def get_us_indicators_layout():
     st.subheader("GDP by Industry")
     selected_gdp_industry = st.selectbox(
         "Select Industry",
-        options=df_combined["Industry"].unique(),
+        options=gdp_industry,
         index=0,
         key="gdp_industry_selectbox"
     )
@@ -847,14 +472,12 @@ def get_us_indicators_layout():
 
     # CPI and PPI Comparison
     st.subheader("CPI & PPI")
-    selected_cpi_series = st.selectbox(
-        "Select CPI Industry", 
-        list(industry_mapping.keys()), 
-        index=1, 
-        key="cpi_series_selectbox"
-    )
-    selected_series_id = industry_mapping[selected_cpi_series]
-    cpi_ppi_fig = plot_cpi_ppi(selected_series_id)
+    if cpi_industry:
+        selected_cpi_industry = st.selectbox("Select CPI Industry", cpi_industry, index=0, key="cpi_industry_selectbox")
+        cpi_ppi_fig = plot_cpi_ppi(selected_cpi_industry)
+        st.plotly_chart(cpi_ppi_fig, use_container_width=True)
+    else:
+        st.warning("No industries available for selection.")
 
     if st.button("Export Charts to PowerPoint", key="export_button"):
         # Export the charts to PowerPoint using the export_all_to_pptx function

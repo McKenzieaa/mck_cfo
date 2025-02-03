@@ -1,0 +1,47 @@
+http://apps.bea.gov/api/data?&UserID=CC97DA09-3364-4CBB-86AA-E96EFB3476BF&method=GetParameterValuesFiltered&datasetname=Regional&TargetParameter=LineCode&TableName=SAPCE1&Key=1&ResultFormat=xml
+
+https://apps.bea.gov/api/data/?&UserID=CC97DA09-3364-4CBB-86AA-E96EFB3476BF&method=GetData&DataSetName=REGIONAL&Year=ALL&tableID=SAGDP9N&Frequency=M&ResultFormat=json
+
+http://apps.bea.gov/api/data?&UserID=CC97DA09-3364-4CBB-86AA-E96EFB3476BF&method=GetParameterValuesFiltered&datasetname=Regional&TargetParameter=LineCode&TableName=SASUMMARY&ResultFormat=xml
+
+SASUMMARY
+http://apps.bea.gov/api/data?&UserID=CC97DA09-3364-4CBB-86AA-E96EFB3476BF&method=GetData&datasetname=Regional&TargetParameter=LineCode&TableName=SASUMMARY&Y
+ear=ALL&GeoFips=STATE&LineCode=1&ResultFormat=json
+
+SQGDP9
+http://apps.bea.gov/api/data?&UserID=CC97DA09-3364-4CBB-86AA-E96EFB3476BF&method=GetData&datasetname=Regional&TargetParameter=LineCode&TableName=SQGDP9&Y
+ear=ALL&GeoFips=STATE&LineCode=1&ResultFormat=json
+
+US & States yearly GDP million dollar
+https://apps.bea.gov/api/data/?UserID=CC97DA09-3364-4CBB-86AA-E96EFB3476BF&
+method=GetData&datasetname=Regional&TableName=SAGDP9N&LineCode=2&Y
+ear=ALL&GeoFips=STATE&ResultFormat=json
+
+https://api.stlouisfed.org/fred/release/tables?release_id=53&api_key=abcdefghijklmnopqrstuvwxyz123456&element_id=12886
+
+Private Fixed Investment - Line Items Series ID
+https://api.stlouisfed.org/fred/release/tables?release_id=53&api_key=c7885a6b8d6f2eaf28681ad9602ffbcb&element_id=8128&file_type=json
+
+Private Fixed Investment - Single series ID
+https://api.stlouisfed.org/fred/series/observations?series_id=FPI&observation_start=2018-01-01&api_key=c7885a6b8d6f2eaf28681ad9602ffbcb&file_type=json
+
+Real Private Inventories - Line Items Series ID
+https://api.stlouisfed.org/fred/release/tables?release_id=53&api_key=c7885a6b8d6f2eaf28681ad9602ffbcb&element_id=8210&file_type=json
+
+Real Private Inventories - Single series ID
+https://api.stlouisfed.org/fred/series/observations?series_id=A371RX1Q020SBEA&observation_start=2018-01-01&api_key=c7885a6b8d6f2eaf28681ad9602ffbcb&file_type=json
+
+PCE Price Index- Line Items Series ID
+https://api.stlouisfed.org/fred/release/tables?release_id=54&api_key=c7885a6b8d6f2eaf28681ad9602ffbcb&element_id=3208&file_type=json
+
+PCE Price Index - Single series ID
+https://api.stlouisfed.org/fred/series/observations?series_id=PCEPI&observation_start=2018-01-01&api_key=c7885a6b8d6f2eaf28681ad9602ffbcb&file_type=json
+
+https://www.bea.gov/sites/default/files/2024-12/pi1124.xlsx
+
+https://apps.bea.gov/iTable/?reqid=19&step=2&isuri=1&categories=survey&_gl=1*1i4h7hy*_ga*NjE4ODM5MzE2LjE3MjU1OTk3ODQ.*_ga_J4698JNNFT*MTczNzk3MzE2Ni44LjEuMTczNzk3NDE2NS4yMi4wLjA.#eyJhcHBpZCI6MTksInN0ZXBzIjpbMSwyLDMsM10sImRhdGEiOltbImNhdGVnb3JpZXMiLCJTdXJ2ZXkiXSxbIk5JUEFfVGFibGVfTGlzdCIsIjEiXSxbIkZpcnN0X1llYXIiLCIyMDAwIl0sWyJMYXN0X1llYXIiLCIyMDI0Il0sWyJTY2FsZSIsIjAiXSxbIlNlcmllcyIsIlEiXSxbIlNlbGVjdF9hbGxfeWVhcnMiLCIxIl1dfQ==
+
+FRED_API=c7885a6b8d6f2eaf28681ad9602ffbcb
+BEA_API=CC97DA09-3364-4CBB-86AA-E96EFB3476BF
+CENSUS_API=a854c9d6c16c4428b65ac7a7b3453ffcc8523e0b
+NEWS_API=ada1eed11e074b6e8c94f01bf83daa4c
