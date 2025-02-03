@@ -51,8 +51,8 @@ df = load_data()
 
 # Ensure all columns are TensorFlow-compatible
 df['Year'] = df['Year'].fillna(0).astype('int32')
-df['EV/Revenue'] = df['EV/Revenue'].fillna(0).astype('float32')
-df['EV/EBITDA'] = df['EV/EBITDA'].fillna(0).astype('float32')
+df['EV/Revenue'] = df['EV/Revenue'].fillna(0).astype('float32').round(2)
+df['EV/EBITDA'] = df['EV/EBITDA'].fillna(0).astype('float32').round(2)
 df['Target'] = df['Target'].fillna("").astype('string')
 df['Business Description'] = df['Business Description'].fillna("").astype('string')
 df['Industry'] = df['Industry'].fillna("").astype('string')
