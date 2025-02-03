@@ -37,8 +37,8 @@ GDP_PCT_QUERY = "SELECT * FROM industry_db.gdp_pct_ind"
 LABOR_QUERY = "SELECT * FROM industry_db.labor_market_data"
 df_lfs = fetch_data(LABOR_QUERY)
 df_lfs = df_lfs.rename(columns={'labor_force_rate': 'labor_force_rate', 'unemployment_rate': 'unemployment_rate', 'population': 'population'})
-df_lfs['year'] = df_lfs['year'].astype(int)
-df_lfs['month'] = df_lfs['month'].astype(int)
+# df_lfs['year'] = df_lfs['year'].astype(int)
+# df_lfs['month'] = df_lfs['month'].astype(int)
 df_lfs['population'] = df_lfs['population'] / 1000
 df_lfs['population'] = df_lfs['population'].round(2)
 df_lfs['unemployment_rate'] = df_lfs['unemployment_rate'].round(2)
