@@ -101,6 +101,8 @@ if selected_industries and selected_locations:
         # Calculate average EV/Revenue and EV/EBITDA for the selected data
         avg_data = selected_data.groupby('Year')[['EV/Revenue', 'EV/EBITDA']].mean().reset_index()
         avg_data['Year'] = avg_data['Year'].astype(int)
+        avg_data['EV/EBITDA'] = avg_data['EV/EBITDA'].round(2)
+        avg_data['EV/Revenue'] = avg_data['EV/Revenue'].round(2)
         color_ev_revenue = "#032649" 
         color_ev_ebitda = "#032649"  
 
